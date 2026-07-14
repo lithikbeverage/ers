@@ -143,14 +143,14 @@
         .items-section { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
         .items-header { background: var(--input-bg); padding: 12px 16px; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
         .item-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border-color); align-items: center; }
-        .item-row input { padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); font-size: 0.9rem; width: 100%; outline: none; }
-        .item-row input:focus { border-color: var(--primary-color); }
+        .item-row input, .item-row select { padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); font-size: 0.9rem; width: 100%; outline: none; }
+        .item-row input:focus, .item-row select:focus { border-color: var(--primary-color); }
         .btn-remove-row { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         
         .btn-add-row { width: 100%; padding: 12px; background: transparent; color: var(--primary-color); border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 1px solid var(--border-color); }
         .btn-add-row:active { background: var(--input-bg); }
 
-        .grand-total-row { padding: 20px 16px; display: flex; justify-content: flex-end; align-items: center; gap: 16px; background: var(--bg-surface); }
+        .grand-total-row { padding: 20px 16px; display: flex; justify-content: flex-end; align-items: center; gap: 16px; background: transparent; }
         .grand-total-label { font-size: 1.1rem; font-weight: 600; color: var(--text-muted); }
         .grand-total-value { font-size: 1.5rem; font-weight: 800; color: var(--success-color); }
 
@@ -260,9 +260,21 @@
                 </div>
             </div>
 
-            <div class="input-wrapper">
-                <label>Date of Purchase *</label>
-                <input type="date" id="pDate">
+            <div class="row-inputs">
+                <div class="input-wrapper">
+                    <label>Date of Purchase *</label>
+                    <input type="date" id="pDate">
+                </div>
+                <div class="input-wrapper">
+                    <label>GST % (Inclusive) *</label>
+                    <select id="pGst" onchange="calcTotal()">
+                        <option value="0">0% (Exempt)</option>
+                        <option value="5">5% GST</option>
+                        <option value="12">12% GST</option>
+                        <option value="18">18% GST</option>
+                        <option value="28">28% GST</option>
+                    </select>
+                </div>
             </div>
 
             <div id="editHistoryPanel" class="history-panel" style="display:none;">
@@ -289,9 +301,23 @@
                     <span class="material-symbols-outlined">add_circle</span> Add Another Item
                 </button>
 
-                <div class="grand-total-row">
-                    <span class="grand-total-label">Grand Total:</span>
-                    <span class="grand-total-value" id="grandTotalDisplay">₹0.00</span>
+                <div style="padding: 20px 16px; background: var(--bg-surface); border-top: 1px solid var(--border-color);">
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; font-size: 0.95rem; color: var(--text-muted);">
+                        <span style="width: 120px; text-align: right;">Base Amount:</span>
+                        <span style="width: 120px; text-align: right; font-weight: 600;" id="baseTotalDisplay">₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 8px; font-size: 0.95rem; color: var(--text-muted);">
+                        <span style="width: 120px; text-align: right;">CGST:</span>
+                        <span style="width: 120px; text-align: right; font-weight: 600;" id="cgstDisplay">₹0.00</span>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin-bottom: 16px; font-size: 0.95rem; color: var(--text-muted);">
+                        <span style="width: 120px; text-align: right;">SGST:</span>
+                        <span style="width: 120px; text-align: right; font-weight: 600;" id="sgstDisplay">₹0.00</span>
+                    </div>
+                    <div class="grand-total-row" style="padding: 0;">
+                        <span class="grand-total-label">Grand Total (Incl. GST):</span>
+                        <span class="grand-total-value" id="grandTotalDisplay">₹0.00</span>
+                    </div>
                 </div>
             </div>
 
@@ -347,21 +373,11 @@
         </div>
     </div>
 
-    <datalist id="rawMaterialsList">
-        <option value="1L Empty Bottle">
-        <option value="500ml Empty Bottle">
-        <option value="Blue Caps (Standard)">
-        <option value="1L Lithik Labels">
-        <option value="500ml Lithik Labels">
-        <option value="Cardboard Cartons">
-        <option value="Sealing Tape">
-    </datalist>
-
     <script type="module">
         import { app, db } from './config.js';
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        // NEW: Imported `increment` for math operations
-        import { collection, doc, getDocs, query, orderBy, limit, startAfter, where, writeBatch, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        // NEW: Imported runTransaction for server-side lock operations
+        import { collection, doc, getDocs, query, orderBy, limit, startAfter, where, writeBatch, serverTimestamp, increment, runTransaction } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         // Navigation Setup
         const navItems = [
@@ -468,14 +484,6 @@
                 snap.forEach(doc => {
                     masterRawGoods.push({ id: doc.id, ...doc.data() });
                 });
-                
-                // Dynamically update the Datalist
-                const dl = document.getElementById('rawMaterialsList');
-                dl.innerHTML = ''; 
-                masterRawGoods.forEach(good => {
-                    dl.innerHTML += `<option value="${good.name}">`;
-                });
-                
                 renderMasterGoodsGrid();
             } catch (err) {
                 console.error("Failed to load master list:", err);
@@ -550,9 +558,22 @@
             const id = `item_row_${itemsCounter}`;
             const container = document.getElementById('itemsContainer');
             
+            // NEW: Build official Dropdown Options
+            let optionsHtml = '<option value="" disabled selected>Select Official Material...</option>';
+            masterRawGoods.forEach(g => {
+                const selected = (g.name === name) ? 'selected' : '';
+                optionsHtml += `<option value="${g.name}" ${selected}>${g.name}</option>`;
+            });
+            // Legacy support for editing old data not in master
+            if(name && !masterRawGoods.find(g => g.name === name)) {
+                optionsHtml += `<option value="${name}" selected>${name} (Legacy)</option>`;
+            }
+            
             const html = `
                 <div class="item-row" id="${id}">
-                    <input type="text" placeholder="Select Official Material..." list="rawMaterialsList" value="${name}" class="i-name" oninput="calcTotal()">
+                    <select class="i-name" onchange="calcTotal()">
+                        ${optionsHtml}
+                    </select>
                     <input type="number" placeholder="Qty" min="1" value="${qty}" class="i-qty" oninput="calcTotal()">
                     <input type="number" placeholder="Cost" min="0" step="0.01" value="${price}" class="i-price" oninput="calcTotal()">
                     <button type="button" class="btn-remove-row" onclick="vibrateApp(20); document.getElementById('${id}').remove(); calcTotal();">
@@ -571,7 +592,19 @@
                 const price = parseFloat(row.querySelector('.i-price').value) || 0;
                 total += (qty * price);
             });
+            
+            // NEW: Inclusive GST Calculation
+            const gstPercent = parseFloat(document.getElementById('pGst').value) || 0;
+            const baseAmount = total / (1 + (gstPercent / 100));
+            const totalGst = total - baseAmount;
+            const cgst = totalGst / 2;
+            const sgst = totalGst / 2;
+
+            document.getElementById('baseTotalDisplay').innerText = `₹${baseAmount.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('cgstDisplay').innerText = `₹${cgst.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('sgstDisplay').innerText = `₹${sgst.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
             document.getElementById('grandTotalDisplay').innerText = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            
             return total;
         };
 
@@ -588,6 +621,7 @@
                 document.getElementById('pSupplier').value = data.supplierName;
                 document.getElementById('pInvoice').value = data.receiptNo;
                 document.getElementById('pDate').value = data.date;
+                document.getElementById('pGst').value = data.gstPercentage || "0";
                 
                 data.items.forEach(i => addEmptyItemRow(i.name, i.qty, i.unitPrice));
                 
@@ -607,6 +641,7 @@
                 document.getElementById('editPurchaseId').value = '';
                 document.getElementById('pSupplier').value = '';
                 document.getElementById('pInvoice').value = '';
+                document.getElementById('pGst').value = "0";
                 document.getElementById('pDate').valueAsDate = new Date();
                 document.getElementById('editReasonWrapper').style.display = 'none';
                 document.getElementById('editHistoryPanel').style.display = 'none';
@@ -617,7 +652,7 @@
             openModal('modalPurchase');
         };
 
-        // NEW UPGRADED SAVE LOGIC WITH MASTER LIST VALIDATION AND INCREMENTING
+        // NEW: Server-Side Firebase Transaction for Save Logic
         document.getElementById('btnSavePurchase').addEventListener('click', async () => {
             vibrateApp(30);
             const id = document.getElementById('editPurchaseId').value;
@@ -625,6 +660,7 @@
             const receiptNo = document.getElementById('pInvoice').value.trim();
             const dateStr = document.getElementById('pDate').value;
             const editReason = document.getElementById('pEditReason').value.trim();
+            const gstPercentage = parseFloat(document.getElementById('pGst').value) || 0;
             
             if (!supplierName || !receiptNo || !dateStr) {
                 showToast("Please fill Supplier, Bill No, and Date.", "error"); return;
@@ -635,7 +671,7 @@
 
             const items = [];
             let validItems = true;
-            let allExistInMaster = true; // Strict validation flag
+            let allExistInMaster = true; 
 
             document.querySelectorAll('.item-row').forEach(row => {
                 const n = row.querySelector('.i-name').value.trim();
@@ -643,7 +679,6 @@
                 const p = parseFloat(row.querySelector('.i-price').value) || 0;
                 
                 if(n && q > 0) {
-                    // Force user to select from Official Master List
                     const matchedGood = masterRawGoods.find(r => r.name.toLowerCase() === n.toLowerCase());
                     if(!matchedGood) {
                         allExistInMaster = false;
@@ -658,74 +693,73 @@
                         });
                     }
                 } else if (n || q > 0 || p > 0) {
-                    validItems = false; // partially filled row
+                    validItems = false;
                 }
             });
 
             if(!validItems) { showToast("Please complete all item rows properly.", "error"); return; }
-            if(!allExistInMaster) { showToast("One or more items are not in the Master List. Create them using the top-right icon first.", "error"); return; }
+            if(!allExistInMaster) { showToast("Invalid Item. Only Master List items allowed.", "error"); return; }
             if(items.length === 0) { showToast("Add at least one raw material.", "error"); return; }
 
             const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
             
             const btn = document.getElementById('btnSavePurchase');
-            btn.disabled = true; btn.innerHTML = "Committing to Database...";
+            btn.disabled = true; btn.innerHTML = "Committing to Server...";
 
             try {
-                const batch = writeBatch(db);
-                const isUpdate = !!id;
-                const docRef = isUpdate ? doc(db, "purchases", id) : doc(collection(db, "purchases"));
-                
-                const payload = {
-                    supplierName,
-                    receiptNo,
-                    date: dateStr,
-                    items,
-                    grandTotal,
-                    status: "Received",
-                    searchTokens: generateSearchTokens(supplierName, receiptNo),
-                    lastUpdated: new Date().toISOString()
-                };
-
-                // INCREMENT LOGIC FOR MASTER STOCK
-                if (isUpdate) {
-                    const existingData = purchaseCache.find(p => p.id === id);
-                    const logs = existingData.editLogs || [];
-                    logs.push({
-                        at: new Date().toISOString(),
-                        by: currentUser.displayName || "Admin",
-                        reason: editReason
-                    });
-                    payload.editLogs = logs;
-                    batch.update(docRef, payload);
-
-                    // Revert old quantities, then add new quantities
-                    existingData.items.forEach(oldItem => {
-                        if(oldItem.rawGoodId) {
-                            const rawRef = doc(db, "raw_goods_master", oldItem.rawGoodId);
-                            batch.update(rawRef, { currentStock: increment(-oldItem.qty) });
-                        }
-                    });
-                    items.forEach(newItem => {
-                        const rawRef = doc(db, "raw_goods_master", newItem.rawGoodId);
-                        batch.update(rawRef, { currentStock: increment(newItem.qty), lastUpdated: new Date().toISOString() });
-                    });
-                } else {
-                    payload.createdAt = serverTimestamp();
-                    payload.createdBy = currentUser.displayName || "Admin";
-                    batch.set(docRef, payload);
+                // Strict Server-Side Transaction Processing
+                await runTransaction(db, async (transaction) => {
+                    const isUpdate = !!id;
+                    const docRef = isUpdate ? doc(db, "purchases", id) : doc(collection(db, "purchases"));
                     
-                    // Add purely new quantities to master stock
-                    items.forEach(newItem => {
-                        const rawRef = doc(db, "raw_goods_master", newItem.rawGoodId);
-                        batch.update(rawRef, { currentStock: increment(newItem.qty), lastUpdated: new Date().toISOString() });
-                    });
-                }
+                    const payload = {
+                        supplierName,
+                        receiptNo,
+                        date: dateStr,
+                        items,
+                        grandTotal,
+                        gstPercentage,
+                        status: "Received",
+                        searchTokens: generateSearchTokens(supplierName, receiptNo),
+                        lastUpdated: new Date().toISOString()
+                    };
 
-                // Execute the entire mathematical update at once
-                await batch.commit();
+                    if (isUpdate) {
+                        const existingData = purchaseCache.find(p => p.id === id);
+                        const logs = existingData.editLogs || [];
+                        logs.push({
+                            at: new Date().toISOString(),
+                            by: currentUser.displayName || "Admin",
+                            reason: editReason
+                        });
+                        payload.editLogs = logs;
+                        transaction.update(docRef, payload);
+
+                        // Safely remove old quantities then push new quantities atomically
+                        existingData.items.forEach(oldItem => {
+                            if(oldItem.rawGoodId) {
+                                const rawRef = doc(db, "raw_goods_master", oldItem.rawGoodId);
+                                transaction.update(rawRef, { currentStock: increment(-oldItem.qty), lastUpdated: new Date().toISOString() });
+                            }
+                        });
+                        items.forEach(newItem => {
+                            const rawRef = doc(db, "raw_goods_master", newItem.rawGoodId);
+                            transaction.update(rawRef, { currentStock: increment(newItem.qty), lastUpdated: new Date().toISOString() });
+                        });
+                    } else {
+                        payload.createdAt = serverTimestamp();
+                        payload.createdBy = currentUser.displayName || "Admin";
+                        transaction.set(docRef, payload);
+                        
+                        // Increment Godown perfectly
+                        items.forEach(newItem => {
+                            const rawRef = doc(db, "raw_goods_master", newItem.rawGoodId);
+                            transaction.update(rawRef, { currentStock: increment(newItem.qty), lastUpdated: new Date().toISOString() });
+                        });
+                    }
+                });
                 
-                showToast(`Purchase ${isUpdate ? 'updated' : 'recorded'} successfully!`, "success");
+                showToast(`Purchase ${id ? 'updated' : 'recorded'} successfully!`, "success");
                 history.back();
                 
                 // Refresh data
@@ -736,7 +770,7 @@
 
             } catch (err) {
                 console.error(err);
-                showToast("Failed to save record.", "error");
+                showToast("Failed to save transaction.", "error");
             } finally {
                 btn.disabled = false;
                 btn.innerHTML = `<span class="material-symbols-outlined">save</span> Save Purchase Record`;
@@ -861,6 +895,7 @@
             const itemCount = item.items ? item.items.length : 0;
             const topItem = itemCount > 0 ? item.items[0].name : "Unknown Goods";
             const moreText = itemCount > 1 ? ` +${itemCount - 1} more items` : "";
+            const gstBadge = item.gstPercentage ? ` | GST: ${item.gstPercentage}%` : ` | GST: Exempt`;
             
             return `
                 <div class="purchase-card" onclick="vibrateApp(20); openPurchaseModal('${item.id}')">
@@ -870,7 +905,7 @@
                     </div>
                     <div class="pc-details">
                         Bill No: <strong>${item.receiptNo}</strong><br>
-                        Goods: <strong>${topItem}</strong>${moreText}
+                        Goods: <strong>${topItem}</strong>${moreText}${gstBadge}
                     </div>
                     <div class="pc-footer">
                         <div class="pc-total">₹${(item.grandTotal || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
