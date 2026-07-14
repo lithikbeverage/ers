@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Purchase & Raw Goods - LITHIK BEVERAGE</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a">
+    <link rel="apple-touch-icon" href="images/icon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Shared Core Theme */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-nav: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary-color: #1e40af;
+            --accent-color: #0ea5e9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e2e8f0;
+            --input-bg: #f1f5f9;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --skeleton-base: #e2e8f0;
+            --skeleton-shine: #f8fafc;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #020617;
+                --bg-surface: #0f172a;
+                --bg-nav: #0f172a;
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --primary-color: #3b82f6;
+                --accent-color: #0ea5e9;
+                --border-color: #1e293b;
+                --input-bg: #1e293b;
+                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+                --skeleton-base: #1e293b;
+                --skeleton-shine: #334155;
+            }
+        }
+
+        /* Reset & Base Layout */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        html, body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; width: 100vw; overflow: hidden; }
+        *::-webkit-scrollbar { display: none !important; }
+        * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+        header, .material-symbols-outlined, .nav-item, .btn-primary, .btn-secondary {
+            -webkit-user-select: none; user-select: none;
+        }
+
+        .material-symbols-outlined { display: inline-flex; align-items: center; justify-content: center; }
+
+        /* Layout Structure */
+        #app-shell { display: flex; height: 100dvh; flex-direction: column; }
+        
+        header { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-surface); padding: 12px 20px; border-bottom: 1px solid var(--border-color); z-index: 10; flex-shrink: 0; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .company-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; box-shadow: var(--shadow-sm); }
+        h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; color: var(--primary-color); margin:0; }
+        
+        .layout-container { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+        
+        /* Navigation (Copied exactly from index) */
+        nav.sidebar { display: none; width: 260px; background-color: var(--bg-nav); border-right: 1px solid var(--border-color); flex-direction: column; padding: 20px 0; overflow-y: auto; }
+        nav.sidebar .nav-item { display: flex; align-items: center; text-decoration: none; color: var(--text-muted); padding: 14px 24px; gap: 16px; font-size: 1rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        nav.sidebar .nav-item:hover, nav.sidebar .nav-item.active { background-color: rgba(59, 130, 246, 0.05); color: var(--primary-color); border-right: 3px solid var(--primary-color); }
+        
+        nav.bottom-nav { display: flex; background-color: var(--bg-nav); border-top: 1px solid var(--border-color); height: 65px; width: 100%; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; padding: 0 10px; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); }
+        nav.bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); min-width: 72px; padding: 8px 4px; gap: 4px; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; cursor: pointer; }
+        nav.bottom-nav .nav-item.active { color: var(--primary-color); }
+        .nav-icon { width: 24px; height: 24px; fill: currentColor; }
+
+        /* Main Scroll Area */
+        .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px; background-color: var(--bg-body); position: relative; }
+        .container-inner { max-width: 800px; margin: 0 auto; width: 100%; }
+
+        /* Search & Actions */
+        .top-actions { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
+        .search-container { flex: 1; display: flex; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 16px; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
+        .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .search-container input { border: none; background: transparent; width: 100%; padding: 14px 0 14px 12px; color: var(--text-main); font-size: 1rem; outline: none; font-family: 'Inter', sans-serif; }
+        .search-container input::placeholder { color: var(--text-muted); }
+        .search-container .material-symbols-outlined { color: var(--text-muted); }
+
+        .btn-fab { background: var(--primary-color); color: white; border: none; width: 48px; height: 48px; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: var(--shadow-md); transition: all 0.2s; flex-shrink: 0; }
+        .btn-fab:active { transform: scale(0.95); }
+
+        /* Purchase List Cards */
+        .purchase-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .purchase-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); transition: transform 0.2s, border-color 0.2s; cursor: pointer; position: relative; overflow: hidden; }
+        .purchase-card:active { transform: translateY(2px); border-color: var(--primary-color); }
+        
+        .pc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+        .pc-supplier { font-weight: 700; font-size: 1.1rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;}
+        .pc-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; background: var(--input-bg); padding: 4px 8px; border-radius: 6px; }
+        
+        .pc-details { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 16px; line-height: 1.5; }
+        .pc-details strong { color: var(--text-main); }
+        
+        .pc-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 16px; }
+        .pc-total { font-size: 1.25rem; font-weight: 800; color: var(--success-color); }
+        .pc-status { font-size: 0.75rem; font-weight: 700; padding: 4px 10px; border-radius: 20px; letter-spacing: 0.5px; }
+        .status-received { background: rgba(16, 185, 129, 0.1); color: var(--success-color); border: 1px solid rgba(16, 185, 129, 0.2); }
+
+        /* Skeletons */
+        .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Modals */
+        .modal { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background-color: var(--bg-body); z-index: 2000; transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); overflow-y: auto; padding-bottom: 80px; }
+        .modal.active { right: 0; }
+        .modal-header { display: flex; align-items: center; gap: 15px; padding: 18px 20px; background: var(--bg-surface); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color); }
+        .close-modal { background: none; border: none; color: var(--text-main); cursor: pointer; display: flex; padding: 8px; border-radius: 50%; margin-left: -8px; }
+        .modal-header h2 { margin: 0; font-size: 1.25em; font-weight: 700; }
+
+        .form-group { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .input-wrapper { margin-bottom: 20px; }
+        .input-wrapper label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-wrapper input, .input-wrapper select { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 1rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s ease; }
+        .input-wrapper input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .row-inputs { display: flex; gap: 16px; }
+        .row-inputs > div { flex: 1; }
+
+        /* Dynamic Item Table Styling */
+        .items-section { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-sm); }
+        .items-header { background: var(--input-bg); padding: 12px 16px; font-weight: 600; font-size: 0.9rem; color: var(--text-muted); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        .item-row { display: grid; grid-template-columns: 2fr 1fr 1fr auto; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border-color); align-items: center; }
+        .item-row input { padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); font-size: 0.9rem; width: 100%; outline: none; }
+        .item-row input:focus { border-color: var(--primary-color); }
+        .btn-remove-row { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        
+        .btn-add-row { width: 100%; padding: 12px; background: transparent; color: var(--primary-color); border: none; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 1px solid var(--border-color); }
+        .btn-add-row:active { background: var(--input-bg); }
+
+        .grand-total-row { padding: 20px 16px; display: flex; justify-content: flex-end; align-items: center; gap: 16px; background: var(--bg-surface); }
+        .grand-total-label { font-size: 1.1rem; font-weight: 600; color: var(--text-muted); }
+        .grand-total-value { font-size: 1.5rem; font-weight: 800; color: var(--success-color); }
+
+        .btn-primary { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--primary-color); color: white; font-size: 1.1em; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
+        .btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* History Log Panel */
+        .history-panel { background: rgba(245, 158, 11, 0.05); border: 1px solid rgba(245, 158, 11, 0.2); padding: 16px; border-radius: 12px; margin-bottom: 24px; font-size: 0.85rem; color: var(--text-main); }
+        .history-panel .material-symbols-outlined { font-size: 18px; color: var(--warning-color); margin-bottom: 8px; }
+
+        /* Toasts */
+        .toast-msg { position: fixed; top: 20px; left: 50%; transform: translate(-50%, -20px); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; display: none; font-weight: 600; font-size: 0.95em; align-items: center; gap: 10px; opacity: 0; transition: all 0.3s; box-shadow: var(--shadow-lg); }
+        .toast-msg.error { background: var(--danger-color); }
+        .toast-msg.success { background: var(--success-color); }
+        .toast-msg.show { display: flex; opacity: 1; transform: translate(-50%, 0); }
+
+        #scrollLoader { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; justify-content: center; gap: 10px; }
+
+        @media (min-width: 768px) {
+            #app-shell { flex-direction: column; }
+            .layout-container { flex-direction: row; }
+            nav.bottom-nav { display: none; }
+            nav.sidebar { display: flex; }
+            .item-row { grid-template-columns: 3fr 1fr 1fr 1fr auto; }
+        }
+        @media (max-width: 767px) {
+            /* Mobile tweaks for grid */
+            .item-row { grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; padding: 16px; }
+            .item-row > :nth-child(1) { grid-column: span 2; }
+            .item-row > :nth-child(2) { grid-column: 1; }
+            .item-row > :nth-child(3) { grid-column: 2; }
+            .item-row > :nth-child(4) { display: none; } /* Hide line total text on mobile to save space */
+            .btn-remove-row { position: absolute; right: 16px; margin-top: 4px; width: 28px; height: 28px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast-msg error" id="errorToast"><span class="material-symbols-outlined">error</span><span id="errorToastText">Error</span></div>
+    <div class="toast-msg success" id="successToast"><span class="material-symbols-outlined">check_circle</span><span id="successToastText">Success</span></div>
+
+    <div id="app-shell">
+        <header>
+            <div class="header-left">
+                <img src="images/icon.png" alt="Logo" class="company-logo" onerror="this.src='https://via.placeholder.com/40'">
+                <h1>PURCHASE</h1>
+            </div>
+        </header>
+
+        <div class="layout-container">
+            <nav class="sidebar" id="desktop-nav"></nav>
+
+            <div class="main-scroll-area" id="mainScroll">
+                <div class="container-inner">
+                    
+                    <div class="top-actions">
+                        <div class="search-container">
+                            <span class="material-symbols-outlined">search</span>
+                            <input type="text" id="searchInput" placeholder="Search Supplier or Bill No..." autocomplete="off">
+                        </div>
+                        <button class="btn-fab" onclick="openPurchaseModal()" title="Add Raw Goods">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+
+                    <div class="purchase-grid" id="purchaseGrid">
+                        </div>
+                    
+                    <div id="scrollLoader">
+                        <span class="skeleton" style="width:16px; height:16px; border-radius:50%;"></span> Loading records...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav" id="mobile-nav"></nav>
+    </div>
+
+    <div class="modal" id="modalPurchase">
+        <div class="modal-header">
+            <button class="close-modal" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button>
+            <h2 id="modalTitle">New Raw Goods Entry</h2>
+        </div>
+        
+        <div class="form-group">
+            <input type="hidden" id="editPurchaseId">
+            
+            <div class="row-inputs">
+                <div class="input-wrapper">
+                    <label>Supplier / Company Name *</label>
+                    <input type="text" id="pSupplier" placeholder="e.g. Apex Plastics Ltd.">
+                </div>
+                <div class="input-wrapper">
+                    <label>Bill / Invoice No. *</label>
+                    <input type="text" id="pInvoice" placeholder="e.g. INV-1045">
+                </div>
+            </div>
+
+            <div class="input-wrapper">
+                <label>Date of Purchase *</label>
+                <input type="date" id="pDate">
+            </div>
+
+            <div id="editHistoryPanel" class="history-panel" style="display:none;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span class="material-symbols-outlined">manage_history</span>
+                    <strong>Edit History</strong>
+                </div>
+                <p id="editHistoryText" style="margin-top: 4px;"></p>
+            </div>
+
+            <label style="display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase;">Raw Materials Received *</label>
+            <div class="items-section">
+                <div class="items-header" id="itemsHeaderDesktop">
+                    <div style="flex: 2;">Material Name</div>
+                    <div style="flex: 1; text-align: center;">Qty</div>
+                    <div style="flex: 1; text-align: center;">Unit Cost (₹)</div>
+                    <div style="width: 36px;"></div>
+                </div>
+                
+                <div id="itemsContainer">
+                    </div>
+                
+                <button class="btn-add-row" onclick="vibrateApp(20); addEmptyItemRow()">
+                    <span class="material-symbols-outlined">add_circle</span> Add Another Item
+                </button>
+
+                <div class="grand-total-row">
+                    <span class="grand-total-label">Grand Total:</span>
+                    <span class="grand-total-value" id="grandTotalDisplay">₹0.00</span>
+                </div>
+            </div>
+
+            <div class="input-wrapper" id="editReasonWrapper" style="display:none;">
+                <label>Reason for Edit *</label>
+                <input type="text" id="pEditReason" placeholder="e.g. Corrected invoice amount">
+            </div>
+
+            <button type="button" class="btn-primary" id="btnSavePurchase">
+                <span class="material-symbols-outlined">save</span>
+                Save Purchase Record
+            </button>
+        </div>
+    </div>
+
+    <datalist id="rawMaterialsList">
+        <option value="1L Empty Bottle">
+        <option value="500ml Empty Bottle">
+        <option value="Blue Caps (Standard)">
+        <option value="1L Lithik Labels">
+        <option value="500ml Lithik Labels">
+        <option value="Cardboard Cartons">
+        <option value="Sealing Tape">
+    </datalist>
+
+    <script type="module">
+        import { app, db } from './config.js';
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+        import { collection, doc, getDocs, query, orderBy, limit, startAfter, where, writeBatch, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        // Navigation Setup
+        const navItems = [
+            { name: 'Dashboard', path: 'index.html', icon: '<path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>' },
+            { name: 'Billing', path: 'bill.html', icon: '<path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>' },
+            { name: 'Production', path: 'production.html', icon: '<path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.36 8.04A5.994 5.994 0 000 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96zM10 17l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>' },
+            { name: 'Inventory', path: 'inventory.html', icon: '<path d="M20 2H4c-1.1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-.9-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>' },
+            { name: 'Purchase', path: 'purchase.html', icon: '<path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>' },
+            { name: 'Sales', path: 'sales.html', icon: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>' },
+            { name: 'Parties', path: 'parties.html', icon: '<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>' },
+            { name: 'Expenses', path: 'expenses.html', icon: '<path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>' },
+            { name: 'Accounts', path: 'accounts.html', icon: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>' },
+            { name: 'Labour', path: 'attendance.html', icon: '<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>' }
+        ];
+
+        const desktopNav = document.getElementById('desktop-nav');
+        const mobileNav = document.getElementById('mobile-nav');
+        const currentPath = window.location.pathname.split('/').pop() || 'purchase.html';
+
+        navItems.forEach(item => {
+            const isActive = currentPath === item.path ? 'active' : '';
+            const html = `
+                <a href="${item.path}" class="nav-item ${isActive}">
+                    <svg class="nav-icon" viewBox="0 0 24 24">${item.icon}</svg>
+                    <span>${item.name}</span>
+                </a>
+            `;
+            desktopNav.innerHTML += html;
+            mobileNav.innerHTML += html;
+        });
+
+        // Utilities
+        window.vibrateApp = function(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); };
+        
+        window.showToast = function(msg, type = "success") {
+            vibrateApp(type === "error" ? 40 : 20);
+            const toast = document.getElementById(type === "error" ? 'errorToast' : 'successToast');
+            document.getElementById(type === "error" ? 'errorToastText' : 'successToastText').innerText = msg;
+            toast.style.display = 'flex';
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.style.display = 'none', 300);
+            }, 3000);
+        };
+
+        // Modal Logic
+        window.openModal = function(modalId) {
+            vibrateApp(20);
+            document.getElementById(modalId).classList.add('active');
+            history.pushState({ modal: modalId }, '', `#${modalId}`);
+        };
+        window.addEventListener('popstate', (e) => {
+            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+            if (e.state && e.state.modal) document.getElementById(e.state.modal).classList.add('active');
+        });
+
+        // Search Token Generator
+        function generateSearchTokens(str1, str2) {
+            const combined = `${str1 || ''} ${str2 || ''}`.toLowerCase().replace(/[.\/\\~*\[\]]/g, ' ');
+            const words = combined.split(/[\s\-_]+/).filter(w => w.trim().length > 0);
+            const tokens = {};
+            words.forEach(w => {
+                let prefix = '';
+                for (let i = 0; i < w.length; i++) {
+                    prefix += w[i];
+                    tokens[prefix] = true;
+                }
+            });
+            return tokens;
+        }
+
+        // Global Variables
+        let currentUser = null;
+        let lastVisibleDoc = null;
+        let isFetching = false;
+        let hasMore = true;
+        let currentSearch = '';
+        let purchaseCache = [];
+        let itemsCounter = 0;
+
+        // Auth
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                loadPurchases();
+                document.getElementById('pDate').valueAsDate = new Date();
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+        // --- Dynamic Items Logic ---
+        window.addEmptyItemRow = function(name='', qty='', price='') {
+            itemsCounter++;
+            const id = `item_row_${itemsCounter}`;
+            const container = document.getElementById('itemsContainer');
+            
+            const html = `
+                <div class="item-row" id="${id}">
+                    <input type="text" placeholder="Item Name (e.g. 1L Bottle)" list="rawMaterialsList" value="${name}" class="i-name" oninput="calcTotal()">
+                    <input type="number" placeholder="Qty" min="1" value="${qty}" class="i-qty" oninput="calcTotal()">
+                    <input type="number" placeholder="Cost" min="0" step="0.01" value="${price}" class="i-price" oninput="calcTotal()">
+                    <button type="button" class="btn-remove-row" onclick="vibrateApp(20); document.getElementById('${id}').remove(); calcTotal();">
+                        <span class="material-symbols-outlined">delete</span>
+                    </button>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        };
+
+        window.calcTotal = function() {
+            let total = 0;
+            const rows = document.querySelectorAll('.item-row');
+            rows.forEach(row => {
+                const qty = parseFloat(row.querySelector('.i-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.i-price').value) || 0;
+                total += (qty * price);
+            });
+            document.getElementById('grandTotalDisplay').innerText = `₹${total.toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            return total;
+        };
+
+        window.openPurchaseModal = function(id = null) {
+            document.getElementById('itemsContainer').innerHTML = '';
+            
+            if (id) {
+                // Edit Mode
+                const data = purchaseCache.find(p => p.id === id);
+                if(!data) return;
+                
+                document.getElementById('modalTitle').innerText = "Edit Purchase Record";
+                document.getElementById('editPurchaseId').value = id;
+                document.getElementById('pSupplier').value = data.supplierName;
+                document.getElementById('pInvoice').value = data.receiptNo;
+                document.getElementById('pDate').value = data.date;
+                
+                data.items.forEach(i => addEmptyItemRow(i.name, i.qty, i.unitPrice));
+                
+                document.getElementById('editReasonWrapper').style.display = 'block';
+                document.getElementById('pEditReason').value = '';
+                
+                if (data.editLogs && data.editLogs.length > 0) {
+                    const lastLog = data.editLogs[data.editLogs.length - 1];
+                    document.getElementById('editHistoryPanel').style.display = 'block';
+                    document.getElementById('editHistoryText').innerHTML = `Last edited by <strong>${lastLog.by}</strong> on ${new Date(lastLog.at).toLocaleDateString()}<br><span style="color:var(--text-muted);">Reason: ${lastLog.reason}</span>`;
+                } else {
+                    document.getElementById('editHistoryPanel').style.display = 'none';
+                }
+            } else {
+                // New Mode
+                document.getElementById('modalTitle').innerText = "New Raw Goods Entry";
+                document.getElementById('editPurchaseId').value = '';
+                document.getElementById('pSupplier').value = '';
+                document.getElementById('pInvoice').value = '';
+                document.getElementById('pDate').valueAsDate = new Date();
+                document.getElementById('editReasonWrapper').style.display = 'none';
+                document.getElementById('editHistoryPanel').style.display = 'none';
+                addEmptyItemRow(); // start with one empty row
+            }
+            
+            calcTotal();
+            openModal('modalPurchase');
+        };
+
+        // Save Logic
+        document.getElementById('btnSavePurchase').addEventListener('click', async () => {
+            vibrateApp(30);
+            const id = document.getElementById('editPurchaseId').value;
+            const supplierName = document.getElementById('pSupplier').value.trim();
+            const receiptNo = document.getElementById('pInvoice').value.trim();
+            const dateStr = document.getElementById('pDate').value;
+            const editReason = document.getElementById('pEditReason').value.trim();
+            
+            if (!supplierName || !receiptNo || !dateStr) {
+                showToast("Please fill Supplier, Bill No, and Date.", "error"); return;
+            }
+            if (id && !editReason) {
+                showToast("Please provide a reason for editing this record.", "error"); return;
+            }
+
+            const items = [];
+            let validItems = true;
+            document.querySelectorAll('.item-row').forEach(row => {
+                const n = row.querySelector('.i-name').value.trim();
+                const q = parseFloat(row.querySelector('.i-qty').value) || 0;
+                const p = parseFloat(row.querySelector('.i-price').value) || 0;
+                if(n && q > 0) {
+                    items.push({ name: n, qty: q, unitPrice: p, total: q * p });
+                } else if (n || q > 0 || p > 0) {
+                    validItems = false; // partially filled row
+                }
+            });
+
+            if(!validItems) { showToast("Please complete all item rows properly.", "error"); return; }
+            if(items.length === 0) { showToast("Add at least one raw material.", "error"); return; }
+
+            const grandTotal = items.reduce((sum, item) => sum + item.total, 0);
+            
+            const btn = document.getElementById('btnSavePurchase');
+            btn.disabled = true; btn.innerHTML = "Saving...";
+
+            try {
+                const batch = writeBatch(db);
+                const isUpdate = !!id;
+                const docRef = isUpdate ? doc(db, "purchases", id) : doc(collection(db, "purchases"));
+                
+                const payload = {
+                    supplierName,
+                    receiptNo,
+                    date: dateStr,
+                    items,
+                    grandTotal,
+                    status: "Received",
+                    searchTokens: generateSearchTokens(supplierName, receiptNo),
+                    lastUpdated: new Date().toISOString()
+                };
+
+                if (isUpdate) {
+                    const existingData = purchaseCache.find(p => p.id === id);
+                    const logs = existingData.editLogs || [];
+                    logs.push({
+                        at: new Date().toISOString(),
+                        by: currentUser.displayName || "Admin",
+                        reason: editReason
+                    });
+                    payload.editLogs = logs;
+                    batch.update(docRef, payload);
+                } else {
+                    payload.createdAt = serverTimestamp();
+                    payload.createdBy = currentUser.displayName || "Admin";
+                    batch.set(docRef, payload);
+                    
+                    // NOTE: In a full system, you would also loop through `items` here 
+                    // and write updates to the `inventory` collection to increase raw stock.
+                    // e.g. batch.update(doc(db, "inventory", itemID), { qty: increment(item.qty) })
+                }
+
+                await batch.commit();
+                showToast(`Purchase ${isUpdate ? 'updated' : 'recorded'} successfully!`, "success");
+                history.back();
+                
+                // Reload lists
+                currentSearch = '';
+                document.getElementById('searchInput').value = '';
+                loadPurchases();
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to save record.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="material-symbols-outlined">save</span> Save Purchase Record`;
+            }
+        });
+
+        // --- Optimized Cursor Pagination Fetch ---
+        function renderSkeletons() {
+            const grid = document.getElementById('purchaseGrid');
+            let html = '';
+            for(let i=0; i<4; i++) {
+                html += `
+                <div class="purchase-card" style="box-shadow: none; border-color: transparent; background: var(--input-bg);">
+                    <div class="skeleton" style="height:20px; width:60%; margin-bottom:12px; border-radius:4px;"></div>
+                    <div class="skeleton" style="height:14px; width:40%; margin-bottom:20px; border-radius:4px;"></div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="skeleton" style="height:24px; width:30%; border-radius:4px;"></div>
+                        <div class="skeleton" style="height:24px; width:20%; border-radius:12px;"></div>
+                    </div>
+                </div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        async function loadPurchases(isLoadMore = false) {
+            if (isLoadMore) {
+                if (isFetching || !hasMore) return;
+                isFetching = true;
+                document.getElementById('scrollLoader').style.display = 'flex';
+            } else {
+                hasMore = true;
+                lastVisibleDoc = null;
+                purchaseCache = [];
+                isFetching = true;
+                renderSkeletons();
+            }
+
+            try {
+                let q;
+                const dbRef = collection(db, "purchases");
+                
+                if (currentSearch !== '') {
+                    const searchWords = currentSearch.replace(/[.\/\\~*\[\]]/g, ' ').split(/[\s\-_]+/).filter(w => w.trim().length > 0);
+                    q = dbRef;
+                    searchWords.forEach(word => {
+                        q = query(q, where(`searchTokens.${word}`, "==", true));
+                    });
+                    
+                    if (isLoadMore && lastVisibleDoc) {
+                        q = query(q, startAfter(lastVisibleDoc), limit(10));
+                    } else {
+                        q = query(q, limit(10));
+                    }
+                } else {
+                    if (isLoadMore && lastVisibleDoc) {
+                        q = query(dbRef, orderBy("createdAt", "desc"), startAfter(lastVisibleDoc), limit(10));
+                    } else {
+                        q = query(dbRef, orderBy("createdAt", "desc"), limit(10));
+                    }
+                }
+
+                const snap = await getDocs(q);
+                
+                if (snap.empty) {
+                    hasMore = false;
+                    if (!isLoadMore) {
+                        document.getElementById('purchaseGrid').innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:40px;">No purchase records found.</div>';
+                    }
+                    document.getElementById('scrollLoader').style.display = 'none';
+                    isFetching = false;
+                    return;
+                }
+
+                lastVisibleDoc = snap.docs[snap.docs.length - 1];
+                
+                const newItems = [];
+                snap.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    if(!purchaseCache.find(p => p.id === doc.id)) {
+                        newItems.push(data);
+                        purchaseCache.push(data);
+                    }
+                });
+
+                if (isLoadMore) {
+                    renderPurchasesAppend(newItems);
+                } else {
+                    renderPurchases(newItems);
+                }
+                document.getElementById('scrollLoader').style.display = 'none';
+
+            } catch (err) {
+                console.error(err);
+                showToast("Error loading records.", "error");
+            } finally {
+                isFetching = false;
+            }
+        }
+
+        // Scroll listener for pagination
+        document.getElementById('mainScroll').addEventListener('scroll', (e) => {
+            const el = e.target;
+            // Trigger load when within 100px of bottom
+            if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) {
+                loadPurchases(true); 
+            }
+        });
+
+        // Search Input delay
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value.toLowerCase().trim();
+                loadPurchases(false);
+            }, 400); 
+        });
+
+        // UI Renderers
+        function generateCardHTML(item) {
+            const d = new Date(item.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric'});
+            const itemCount = item.items ? item.items.length : 0;
+            const topItem = itemCount > 0 ? item.items[0].name : "Unknown Goods";
+            const moreText = itemCount > 1 ? ` +${itemCount - 1} more items` : "";
+            
+            return `
+                <div class="purchase-card" onclick="vibrateApp(20); openPurchaseModal('${item.id}')">
+                    <div class="pc-header">
+                        <div class="pc-supplier"><span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);">local_shipping</span> ${item.supplierName}</div>
+                        <div class="pc-date">${d}</div>
+                    </div>
+                    <div class="pc-details">
+                        Bill No: <strong>${item.receiptNo}</strong><br>
+                        Goods: <strong>${topItem}</strong>${moreText}
+                    </div>
+                    <div class="pc-footer">
+                        <div class="pc-total">₹${(item.grandTotal || 0).toLocaleString('en-IN', {minimumFractionDigits: 2})}</div>
+                        <div class="pc-status status-received">RECEIVED</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderPurchases(items) {
+            const grid = document.getElementById('purchaseGrid');
+            grid.innerHTML = items.map(generateCardHTML).join('');
+        }
+
+        function renderPurchasesAppend(items) {
+            const grid = document.getElementById('purchaseGrid');
+            grid.insertAdjacentHTML('beforeend', items.map(generateCardHTML).join(''));
+        }
+
+    </script>
+</body>
+</html>
