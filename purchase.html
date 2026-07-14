@@ -131,6 +131,12 @@
         .close-modal { background: none; border: none; color: var(--text-main); cursor: pointer; display: flex; padding: 8px; border-radius: 50%; margin-left: -8px; }
         .modal-header h2 { margin: 0; font-size: 1.25em; font-weight: 700; }
 
+        /* NEW: Mini Popup Modals Styling */
+        .mini-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(15, 23, 42, 0.6); z-index: 4000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(4px); }
+        .mini-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .mini-modal-content { background: var(--bg-surface); width: 92%; max-width: 400px; border-radius: 24px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid var(--border-color); }
+        .mini-modal-overlay.active .mini-modal-content { transform: scale(1); }
+
         .form-group { padding: 20px; max-width: 800px; margin: 0 auto; }
         .input-wrapper { margin-bottom: 20px; }
         .input-wrapper label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -170,7 +176,7 @@
 
         #scrollLoader { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; justify-content: center; gap: 10px; }
 
-        /* NEW: Styles for Master Goods Grid */
+        /* Styles for Master Goods Grid */
         .master-good-card { display:flex; justify-content:space-between; align-items:center; background: var(--bg-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); }
         .mg-name { font-weight: 700; font-size: 1rem; color: var(--text-main); }
         .mg-uom { font-size: 0.8rem; color: var(--text-muted); background: var(--input-bg); padding: 2px 8px; border-radius: 4px; margin-top: 4px; display: inline-block;}
@@ -241,9 +247,15 @@
     </div>
 
     <div class="modal" id="modalPurchase">
-        <div class="modal-header">
-            <button class="close-modal" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button>
-            <h2 id="modalTitle">New Raw Goods Entry</h2>
+        <div class="modal-header" style="justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="close-modal" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button>
+                <h2 id="modalTitle">New Raw Goods Entry</h2>
+            </div>
+            <!-- NEW: Trash Icon in Header (hidden by default) -->
+            <button class="close-modal" id="btnDeletePurchase" style="display: none; color: var(--danger-color); background: rgba(239, 68, 68, 0.1); border-radius: 8px;" onclick="vibrateApp(20); openMiniModal('miniModalDeletePurchase')">
+                <span class="material-symbols-outlined">delete</span>
+            </button>
         </div>
         
         <div class="form-group">
@@ -373,22 +385,59 @@
         </div>
     </div>
 
-    <!-- NEW: Master Good Delete Confirmation Modal -->
-    <div class="modal" id="modalDeleteConfirm" style="z-index: 3000;">
-        <div class="modal-header">
-            <button class="close-modal" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button>
-            <h2>Confirm Deletion</h2>
-        </div>
-        <div class="form-group" style="text-align: center; padding: 40px 20px;">
-            <div style="width: 80px; height: 80px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto;">
-                <span class="material-symbols-outlined" style="font-size: 40px; color: var(--danger-color);">warning</span>
+    <!-- NEW: Mini Popup - Master Good Delete Confirmation -->
+    <div class="mini-modal-overlay" id="miniModalDeleteConfirm">
+        <div class="mini-modal-content">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--danger-color);">warning</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Delete Material?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5;">This action cannot be undone. Are you sure you want to remove this raw material from the master godown list?</p>
+                <input type="hidden" id="deleteGoodId">
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeMiniModal('miniModalDeleteConfirm')" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                    <button type="button" id="btnConfirmDeleteMaster" class="btn-primary" onclick="executeDeleteMasterGood()" style="flex: 1; background: var(--danger-color); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); border: none; padding: 12px;">Delete</button>
+                </div>
             </div>
-            <h3 style="margin-bottom: 12px; font-size: 1.5rem; color: var(--text-main);">Delete Material?</h3>
-            <p style="color: var(--text-muted); margin-bottom: 32px; line-height: 1.5;">This action cannot be undone. Are you sure you want to remove this raw material from the master godown list?</p>
-            <input type="hidden" id="deleteGoodId">
-            <div style="display: flex; gap: 16px;">
-                <button type="button" onclick="history.back()" style="flex: 1; padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); font-weight: 700; cursor: pointer; font-size: 1.1em; transition: all 0.2s;">Cancel</button>
-                <button type="button" class="btn-primary" onclick="executeDeleteMasterGood()" style="flex: 1; background: var(--danger-color); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); border: none;">Delete</button>
+        </div>
+    </div>
+
+    <!-- NEW: Mini Popup - Edit Quantity Confirmation -->
+    <div class="mini-modal-overlay" id="miniModalEditQty">
+        <div class="mini-modal-content">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(14, 165, 233, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--accent-color);">edit_square</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Adjust Stock</h3>
+                <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.95rem; line-height: 1.5;" id="editGoodName">Material Name</p>
+                <input type="hidden" id="editGoodId">
+                <div class="input-wrapper" style="text-align: left;">
+                    <label>New Quantity *</label>
+                    <input type="number" id="editGoodQty" placeholder="0" min="0">
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeMiniModal('miniModalEditQty')" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                    <button type="button" id="btnConfirmEditQty" class="btn-primary" onclick="executeEditQty()" style="flex: 1; padding: 12px; background: var(--accent-color); box-shadow: 0 4px 10px rgba(14, 165, 233, 0.2);">Update</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Mini Popup - Purchase Delete Confirmation -->
+    <div class="mini-modal-overlay" id="miniModalDeletePurchase">
+        <div class="mini-modal-content">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--danger-color);">delete_forever</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Delete Purchase?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5;">Are you sure? This will delete the bill and <strong>automatically deduct</strong> the items from the Godown stock to reverse the entry.</p>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeMiniModal('miniModalDeletePurchase')" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                    <button type="button" id="btnConfirmDeletePurchase" class="btn-primary" onclick="executeDeletePurchase()" style="flex: 1; background: var(--danger-color); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); border: none; padding: 12px;">Delete</button>
+                </div>
             </div>
         </div>
     </div>
@@ -452,8 +501,19 @@
         };
         window.addEventListener('popstate', (e) => {
             document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+            // Close mini modals on back button
+            document.querySelectorAll('.mini-modal-overlay.active').forEach(m => m.classList.remove('active'));
             if (e.state && e.state.modal) document.getElementById(e.state.modal).classList.add('active');
         });
+
+        // NEW: Mini Modal Handlers
+        window.openMiniModal = function(id) {
+            vibrateApp(20);
+            document.getElementById(id).classList.add('active');
+        };
+        window.closeMiniModal = function(id) {
+            document.getElementById(id).classList.remove('active');
+        };
 
         // Search Token Generator
         function generateSearchTokens(str1, str2) {
@@ -479,7 +539,7 @@
         let purchaseCache = [];
         let itemsCounter = 0;
         
-        // NEW: Master List Array
+        // Master List Array
         let masterRawGoods = [];
 
         // Auth & Initial Load
@@ -495,7 +555,7 @@
             }
         });
 
-        // --- NEW: Master Godown Logic ---
+        // --- Master Godown Logic ---
         async function fetchMasterRawGoods() {
             try {
                 const q = query(collection(db, "raw_goods_master"), orderBy("name"));
@@ -516,7 +576,7 @@
                 grid.innerHTML = '<div style="text-align:center; padding: 20px; color:var(--text-muted);">No raw materials created yet.</div>';
                 return;
             }
-            // Made UI Professional and included delete icon
+            // Made UI Professional and included edit and delete icons
             grid.innerHTML = masterRawGoods.map(g => `
                 <div class="master-good-card" style="display:flex; justify-content:space-between; align-items:center; background: var(--bg-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); margin-bottom: 12px;">
                     <div style="display:flex; align-items: center; gap: 12px;">
@@ -528,22 +588,68 @@
                             <div class="mg-uom" style="font-size: 0.8rem; color: var(--text-muted); background: var(--input-bg); padding: 2px 8px; border-radius: 4px; margin-top: 4px; display: inline-block;">UOM: ${g.uom}</div>
                         </div>
                     </div>
-                    <div style="display:flex; align-items: center; gap: 16px;">
-                        <div style="text-align:right;">
+                    <div style="display:flex; align-items: center; gap: 12px;">
+                        <div style="text-align:right; margin-right: 4px;">
                             <div class="mg-stock" style="font-size: 1.3rem; font-weight: 800; color: var(--primary-color);">${(g.currentStock || 0).toLocaleString('en-IN')}</div>
                             <div class="mg-label" style="font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px;">In Stock</div>
                         </div>
-                        <button type="button" onclick="vibrateApp(20); confirmDeleteMasterGood('${g.id}')" style="background: rgba(239, 68, 68, 0.1); border: none; color: var(--danger-color); cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s;" title="Delete Material">
-                            <span class="material-symbols-outlined">delete</span>
-                        </button>
+                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                            <button type="button" onclick="openEditQtyModal('${g.id}', '${g.name}', ${g.currentStock || 0})" style="background: rgba(14, 165, 233, 0.1); border: none; color: var(--accent-color); cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s;" title="Edit Quantity">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">edit</span>
+                            </button>
+                            <button type="button" onclick="confirmDeleteMasterGood('${g.id}')" style="background: rgba(239, 68, 68, 0.1); border: none; color: var(--danger-color); cursor: pointer; padding: 6px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: all 0.2s;" title="Delete Material">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             `).join('');
         }
         
+        // NEW: Open Edit Quantity Mini Modal
+        window.openEditQtyModal = function(id, name, currentStock) {
+            document.getElementById('editGoodId').value = id;
+            document.getElementById('editGoodName').innerText = name;
+            document.getElementById('editGoodQty').value = currentStock;
+            openMiniModal('miniModalEditQty');
+        };
+
+        // NEW: Execute Quantity Update via transaction
+        window.executeEditQty = async function() {
+            vibrateApp(30);
+            const id = document.getElementById('editGoodId').value;
+            const newQty = parseInt(document.getElementById('editGoodQty').value);
+            
+            if (!id || isNaN(newQty) || newQty < 0) {
+                showToast("Please enter a valid quantity", "error"); return;
+            }
+
+            const btn = document.getElementById('btnConfirmEditQty');
+            btn.disabled = true; btn.innerText = "Updating...";
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const rawRef = doc(db, "raw_goods_master", id);
+                    transaction.update(rawRef, { 
+                        currentStock: newQty, 
+                        lastUpdated: new Date().toISOString() 
+                    });
+                });
+                
+                showToast("Stock quantity updated successfully!", "success");
+                closeMiniModal('miniModalEditQty');
+                await fetchMasterRawGoods();
+            } catch(err) {
+                console.error(err);
+                showToast("Failed to update quantity", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Update";
+            }
+        };
+        
         window.confirmDeleteMasterGood = function(id) {
             document.getElementById('deleteGoodId').value = id;
-            openModal('modalDeleteConfirm');
+            openMiniModal('miniModalDeleteConfirm');
         };
 
         window.executeDeleteMasterGood = async function() {
@@ -551,14 +657,19 @@
             const id = document.getElementById('deleteGoodId').value;
             if(!id) return;
             
+            const btn = document.getElementById('btnConfirmDeleteMaster');
+            btn.disabled = true; btn.innerText = "Deleting...";
+
             try {
                 await deleteDoc(doc(db, "raw_goods_master", id));
                 showToast("Material deleted successfully!", "success");
-                history.back(); // Using mobile back button support automatically removes active state
+                closeMiniModal('miniModalDeleteConfirm');
                 await fetchMasterRawGoods(); 
             } catch(err) {
                 console.error(err);
                 showToast("Failed to delete material", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Delete";
             }
         };
 
@@ -610,7 +721,7 @@
             const id = `item_row_${itemsCounter}`;
             const container = document.getElementById('itemsContainer');
             
-            // NEW: Build official Dropdown Options
+            // Build official Dropdown Options
             let optionsHtml = '<option value="" disabled selected>Select Official Material...</option>';
             masterRawGoods.forEach(g => {
                 const selected = (g.name === name) ? 'selected' : '';
@@ -645,7 +756,7 @@
                 total += (qty * price);
             });
             
-            // NEW: Inclusive GST Calculation
+            // Inclusive GST Calculation
             const gstPercent = parseFloat(document.getElementById('pGst').value) || 0;
             const baseAmount = total / (1 + (gstPercent / 100));
             const totalGst = total - baseAmount;
@@ -669,6 +780,7 @@
                 if(!data) return;
                 
                 document.getElementById('modalTitle').innerText = "Edit Purchase Record";
+                document.getElementById('btnDeletePurchase').style.display = "flex"; // Show trash icon
                 document.getElementById('editPurchaseId').value = id;
                 document.getElementById('pSupplier').value = data.supplierName;
                 document.getElementById('pInvoice').value = data.receiptNo;
@@ -690,6 +802,7 @@
             } else {
                 // New Mode
                 document.getElementById('modalTitle').innerText = "New Raw Goods Entry";
+                document.getElementById('btnDeletePurchase').style.display = "none"; // Hide trash icon
                 document.getElementById('editPurchaseId').value = '';
                 document.getElementById('pSupplier').value = '';
                 document.getElementById('pInvoice').value = '';
@@ -704,7 +817,7 @@
             openModal('modalPurchase');
         };
 
-        // NEW: Server-Side Firebase Transaction for Save Logic
+        // Server-Side Firebase Transaction for Save Logic (Multi-Item Safe)
         document.getElementById('btnSavePurchase').addEventListener('click', async () => {
             vibrateApp(30);
             const id = document.getElementById('editPurchaseId').value;
@@ -835,6 +948,62 @@
                 btn.innerHTML = `<span class="material-symbols-outlined">save</span> Save Purchase Record`;
             }
         });
+
+        // NEW: Server-Side Transaction logic to Delete an Entire Purchase & Revert Stock
+        window.executeDeletePurchase = async function() {
+            vibrateApp(30);
+            const id = document.getElementById('editPurchaseId').value;
+            if(!id) return;
+            
+            const existingData = purchaseCache.find(p => p.id === id);
+            if(!existingData) return;
+
+            const btn = document.getElementById('btnConfirmDeletePurchase');
+            btn.disabled = true; btn.innerText = "Deleting...";
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const docRef = doc(db, "purchases", id);
+                    
+                    // Accumulate stock to revert
+                    const stockChanges = {};
+                    existingData.items.forEach(oldItem => {
+                        if(oldItem.rawGoodId) {
+                            stockChanges[oldItem.rawGoodId] = (stockChanges[oldItem.rawGoodId] || 0) - oldItem.qty;
+                        }
+                    });
+
+                    // Deduct strictly from master collection
+                    Object.keys(stockChanges).forEach(rawGoodId => {
+                        if (stockChanges[rawGoodId] !== 0) {
+                            const rawRef = doc(db, "raw_goods_master", rawGoodId);
+                            transaction.update(rawRef, { 
+                                currentStock: increment(stockChanges[rawGoodId]), 
+                                lastUpdated: new Date().toISOString() 
+                            });
+                        }
+                    });
+
+                    // Delete the purchase document
+                    transaction.delete(docRef);
+                });
+
+                showToast("Purchase deleted & stock reverted!", "success");
+                closeMiniModal('miniModalDeletePurchase');
+                history.back(); // close purchase modal
+                
+                fetchMasterRawGoods(); 
+                currentSearch = '';
+                document.getElementById('searchInput').value = '';
+                loadPurchases();
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to delete purchase.", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Delete";
+            }
+        };
 
         // --- Optimized Cursor Pagination Fetch ---
         function renderSkeletons() {
