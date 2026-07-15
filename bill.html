@@ -561,7 +561,7 @@
     <script type="module">
         import { app, db } from './config.js';
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        import { collection, query, where, limit, getDocs, doc, writeBatch, serverTimestamp, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        import { collection, query, where, limit, getDocs, doc, writeBatch, serverTimestamp, increment, onSnapshot, startAfter, orderBy } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         const navItems = [
             { name: 'Dashboard', path: 'index.html', icon: '<path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>' },
@@ -633,7 +633,121 @@
         // --- SEARCH ---
         const searchInput = document.getElementById('pSearch');
         const suggestionsBox = document.getElementById('pSuggestions');
+        
         let searchTimeout;
+        let lastVisibleDoc = null;
+        let isFetchingSearch = false;
+        let hasMoreSearch = true;
+        let currentSearchKeyword = "";
+        let useKeywordsArray = true; // Tracks if we should try 'keywords' array first
+
+        const loadSuggestions = async (isLoadMore = false) => {
+            if (isFetchingSearch || (!hasMoreSearch && isLoadMore)) return;
+            isFetchingSearch = true;
+            
+            if (!isLoadMore) {
+                suggestionsBox.style.display = 'block';
+                suggestionsBox.innerHTML = '<div style="padding:14px 16px; color:var(--text-muted);">Searching... <span class="spinner" style="width:12px;height:12px;border-width:2px; vertical-align: middle;"></span></div>';
+                lastVisibleDoc = null;
+                hasMoreSearch = true;
+            } else {
+                const loadingIndicator = document.createElement('div');
+                loadingIndicator.id = 'loadMoreSpinner';
+                loadingIndicator.style.cssText = 'padding:10px; text-align:center; color:var(--text-muted);';
+                loadingIndicator.innerHTML = '<span class="spinner" style="width:16px;height:16px;border-width:2px; border-top-color:var(--primary-color);"></span>';
+                suggestionsBox.appendChild(loadingIndicator);
+            }
+
+            try {
+                const keywordLower = currentSearchKeyword.toLowerCase();
+                let q;
+                
+                // Primary: Try searching utilizing "keywords" array
+                if (useKeywordsArray) {
+                    if (lastVisibleDoc) {
+                        q = query(collection(db, "inventory"), where("keywords", "array-contains", keywordLower), startAfter(lastVisibleDoc), limit(10));
+                    } else {
+                        q = query(collection(db, "inventory"), where("keywords", "array-contains", keywordLower), limit(10));
+                    }
+                } else {
+                    // Fallback: Name Prefix
+                    if (lastVisibleDoc) {
+                        q = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), startAfter(lastVisibleDoc), limit(10));
+                    } else {
+                        q = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), limit(10));
+                    }
+                }
+                
+                let snap;
+                try {
+                    snap = await getDocs(q);
+                } catch (err) {
+                    if (useKeywordsArray) {
+                        console.warn("Keywords array search failed, falling back to name prefix search.", err);
+                        useKeywordsArray = false; // Disable for future requests
+                        
+                        // Retry with fallback
+                        if (lastVisibleDoc) {
+                            q = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), startAfter(lastVisibleDoc), limit(10));
+                        } else {
+                            q = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), limit(10));
+                        }
+                        snap = await getDocs(q);
+                    } else {
+                        throw err;
+                    }
+                }
+                
+                if (!isLoadMore) suggestionsBox.innerHTML = '';
+                else {
+                    const spinner = document.getElementById('loadMoreSpinner');
+                    if (spinner) spinner.remove();
+                }
+
+                if (snap.empty) { 
+                    if (!isLoadMore) suggestionsBox.innerHTML = '<div style="padding:14px 16px; color:var(--text-muted);">No products found.</div>'; 
+                    hasMoreSearch = false;
+                    isFetchingSearch = false;
+                    return; 
+                }
+
+                lastVisibleDoc = snap.docs[snap.docs.length - 1];
+                if (snap.docs.length < 10) hasMoreSearch = false;
+
+                snap.forEach(docSnap => {
+                    const d = docSnap.data();
+                    d.id = docSnap.id;
+                    
+                    const div = document.createElement('div'); 
+                    div.className = 'suggestion-item';
+                    div.innerHTML = `<div><div class="s-name">${d.name}</div><div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">₹${d.price || 0}</div></div><div class="s-stock ${d.qty <= 0 ? 'zero':''}">${d.qty} in stock</div>`;
+                    
+                    div.onclick = () => {
+                        vibrateApp(10);
+                        if(d.qty <= 0) { showToast("Item is out of stock!"); return; }
+                        document.getElementById('pInvId').value = d.id;
+                        document.getElementById('pCurrentStock').value = d.qty || 0;
+                        document.getElementById('pName').value = d.name;
+                        document.getElementById('pPrice').value = d.price || '';
+                        document.getElementById('pQty').value = 1;
+                        searchInput.value = '';
+                        suggestionsBox.style.display = 'none';
+                    };
+                    suggestionsBox.appendChild(div);
+                });
+                
+            } catch (error) {
+                console.error("Search failed:", error);
+                if (!isLoadMore) {
+                    suggestionsBox.innerHTML = '<div style="padding:14px 16px; color:var(--danger-color);">Error fetching products</div>';
+                } else {
+                    const spinner = document.getElementById('loadMoreSpinner');
+                    if (spinner) spinner.remove();
+                }
+            }
+            
+            isFetchingSearch = false;
+        };
 
         searchInput.addEventListener('input', (e) => {
             clearTimeout(searchTimeout);
@@ -644,52 +758,20 @@
                 return; 
             }
             
-            searchTimeout = setTimeout(async () => {
-                suggestionsBox.style.display = 'block';
-                suggestionsBox.innerHTML = '<div style="padding:14px 16px; color:var(--text-muted);">Searching... <span class="spinner" style="width:12px;height:12px;border-width:2px;"></span></div>';
-                
-                try {
-                    const q = query(
-                        collection(db, "inventory"), 
-                        where("name", ">=", val),
-                        where("name", "<=", val + "\uf8ff"),
-                        limit(8)
-                    );
-                    
-                    const snap = await getDocs(q);
-                    
-                    if(snap.empty) { 
-                        suggestionsBox.innerHTML = '<div style="padding:14px 16px; color:var(--text-muted);">No products found.</div>'; 
-                        return; 
-                    }
-                    
-                    suggestionsBox.innerHTML = '';
-                    snap.forEach(doc => {
-                        const d = doc.data();
-                        d.id = doc.id;
-                        
-                        const div = document.createElement('div'); 
-                        div.className = 'suggestion-item';
-                        div.innerHTML = `<div><div class="s-name">${d.name}</div><div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">₹${d.price || 0}</div></div><div class="s-stock ${d.qty <= 0 ? 'zero':''}">${d.qty} in stock</div>`;
-                        
-                        div.onclick = () => {
-                            vibrateApp(10);
-                            if(d.qty <= 0) { showToast("Item is out of stock!"); return; }
-                            document.getElementById('pInvId').value = d.id;
-                            document.getElementById('pCurrentStock').value = d.qty || 0;
-                            document.getElementById('pName').value = d.name;
-                            document.getElementById('pPrice').value = d.price || '';
-                            document.getElementById('pQty').value = 1;
-                            searchInput.value = '';
-                            suggestionsBox.style.display = 'none';
-                        };
-                        suggestionsBox.appendChild(div);
-                    });
-                } catch(error) {
-                    console.error("Search failed:", error);
-                    suggestionsBox.innerHTML = '<div style="padding:14px 16px; color:var(--danger-color);">Error fetching products</div>';
-                }
+            currentSearchKeyword = val;
+            
+            searchTimeout = setTimeout(() => {
+                loadSuggestions(false);
             }, 400); 
+        });
+
+        // Infinite Scroll Pagination Event Listener
+        suggestionsBox.addEventListener('scroll', () => {
+            if (suggestionsBox.scrollTop + suggestionsBox.clientHeight >= suggestionsBox.scrollHeight - 10) {
+                if (hasMoreSearch && !isFetchingSearch) {
+                    loadSuggestions(true);
+                }
+            }
         });
 
         document.addEventListener('click', (e) => {
