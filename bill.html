@@ -144,44 +144,147 @@
         }
 
         /* ---------------------------------------------------- */
-        /* --- PROFESSIONAL PRINT INVOICE LAYOUT --- */
+        /* --- PROFESSIONAL PRINT INVOICE LAYOUT (B&W REPLICA) --- */
         /* ---------------------------------------------------- */
         #printArea { display: none; }
 
         @media print {
+            /* Safely hide app UI */
             #app-shell, .toast-msg { display: none !important; }
-            @page { size: A4 portrait; margin: 0mm; }
+
+            /* Force 1 page and remove browser headers/footers */
+            @page {
+                size: A4 portrait;
+                margin: 0mm; 
+            }
             
             body * { visibility: hidden; }
-            body { background: white; color: black; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            body { 
+                background: white; color: black; 
+                margin: 0; padding: 0; 
+                font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; 
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important; 
+            }
             
+            /* Show only the Print Area */
             #printArea, #printArea * { visibility: visible; }
-            #printArea { display: block !important; position: relative; width: 100%; max-width: 210mm; min-height: 100vh; margin: 0 auto; padding: 0; padding-bottom: 260px !important; background: white; color: #000; box-sizing: border-box; }
+            #printArea { 
+                display: block !important; 
+                position: relative; 
+                width: 100%; 
+                max-width: 210mm; 
+                min-height: 100vh;
+                margin: 0 auto; 
+                padding: 0; 
+                padding-bottom: 260px !important; /* Stops main content before fixed footers */
+                background: white; color: #000;
+                box-sizing: border-box;
+                -webkit-print-color-adjust: exact !important; 
+                print-color-adjust: exact !important;
+            }
 
-            .print-top-band { padding: 35px 40px 25px 40px; display: flex; justify-content: space-between; margin-bottom: 25px; border-bottom: 2px solid #333; }
-            .print-header-left { width: 55%; }
-            .print-brand h2 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: 1px; color: #000; text-transform: uppercase;}
-            .print-invoice-to h3 { margin: 0 0 8px 0; font-size: 16px; font-weight: bold; color: #000;}
-            .print-header-right { width: 40%; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-            .invoice-title-text { font-size: 32px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; color: #000;}
+            /* Top Band Header (Professional Gray) */
+            .print-top-band {
+                background-color: #cccccc !important; 
+                padding: 35px 40px 25px 40px;
+                display: flex;
+                justify-content: space-between;
+                margin-bottom: 25px;
+                border-bottom: 1px solid #999;
+            }
             
+            /* Restrict Logo Size in Print Layout */
+            .brand-logo-print {
+                max-width: 70px;
+                height: auto;
+                border-radius: 8px;
+                margin-bottom: 10px;
+                display: block;
+            }
+
+            /* Header Left Side */
+            .print-header-left { width: 55%; }
+            .print-brand { display: flex; flex-direction: column; gap: 2px; margin-bottom: 25px; }
+            .print-brand h2 { margin: 0; font-size: 28px; font-weight: 900; letter-spacing: -1px; color: #1e40af !important; line-height: 1;}
+            
+            .print-invoice-to { margin-top: 10px; }
+            .section-label { font-size: 10px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 5px; color: #555; }
+            .print-invoice-to h3 { margin: 0 0 8px 0; font-size: 18px; font-weight: bold; color: #000;}
+            .print-invoice-to p { margin: 3px 0; font-size: 12px; color: #222;}
+            .print-invoice-to p strong { display: inline-block; width: 75px; font-size: 10px; text-transform: uppercase; color: #000;}
+
+            /* Header Right Side */
+            .print-header-right { width: 40%; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+            
+            .invoice-title-text { font-size: 38px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; line-height: 1; color: #1e40af !important;}
+            .invoice-no-text { font-size: 14px; font-weight: bold; margin: 5px 0 15px 0; color: #000;}
+            
+            .invoice-date-box { text-align: left; display: flex; flex-direction: column; align-items: flex-end; margin-top: 15px;}
+            .invoice-date-box span { font-size: 9px; font-weight: bold; text-transform: uppercase; color: #333;}
+            .invoice-date-box strong { font-size: 13px; font-weight: bold; color: #000;}
+
+            /* Table Layout - Professional Alignment */
             .print-table-container { padding: 0 40px; display: block; width: 100%; box-sizing: border-box; }
             .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; } 
-            .print-table th { background-color: #eee !important; padding: 10px; font-size: 11px; text-transform: uppercase; text-align: left; border: 1px solid #000; }
-            .print-table td { border: 1px solid #ddd; border-top: none; border-bottom: none; padding: 10px; font-size: 12px; color: #000;}
-            .print-table th.text-right, .print-table td.text-right { text-align: right; }
+            .print-table th { background-color: #cccccc !important; padding: 12px 10px; font-size: 11px; text-transform: uppercase; text-align: left; color: #000; font-weight: bold; border-top: 1px solid #000; border-bottom: 1px solid #000; }
+            .print-table td { border-bottom: 1px solid #ddd; padding: 12px 10px; font-size: 12px; vertical-align: middle; color: #000;}
+            .print-table th.text-right, .print-table td.text-right { text-align: right; padding-right: 15px; }
             .print-table th.text-center, .print-table td.text-center { text-align: center; }
 
-            .print-middle-section { display: flex; justify-content: space-between; padding: 15px 40px; position: fixed !important; bottom: 105px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999; }
-            .print-totals-box { width: 50%; margin-left: auto; border: 1px solid #000; }
-            .totals-grid { width: 100%; border-collapse: collapse; }
-            .totals-grid td { padding: 6px 10px; font-size: 12px; border-bottom: 1px solid #ddd; color: #000;}
-            .totals-grid .t-grand-row { background-color: #eee !important; border-top: 2px solid #000; }
-            .totals-grid .t-grand-row td { font-size: 15px; font-weight: 900; } 
+            /* --- Strict Row Formatting for Pagination Safety --- */
+            .print-table tbody tr:nth-child(5n):not(:last-child) {
+                page-break-after: always;
+                break-after: page;
+            }
+            .print-table tbody tr {
+                page-break-inside: avoid;
+                break-inside: avoid;
+                height: 25mm !important; 
+                max-height: 25mm !important; 
+                overflow: hidden;
+            }
 
-            .print-signature-area { display: flex; justify-content: space-between; padding: 0 40px; position: fixed !important; bottom: 35px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999; }
-            .sign-box { text-align: center; width: 200px; }
-            .sign-box div.sign-placeholder { border-bottom: 1px solid #000; height: 40px; margin-bottom: 5px; width: 100%; }
+            /* Middle Section (Totals & Thanks) - STRICT FIXED BOTTOM */
+            .print-middle-section { 
+                display: flex; justify-content: space-between; padding: 15px 40px; margin-top: 0; 
+                page-break-inside: avoid; break-inside: avoid; 
+                position: fixed !important; bottom: 105px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999;
+            }
+            
+            .print-left-footer-info { width: 45%; }
+            .thanks-box { background-color: #eee !important; padding: 15px; margin-bottom: 15px; border-left: 4px solid #1e40af; border-radius: 2px;} 
+            .thanks-box strong { display: block; font-size: 13px; margin-bottom: 5px; color: #000;}
+            .thanks-box p { margin: 0; font-size: 10px; color: #444; line-height: 1.5; }
+            
+            .payment-methods p { margin: 6px 0; font-size: 11px; font-weight: bold; color: #000;}
+            .payment-methods span { display: block; font-weight: normal; font-size: 11px; color: #444; margin-top: 2px;}
+
+            .print-totals-box { width: 40%; }
+            .totals-grid { width: 100%; border-collapse: collapse; }
+            .totals-grid td { padding: 6px 15px 6px 10px; font-size: 12px; border: none; font-weight: bold; color: #444;}
+            .totals-grid .t-label { text-align: right; }
+            .totals-grid .t-val { text-align: right; color: #000; }
+            .totals-grid .t-grand-row { background-color: #cccccc !important; border-top: 2px solid #000; }
+            .totals-grid .t-grand-row td { font-size: 16px; font-weight: 900; color: #1e40af !important; padding: 10px 15px 10px 10px; } 
+
+            /* Signature Area - STRICT FIXED BOTTOM */
+            .print-signature-area { 
+                display: flex; justify-content: space-between; padding: 0 40px; margin-top: 0; 
+                page-break-inside: avoid; break-inside: avoid; 
+                position: fixed !important; bottom: 35px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999;
+            }
+            .sign-box { text-align: center; width: 220px; }
+            .sign-box div.sign-placeholder { border-bottom: 1px solid #000; height: 35px; margin-bottom: 8px; width: 100%; }
+            .sign-box p { margin: 0; font-size: 11px; font-weight: bold; color: #000;}
+            
+            /* Absolute Footer - STRICT FIXED BOTTOM */
+            .print-absolute-footer { 
+                background-color: #cccccc !important; padding: 10px 40px; display: flex; justify-content: center; align-items: center; margin-top: 0; 
+                page-break-inside: avoid; break-inside: avoid; 
+                position: fixed !important; bottom: 0; left: 0; right: 0; width: 100%; box-sizing: border-box; z-index: 999;
+            }
+            .print-absolute-footer p { margin: 0; font-size: 9px; font-weight: bold; color: #333; text-transform: uppercase; letter-spacing: 1px;}
         }
     </style>
 </head>
@@ -207,9 +310,6 @@
                     <div class="section-box">
                         <h2 class="section-title">
                             <div><span class="material-symbols-outlined" style="vertical-align: bottom;">person</span> Customer Details</div>
-                            <div style="font-size: 0.75em; color: var(--text-muted); background: var(--input-bg); padding: 4px 10px; border-radius: 20px;">
-                                <strong style="color: var(--primary-color);" id="displayInvoiceNo">INV-XXXX</strong>
-                            </div>
                         </h2>
                         <div class="form-group">
                             <div class="input-row">
@@ -357,27 +457,26 @@
                         puduchatram, Thiruvallur,<br>
                         Tamil Nadu - 600124
                     </p>
-                    <p style="margin-top: 5px;"><strong>Ph:</strong> 7200719392</p>
-                    <div style="margin-top: 10px;">
-                        <span style="font-size: 12px; font-weight: bold; color: #000; border: 1px solid #000; padding: 4px 8px;">
-                            GSTIN: 33BFIPL2226K1ZJ
-                        </span>
-                    </div>
+                    <p style="font-weight: normal; margin-top: 2px;"><strong>Ph:</strong> 7200719392</p>
+                    <div style="margin-top: 10px;"><span style="font-size: 11px; font-weight: bold; color: #000; border: 1px solid #999; padding: 5px 10px; border-radius: 4px; background-color: #f5f5f5; letter-spacing: 0.5px;">GSTIN: 33BFIPL2226K1ZJ</span></div>
                 </div>
                 
                 <div class="print-invoice-to">
-                    <p class="section-label" style="font-size: 10px; font-weight: bold; color: #555; text-transform: uppercase;">Billed To</p>
+                    <p class="section-label">BILLED TO</p>
                     <h3 id="prName">Customer Name</h3>
-                    <p style="margin: 3px 0; font-size: 12px; color: #222;"><strong>Phone:</strong> <span id="prPhone"></span></p>
-                    <p style="margin: 3px 0; font-size: 12px; color: #222;"><strong>Address:</strong> <span id="prAddress"></span></p>
+                    <p><strong>PHONE :</strong> <span id="prPhone"></span></p>
+                    <p><strong>ADDRESS :</strong> <span id="prAddress"></span></p>
                 </div>
             </div>
             
             <div class="print-header-right">
                 <h1 class="invoice-title-text">TAX INVOICE</h1>
-                <p class="invoice-no-text">Invoice #: <span id="prInvNo">INV-XXXX</span></p>
-                <p style="font-size: 12px; font-weight: bold;">Date: <span id="prDate">DD-MM-YYYY</span></p>
-                <p style="font-size: 12px; margin-top:10px;">Payment: <span id="prPaymentMode"></span></p>
+                <p class="invoice-no-text">No. <span id="prInvNo">INV-XXXX</span></p>
+                
+                <div class="invoice-date-box">
+                    <span style="font-size: 9px; font-weight: bold; text-transform: uppercase; color: #333; display:block;">Invoice Date</span>
+                    <strong id="prDate">DD-MM-YYYY</strong>
+                </div>
             </div>
         </div>
 
@@ -393,37 +492,49 @@
                         <th style="width: 15%;" class="text-right">Total</th>
                     </tr>
                 </thead>
-                <tbody id="prTableBody"></tbody>
+                <tbody id="prTableBody">
+                    </tbody>
             </table>
         </div>
 
         <div class="print-middle-section">
-            <div style="width: 45%;">
-                <p style="font-size: 11px; font-weight: bold;">Terms & Conditions</p>
-                <p style="font-size: 10px; color: #444; line-height: 1.4;">1. Goods once sold will not be taken back.<br>2. All disputes subject to local jurisdiction.</p>
+            <div class="print-left-footer-info">
+                <div class="thanks-box">
+                    <strong>Thank you for your business!</strong>
+                    <p>1. Goods once sold will not be taken back.<br>2. All disputes subject to local jurisdiction.</p>
+                </div>
+                
+                <div class="payment-methods">
+                    <p>Payment Mode:<br><span id="prPaymentMode">Cash / UPI / Bank Transfer</span></p>
+                </div>
             </div>
+            
             <div class="print-totals-box">
                 <table class="totals-grid">
-                    <tr><td class="t-label">Taxable Amount</td><td class="t-val" id="prBaseTotal" style="text-align: right;">₹0.00</td></tr>
-                    <tr><td class="t-label">CGST</td><td class="t-val" id="prCgstTotal" style="text-align: right;">₹0.00</td></tr>
-                    <tr><td class="t-label">SGST</td><td class="t-val" id="prSgstTotal" style="text-align: right;">₹0.00</td></tr>
-                    <tr><td class="t-label">Discount</td><td class="t-val" id="prDiscountTotal" style="text-align: right;">-₹0.00</td></tr>
-                    <tr><td class="t-label">Transport Charges</td><td class="t-val" id="prTransportTotal" style="text-align: right;">+₹0.00</td></tr>
-                    <tr class="t-grand-row"><td class="t-label">GRAND TOTAL</td><td class="t-val" id="prGrandTotal" style="text-align: right;">₹0.00</td></tr>
+                    <tr><td class="t-label">Taxable Amount</td><td class="t-val" id="prBaseTotal">₹0.00</td></tr>
+                    <tr><td class="t-label">CGST</td><td class="t-val" id="prCgstTotal">₹0.00</td></tr>
+                    <tr><td class="t-label">SGST</td><td class="t-val" id="prSgstTotal">₹0.00</td></tr>
+                    <tr><td class="t-label">Discount</td><td class="t-val" id="prDiscountTotal">-₹0.00</td></tr>
+                    <tr><td class="t-label">Transport</td><td class="t-val" id="prTransportTotal">+₹0.00</td></tr>
+                    <tr class="t-grand-row"><td class="t-label">TOTAL :</td><td class="t-val" id="prGrandTotal">₹0.00</td></tr>
                 </table>
             </div>
         </div>
 
         <div class="print-signature-area">
             <div class="sign-box">
-                <p style="margin-bottom: 20px; font-size: 11px; font-weight: bold;">Customer Signature</p>
+                <p style="margin-bottom: 25px;">Customer Signature</p>
                 <div class="sign-placeholder"></div>
             </div>
             <div class="sign-box">
-                <p style="margin-bottom: 20px; font-size: 11px; font-weight: bold;">For LITHIK BEVERAGE</p>
+                <p style="margin-bottom: 25px;">For LITHIK BEVERAGE</p>
                 <div class="sign-placeholder"></div>
-                <p style="font-size: 11px; font-weight: bold;">Authorized Signatory</p>
+                <p>Authorized Signatory</p>
             </div>
+        </div>
+
+        <div class="print-absolute-footer">
+            <p>System Generated Invoice • Powered by Goorac Software Solutions</p>
         </div>
     </div>
 
@@ -432,7 +543,6 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, query, where, limit, getDocs, doc, writeBatch, serverTimestamp, increment, onSnapshot } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // COMPLETE Navigation Data Setup (All Items Added Back)
         const navItems = [
             { name: 'Dashboard', path: 'index.html', icon: '<path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>' },
             { name: 'Billing', path: 'bill.html', icon: '<path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>' },
@@ -457,12 +567,10 @@
             mobileNav.innerHTML += html;
         });
 
-        // Date Init (IST specific parsing mapping)
         const today = new Date();
         const localIso = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
         document.getElementById('cDate').value = localIso;
 
-        // Utilities
         window.vibrateApp = function(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); };
         
         window.showToast = function(msg, type = "error") {
@@ -481,7 +589,7 @@
             if (!user) { window.location.replace('login.html'); }
         });
 
-        // --- AUTOMATIC INVOICE NUMBERING (Real-Time Counter) ---
+        // --- AUTOMATIC INVOICE NUMBERING ---
         let currentInvoiceNumber = "INV-XXXX";
         let nextInvCount = 1;
         function listenToInvoiceCounter() {
@@ -492,8 +600,6 @@
                         nextInvCount = snap.data().nextInvoice || 1;
                     }
                     currentInvoiceNumber = `INV-${nextInvCount.toString().padStart(5, '0')}`;
-                    document.getElementById('displayInvoiceNo').innerText = currentInvoiceNumber;
-                    
                     const customInput = document.getElementById('customInvNo');
                     if (customInput) customInput.placeholder = `Auto (e.g. ${currentInvoiceNumber})`;
                 });
@@ -501,7 +607,7 @@
         }
         listenToInvoiceCounter();
 
-        // --- OPTIMIZED SERVER-SIDE DEBOUNCED SEARCH ---
+        // --- SEARCH ---
         const searchInput = document.getElementById('pSearch');
         const suggestionsBox = document.getElementById('pSuggestions');
         let searchTimeout;
@@ -560,14 +666,14 @@
                     console.error("Search failed:", error);
                     suggestionsBox.innerHTML = '<div style="padding:14px 16px; color:var(--danger-color);">Error fetching products</div>';
                 }
-            }, 400); // 400ms Debounce
+            }, 400); 
         });
 
         document.addEventListener('click', (e) => {
             if (!searchInput.contains(e.target) && !suggestionsBox.contains(e.target)) suggestionsBox.style.display = 'none';
         });
 
-        // --- Cart Logic & Math ---
+        // --- CART LOGIC ---
         let cartItems = [];
         let billTotals = { base: 0, cgst: 0, sgst: 0, gst: 0, discount: 0, transport: 0, grand: 0 }; 
 
@@ -588,7 +694,6 @@
             const existingQty = existingIndex > -1 ? cartItems[existingIndex].qty : 0;
             if ((qty + existingQty) > currentStock) { showToast(`Only ${currentStock} in stock.`); return; }
 
-            // Math - Price is Inclusive of GST
             const gross = price * qty;
             const netAfterDiscount = Math.max(0, gross - discount);
             const baseAmount = Number((netAfterDiscount / (1 + (gstPercent / 100))).toFixed(2));
@@ -610,7 +715,6 @@
                 cartItems.push({ invId, name, price, qty, discount, gstPercent, baseTotal: baseAmount, gstAmount: totalGstAmount, cgst: cgstAmount, sgst: sgstAmount, finalTotal: netAfterDiscount });
             }
 
-            // Clear entry inputs
             document.getElementById('pInvId').value = '';
             document.getElementById('pName').value = '';
             document.getElementById('pPrice').value = '';
@@ -673,7 +777,7 @@
         }
 
         // --- BUTTON STATE MACHINE & SAVE LOGIC ---
-        let actionState = "SAVE"; // Can be SAVE or PRINT
+        let actionState = "SAVE"; 
 
         document.getElementById('btnAction').addEventListener('click', async () => {
             vibrateApp(30);
@@ -686,7 +790,6 @@
                 return;
             }
 
-            // Save Flow
             const cName = document.getElementById('cName').value.trim();
             if (!cName) { showToast("Customer Name is required."); return; }
             if (cartItems.length === 0) return;
@@ -698,14 +801,12 @@
             try {
                 const batch = writeBatch(db);
                 
-                // Construct Date and custom Invoice number safely
                 const cDateInput = document.getElementById('cDate').value;
                 const finalDate = cDateInput ? new Date(cDateInput) : serverTimestamp();
                 
                 let customInvNo = document.getElementById('customInvNo').value.trim();
                 let finalInvNo = customInvNo || currentInvoiceNumber;
 
-                // Save to 'sales' collection
                 const sellRef = doc(collection(db, "sales"));
                 batch.set(sellRef, {
                     invoiceNo: finalInvNo,
@@ -721,12 +822,10 @@
                     createdAt: serverTimestamp()
                 });
 
-                // Deduct Inventory Quantities
                 cartItems.forEach(item => {
                     batch.update(doc(db, "inventory", item.invId), { qty: increment(-item.qty) });
                 });
                 
-                // Smart logic: Auto increment based on provided sequence if available
                 let smartNextNormal = null;
                 if(customInvNo) {
                     const numMatch = customInvNo.match(/(\d+)$/);
@@ -735,7 +834,6 @@
                     }
                 }
                 
-                // Update Invoice Counter Safely (Using merge so we don't throw an error on empty databases)
                 const counterRef = doc(db, "settings", "invoiceCounters");
                 batch.set(counterRef, { 
                     nextInvoice: smartNextNormal !== null ? smartNextNormal : increment(1) 
@@ -744,10 +842,8 @@
                 await batch.commit();
                 showToast("Bill Saved Successfully!", "success");
                 
-                // Build Print Layout
                 buildPrintLayout(finalInvNo);
 
-                // Transform into Print Button
                 actionState = "PRINT";
                 btn.style.backgroundColor = "var(--success-color)";
                 icon.style.display = "inline-block";
@@ -764,8 +860,9 @@
             }
         });
 
+        // --- UPDATED PRINT LAYOUT LOGIC (PAGINATION) ---
         function buildPrintLayout(invNo) {
-            document.getElementById('prName').innerText = document.getElementById('cName').value;
+            document.getElementById('prName').innerText = document.getElementById('cName').value || 'Cash Customer';
             document.getElementById('prPhone').innerText = document.getElementById('cPhone').value || 'N/A';
             document.getElementById('prAddress').innerText = document.getElementById('cAddress').value || 'N/A';
             document.getElementById('prPaymentMode').innerText = document.getElementById('cPaymentMode').value;
@@ -777,18 +874,49 @@
             const tbody = document.getElementById('prTableBody');
             tbody.innerHTML = '';
             
-            cartItems.forEach((item, idx) => {
+            // SMART ALGORITHM: Pad items to strictly force 5 items per chunk 
+            let printItems = [...cartItems];
+            const maxRowsPerPage = 5;
+            const remainder = printItems.length % maxRowsPerPage;
+            
+            if (remainder !== 0 || printItems.length === 0) {
+                const padCount = printItems.length === 0 ? maxRowsPerPage : (maxRowsPerPage - remainder);
+                for(let i = 0; i < padCount; i++) {
+                    printItems.push({ isEmptyRow: true });
+                }
+            }
+
+            printItems.forEach((item, index) => {
+                if (item.isEmptyRow) {
+                    // Inject invisible spacing row to maintain physical space for pagination structure
+                    tbody.innerHTML += `
+                        <tr style="height: 25mm; max-height: 25mm;">
+                            <td style="border-bottom: 1px solid #ddd;"></td>
+                            <td style="border-bottom: 1px solid #ddd;"></td>
+                            <td style="border-bottom: 1px solid #ddd;"></td>
+                            <td style="border-bottom: 1px solid #ddd;"></td>
+                            <td style="border-bottom: 1px solid #ddd;"></td>
+                            <td style="border-bottom: 1px solid #ddd;"></td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                const num = (index + 1).toString().padStart(2, '0');
+                
+                const desc = `
+                    <strong style="font-size:13px; display:block; color:#000; padding-bottom: 3px;">${item.name}</strong>
+                    <span style="font-size:11px; color:#555;">GST: ${item.gstPercent}% | Base: ₹${item.baseTotal.toFixed(2)}</span>
+                `;
+                
                 tbody.innerHTML += `
-                    <tr>
-                        <td>${idx + 1}</td>
-                        <td>
-                            <strong style="font-size:12px; color:#000;">${item.name}</strong><br>
-                            <span style="font-size:10px; color:#555;">GST: ${item.gstPercent}% | Base: ₹${item.baseTotal.toFixed(2)}</span>
-                        </td>
+                    <tr style="height: 25mm; max-height: 25mm;">
+                        <td>${num}.</td>
+                        <td>${desc}</td>
                         <td class="text-center">-</td>
-                        <td class="text-center">${item.qty}</td>
+                        <td class="text-center">${item.qty.toString().padStart(2, '0')}</td>
                         <td class="text-right">₹${item.price.toFixed(2)}</td>
-                        <td class="text-right"><strong>₹${item.finalTotal.toFixed(2)}</strong></td>
+                        <td class="text-right" style="font-weight:bold; color:#000;">₹${item.finalTotal.toFixed(2)}</td>
                     </tr>
                 `;
             });
@@ -807,7 +935,7 @@
                 document.getElementById('cPhone').value = '';
                 document.getElementById('cAddress').value = '';
                 document.getElementById('cTransport').value = '0';
-                document.getElementById('customInvNo').value = ''; // Reset Custom Inv Box
+                document.getElementById('customInvNo').value = ''; 
                 
                 cartItems.splice(0, cartItems.length);
                 renderCart();
