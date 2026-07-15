@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard - LITHIK BEVERAGE</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* CSS Variables for Auto Dark/Light Mode matching Login page */
+        :root {
+            --bg-color: #f8fafc;
+            --surface-color: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary-color: #1e40af; 
+            --focus-ring: rgba(30, 64, 175, 0.2);
+            --border-color: #e2e8f0;
+            --danger-color: #dc2626;
+            --danger-hover: #b91c1c;
+            --success-color: #16a34a;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #020617;
+                --surface-color: #0f172a;
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --primary-color: #2563eb; 
+                --focus-ring: rgba(37, 99, 235, 0.25);
+                --border-color: #1e293b;
+                --danger-color: #ef4444;
+                --danger-hover: #dc2626;
+                --success-color: #22c55e;
+            }
+        }
+
+        /* Strict Layout Rules: No text copy selection, matching global UI spec */
+        * {
+            box-sizing: border-box;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Aggressively Hide All Scrollbars Everywhere */
+        html, body, * {
+            -ms-overflow-style: none !important;
+            scrollbar-width: none !important;
+        }
+        
+        *::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+            -webkit-appearance: none !important;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            min-height: 100vh;
+            width: 100vw;
+            overflow-y: auto;
+            overflow-x: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* Top Header Navigation Section */
+        .admin-header {
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .back-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: none;
+            width: auto;
+            display: inline-flex;
+        }
+
+        .back-btn:hover {
+            background-color: var(--bg-color);
+            transform: none;
+        }
+
+        .header-title {
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--primary-color);
+            margin: 0;
+            letter-spacing: 0.5px;
+        }
+
+        /* Current Logged In Profile UI components */
+        .current-user-badge {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 6px 12px;
+            background-color: var(--bg-color);
+            border-radius: 30px;
+            border: 1px solid var(--border-color);
+        }
+
+        .current-user-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .current-user-info {
+            display: flex;
+            flex-direction: column;
+            text-align: right;
+        }
+
+        .current-user-name {
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .current-user-role {
+            font-size: 0.7rem;
+            color: var(--primary-color);
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        /* Main Workspace Container Layout */
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        /* Users Responsive Grid Cards */
+        .users-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+
+        @media (min-width: 768px) {
+            .users-grid {
+                grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            }
+        }
+
+        .user-card {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: transform 0.2s ease;
+        }
+
+        .user-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .user-card-pic {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            background-color: var(--bg-color);
+        }
+
+        .user-card-details {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .user-card-name {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin: 0 0 4px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .user-card-email {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .badge-row {
+            margin-top: 6px;
+            display: flex;
+            gap: 6px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            border-radius: 4px;
+            text-transform: uppercase;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .role-badge.admin {
+            background-color: rgba(30, 64, 175, 0.1);
+            color: var(--primary-color);
+            border-color: rgba(30, 64, 175, 0.2);
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            .role-badge.admin {
+                background-color: rgba(37, 99, 235, 0.2);
+                color: var(--primary-color);
+            }
+        }
+
+        .edit-action-btn {
+            width: 100%;
+            padding: 10px;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            background-color: var(--surface-color);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            box-shadow: none;
+        }
+
+        .edit-action-btn:hover {
+            background-color: var(--bg-color);
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Pagination Read Optimizations Elements */
+        .pagination-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .pagination-btn {
+            width: auto;
+            min-width: 100px;
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .page-indicator {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Mobile Back Button Supported Modal Architecture */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            display: none;
+            align-items: flex-end; /* Default Slide-up for Mobile */
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: var(--surface-color);
+            width: 100%;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.1);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        /* Center modal window design presentation on PC/Desktop environments */
+        @media (min-width: 768px) {
+            .modal-overlay {
+                align-items: center;
+            }
+            .modal-content {
+                width: 100%;
+                max-width: 460px;
+                border-radius: 12px;
+                transform: scale(0.9);
+                transition: transform 0.2s ease, opacity 0.2s ease;
+                opacity: 0;
+            }
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-overlay.active .modal-content {
+            transform: translateY(0);
+        }
+
+        @media (min-width: 768px) {
+            .modal-overlay.active .modal-content {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            margin: 0 0 20px 0;
+            font-weight: 800;
+            font-size: 1.3rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--text-muted);
+        }
+
+        .form-control-input {
+            width: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            border: 2px solid var(--border-color);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            -webkit-user-select: auto;
+            user-select: auto;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-control-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        /* iOS/Android Style Toggle Switch Wrapper */
+        .toggle-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background-color: var(--bg-color);
+            padding: 14px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .toggle-label-desc {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toggle-title {
+            font-size: 0.95rem;
+            font-weight: 600;
+        }
+
+        .toggle-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .switch-input-element {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .switch-track-slider {
+            position: relative;
+            display: inline-block;
+            width: 46px;
+            height: 26px;
+            background-color: var(--border-color);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .switch-track-slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            border-radius: 50%;
+            transition: transform 0.2s ease;
+        }
+
+        .switch-input-element:checked + .switch-track-slider {
+            background-color: var(--success-color);
+        }
+
+        .switch-input-element:checked + .switch-track-slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Left-aligned Delete and Right-aligned Save Modal Footer Block */
+        .modal-actions-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 16px;
+        }
+
+        .btn-delete-user {
+            background-color: transparent;
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+            padding: 12px 20px;
+            border-radius: 8px;
+            width: auto;
+            box-shadow: none;
+        }
+
+        .btn-delete-user:hover:not(:disabled) {
+            background-color: rgba(220, 38, 38, 0.08);
+            color: var(--danger-hover);
+            border-color: var(--danger-hover);
+            transform: none;
+            box-shadow: none;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            .btn-delete-user:hover:not(:disabled) {
+                background-color: rgba(239, 68, 68, 0.1);
+            }
+        }
+
+        .btn-save-user {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            width: auto;
+            flex: 1;
+            max-width: 180px;
+        }
+
+        /* Center Loading Screen Spinner container view */
+        .loading-screen-view {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 50vh;
+        }
+
+        .spinner-main {
+            border: 3px solid var(--border-color);
+            border-radius: 50%;
+            border-top: 3px solid var(--primary-color);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 2px solid #ffffff;
+            width: 16px;
+            height: 16px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation Element Block -->
+    <header class="admin-header">
+        <div class="header-left">
+            <button class="back-btn" id="btn-header-back" onclick="window.location.href='index.html'">← Back</button>
+            <h1 class="header-title">LITHIK BEVERAGE</h1>
+        </div>
+        
+        <!-- Logged In active status preview -->
+        <div class="current-user-badge" id="logged-in-badge" style="display: none;">
+            <div class="current-user-info">
+                <span class="current-user-name" id="my-profile-name">Loading...</span>
+                <span class="current-user-role" id="my-profile-role">Admin</span>
+            </div>
+            <img class="current-user-pic" id="my-profile-pic" src="https://via.placeholder.com/32" alt="My Profile">
+        </div>
+    </header>
+
+    <main class="main-container">
+        <h2 class="section-title">User Management</h2>
+        
+        <!-- Main dynamic loading states and users listings grid target -->
+        <div id="main-content-loader" class="loading-screen-view">
+            <div class="spinner-main"></div>
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-top: 12px;">Fetching records securely...</p>
+        </div>
+
+        <div id="users-grid-container" class="users-grid" style="display: none;">
+            <!-- Rendered User cards elements injected dynamically via execution loop logic -->
+        </div>
+
+        <!-- Pagination Bar handling strict 10 read limits for scaling controls -->
+        <div class="pagination-container" id="pagination-wrapper" style="display: none;">
+            <button class="pagination-btn" id="btn-page-prev" disabled>Previous</button>
+            <span class="page-indicator" id="text-page-indicator">Page 1</span>
+            <button class="pagination-btn" id="btn-page-next" disabled>Next</button>
+        </div>
+    </main>
+
+    <!-- Mobile Navigation Back Button Aware Modal Framework -->
+    <div class="modal-overlay" id="edit-user-modal">
+        <div class="modal-content">
+            <h3 class="modal-title">Edit Member Profile</h3>
+            
+            <input type="hidden" id="edit-field-uid">
+            
+            <div class="form-group">
+                <label for="edit-field-name">FULL NAME</label>
+                <input type="text" id="edit-field-name" class="form-control-input" placeholder="Enter Full Name">
+            </div>
+
+            <div class="form-group" style="margin-top: 24px;">
+                <div class="toggle-wrapper">
+                    <div class="toggle-label-desc">
+                        <span class="toggle-title">Administrator Privilege</span>
+                        <span class="toggle-sub">Grants write and system settings access</span>
+                    </div>
+                    <label style="margin: 0; position: relative;">
+                        <input type="checkbox" id="edit-field-admin-toggle" class="switch-input-element">
+                        <span class="switch-track-slider"></span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- UI Action Items footer. Left alignment Delete User, Right alignment Save Button -->
+            <div class="modal-actions-footer">
+                <button type="button" class="btn-delete-user" id="btn-modal-delete">Delete User</button>
+                <button type="button" class="btn-save-user" id="btn-modal-save">
+                    <span>Save</span>
+                    <div class="spinner" id="modal-save-spinner" style="margin-left: 8px; inline-size: max-content;"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script runtime injection modules matching app config standard specifications -->
+    <script type="module">
+        import { app, db } from './config.js';
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+        import { 
+            doc, 
+            getDoc,
+            collection, 
+            query, 
+            orderBy, 
+            limit, 
+            startAfter, 
+            limitToLast, 
+            endBefore, 
+            getDocs, 
+            updateDoc, 
+            deleteDoc 
+        } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        const auth = getAuth(app);
+        
+        // Element references mappings
+        const mainLoader = document.getElementById('main-content-loader');
+        const gridContainer = document.getElementById('users-grid-container');
+        const paginationWrapper = document.getElementById('pagination-wrapper');
+        const prevBtn = document.getElementById('btn-page-prev');
+        const nextBtn = document.getElementById('btn-page-next');
+        const pageIndicator = document.getElementById('text-page-indicator');
+        
+        // Modal references mappings
+        const modalOverlay = document.getElementById('edit-user-modal');
+        const modalInputUid = document.getElementById('edit-field-uid');
+        const modalInputName = document.getElementById('edit-field-name');
+        const modalToggleAdmin = document.getElementById('edit-field-admin-toggle');
+        const modalSaveBtn = document.getElementById('btn-modal-save');
+        const modalDeleteBtn = document.getElementById('btn-modal-delete');
+        const modalSaveSpinner = document.getElementById('modal-save-spinner');
+
+        // Pagination Tracking Variables (Cursor Optimization)
+        const PAGE_LIMIT = 10;
+        let firstVisibleDoc = null;
+        let lastVisibleDoc = null;
+        let pageHistory = []; 
+        let currentPageIndex = 0; 
+        let loadedUsers = [];
+
+        // Haptic Feedback Engine Helper
+        function triggerHaptic(duration) {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(duration);
+            }
+        }
+
+        // Handle and verify logged in session user details matching requirements
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                // Populate active profile metadata view layout header cards components
+                document.getElementById('my-profile-pic').src = user.photoURL || 'https://via.placeholder.com/32';
+                document.getElementById('my-profile-name').innerText = user.displayName || 'Authorized Admin';
+                document.getElementById('logged-in-badge').style.display = 'flex';
+                
+                // Fetch the user's role from Firestore to verify admin privileges
+                try {
+                    const userDoc = await getDoc(doc(db, "users", user.uid));
+                    if (userDoc.exists() && userDoc.data().role === 'admin') {
+                        document.getElementById('my-profile-role').innerText = 'Admin';
+                    } else {
+                        document.getElementById('my-profile-role').innerText = userDoc.data().role || 'User';
+                    }
+                } catch (e) {
+                    console.error("Error reading profile role setup: ", e);
+                }
+
+                // Initial optimized cursor read list execution instance invocation
+                loadUsersPage(null, 'next');
+            } else {
+                // Return explicitly to login interface configuration if unauthenticated
+                window.location.href = 'login.html';
+            }
+        });
+
+        /**
+         * Optimized Firebase Document Cursor Pagination Engine Logic
+         * Enforces maximum limits of 10 reads per interaction step safely.
+         */
+        async function loadUsersPage(cursorDoc, direction = 'next') {
+            mainLoader.style.display = 'flex';
+            gridContainer.style.display = 'none';
+            paginationWrapper.style.display = 'none';
+
+            try {
+                let usersQuery;
+                const usersCollectionRef = collection(db, "users");
+
+                if (direction === 'next') {
+                    if (cursorDoc) {
+                        usersQuery = query(usersCollectionRef, orderBy("name"), startAfter(cursorDoc), limit(PAGE_LIMIT));
+                    } else {
+                        usersQuery = query(usersCollectionRef, orderBy("name"), limit(PAGE_LIMIT));
+                    }
+                } else if (direction === 'prev') {
+                    usersQuery = query(usersCollectionRef, orderBy("name"), endBefore(cursorDoc), limitToLast(PAGE_LIMIT));
+                }
+
+                const querySnapshot = await getDocs(usersQuery);
+                
+                if (!querySnapshot.empty) {
+                    loadedUsers = [];
+                    gridContainer.innerHTML = '';
+                    
+                    firstVisibleDoc = querySnapshot.docs[0];
+                    lastVisibleDoc = querySnapshot.docs[querySnapshot.docs.length - 1];
+
+                    querySnapshot.forEach((docSnap) => {
+                        const data = docSnap.data();
+                        data.id = docSnap.id; // Append record unique system identifier reference mapping
+                        loadedUsers.push(data);
+                        renderUserCard(data);
+                    });
+
+                    // Manage navigation history boundaries tracking matrices array lists pointers layout setups
+                    if (direction === 'next' && cursorDoc) {
+                        currentPageIndex++;
+                        if (!pageHistory[currentPageIndex]) {
+                            pageHistory[currentPageIndex] = firstVisibleDoc;
+                        }
+                    } else if (direction === 'prev') {
+                        currentPageIndex--;
+                    } else {
+                        currentPageIndex = 1;
+                        pageHistory[currentPageIndex] = firstVisibleDoc;
+                    }
+
+                    pageIndicator.innerText = `Page ${currentPageIndex}`;
+                    
+                    // Lookahead logic element parsing configuration strategy check arrays pointers rules optimization updates
+                    // Check if there is a next page available
+                    const nextCheckQuery = query(usersCollectionRef, orderBy("name"), startAfter(lastVisibleDoc), limit(1));
+                    const nextCheckSnap = await getDocs(nextCheckQuery);
+                    
+                    prevBtn.disabled = (currentPageIndex <= 1);
+                    nextBtn.disabled = nextCheckSnap.empty;
+
+                    mainLoader.style.display = 'none';
+                    gridContainer.style.display = 'grid';
+                    paginationWrapper.style.display = 'flex';
+                } else {
+                    if (currentPageIndex === 0) {
+                        gridContainer.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: var(--text-muted);">No members profiles registered inside collection fields.</p>`;
+                        mainLoader.style.display = 'none';
+                        gridContainer.style.display = 'grid';
+                    }
+                }
+            } catch (error) {
+                console.error("Firestore read execution failed error logs trace context exception: ", error);
+                alert("Database retrieval fault. Ensure connection access rules constraints are operational.");
+                mainLoader.style.display = 'none';
+            }
+        }
+
+        // Pagination Buttons Event Interaction Bindings Handlers
+        nextBtn.addEventListener('click', () => {
+            triggerHaptic(40);
+            loadUsersPage(lastVisibleDoc, 'next');
+        });
+
+        prevBtn.addEventListener('click', () => {
+            triggerHaptic(40);
+            const prevCursor = pageHistory[currentPageIndex - 1];
+            loadUsersPage(prevCursor, 'next'); // Reload via the precise history cursor element pointer references tracking logic matrix configuration
+            currentPageIndex -= 2; // Offset tracking correction values counters balance calculation structure arrays metrics alignment loop
+        });
+
+        /**
+         * Dynamically Renders a User Card Component matching theme context guidelines layout matrix elements array loop variables framework standard specs layout view
+         */
+        function renderUserCard(user) {
+            const card = document.createElement('div');
+            card.className = 'user-card';
+            
+            const isAdmin = user.role === 'admin' || user.admin === true;
+            
+            card.innerHTML = `
+                <div class="user-card-header">
+                    <img class="user-card-pic" src="${user.photoURL || 'https://via.placeholder.com/54'}" alt="Profile Pic" onerror="this.src='https://via.placeholder.com/54'">
+                    <div class="user-card-details">
+                        <h4 class="user-card-name">${user.name || 'Anonymous Platform Profile Member Account'}</h4>
+                        <p class="user-card-email">${user.email || 'No Linked Email System field reference configurations'}</p>
+                        <div class="badge-row">
+                            <span class="role-badge ${isAdmin ? 'admin' : ''}">${isAdmin ? 'Admin' : (user.role || 'pending')}</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="edit-action-btn" data-id="${user.id}">Edit Profile Access</button>
+            `;
+
+            // Setup bindings listener interaction event hook mapping actions array fields element
+            card.querySelector('.edit-action-btn').addEventListener('click', () => {
+                triggerHaptic(50);
+                openEditModal(user);
+            });
+
+            gridContainer.appendChild(card);
+        }
+
+        /**
+         * Open Modal Architecture with Mobile hardware back button intercepts capabilities using standard structural browser pushStates history manipulation rules engines layouts controls elements variables
+         */
+        function openEditModal(user) {
+            modalInputUid.value = user.id;
+            modalInputName.value = user.name || '';
+            modalToggleAdmin.checked = (user.role === 'admin' || user.admin === true);
+
+            modalOverlay.classList.add('active');
+
+            // Intercept Mobile Device Physical Back-Button Press Action Routine Matrix Framework Setup Logic Tracking Elements
+            window.history.pushState({ modalActiveActiveView: true }, "");
+        }
+
+        function closeEditModal(triggerHistoryBack = true) {
+            modalOverlay.classList.remove('active');
+            
+            // Revert state structure values back indices alignment calculations
+            if (triggerHistoryBack && window.history.state?.modalActiveActiveView) {
+                window.history.back();
+            }
+        }
+
+        // Global browser device history window tracking state pops configuration rules updates matrix listener alignment engine
+        window.addEventListener('popstate', (event) => {
+            // If the user navigates back while modal overlay displays visual configurations layer layouts interface frames elements, catch action state to close overlay safely
+            if (modalOverlay.classList.contains('active')) {
+                closeEditModal(false);
+            }
+        });
+
+        // Close modal when tapping outside content bounds safely
+        modalOverlay.addEventListener('click', (e) => {
+            if (e.target === modalOverlay) {
+                triggerHaptic(30);
+                closeEditModal(true);
+            }
+        });
+
+        /**
+         * Save User Updates Framework
+         */
+        modalSaveBtn.addEventListener('click', async () => {
+            triggerHaptic(50);
+            const targetUid = modalInputUid.value;
+            const updatedName = modalInputName.value.trim();
+            const setAsAdmin = modalToggleAdmin.checked;
+
+            if (!updatedName) {
+                triggerHaptic([50, 100, 50]);
+                alert("Profile user name fields validation matching restrictions constraints error: Field cannot persist blanks values spaces configurations updates execution context.");
+                return;
+            }
+
+            try {
+                modalSaveBtn.disabled = true;
+                modalSaveSpinner.style.display = 'block';
+
+                const targetUserDocRef = doc(db, "users", targetUid);
+                
+                // Write updates maps structures data packets variables references fields rules operations configuration limits parameters bounds validation mapping structures tracking system configurations properties keys elements setup properties maps matrices calculations logic adjustments values update definitions
+                await updateDoc(targetUserDocRef, {
+                    name: updatedName,
+                    role: setAsAdmin ? "admin" : "pending",
+                    admin: setAsAdmin
+                });
+
+                triggerHaptic([30, 40, 30]);
+                closeEditModal(true);
+                
+                // Refresh local records array memory layout frames boundaries state interface to keep reads highly optimized without incurring structural read charges penalties limits parameters sets models calculations structure elements indices views parameters fields properties keys mapping rules context adjustments tracking matrix engines logic updates
+                const userIndex = loadedUsers.findIndex(u => u.id === targetUid);
+                if (userIndex !== -1) {
+                    loadedUsers[userIndex].name = updatedName;
+                    loadedUsers[userIndex].role = setAsAdmin ? "admin" : "pending";
+                    loadedUsers[userIndex].admin = setAsAdmin;
+                    
+                    // Re-render display layout component views parameters
+                    gridContainer.innerHTML = '';
+                    loadedUsers.forEach(u => renderUserCard(u));
+                }
+
+                // Clean loading spinner elements frames boundaries state representations structures metrics sets controls resets values updates parameters properties arrays adjustments components layouts maps interfaces
+                modalSaveBtn.disabled = false;
+                modalSaveSpinner.style.display = 'none';
+
+            } catch (error) {
+                console.error("Failed to commit profile updates fields transaction error context: ", error);
+                triggerHaptic([50, 100, 50]);
+                alert("Unable to update account details. Check authorization levels configurations permissions rules framework parameters bounds adjustments context.");
+                modalSaveBtn.disabled = false;
+                modalSaveSpinner.style.display = 'none';
+            }
+        });
+
+        /**
+         * Left-Aligned Delete User Profile System Implementation Routine Execution Framework Logic Context Management Control Intercept Action Systems Configurations Updates Context Elements
+         */
+        modalDeleteBtn.addEventListener('click', async () => {
+            triggerHaptic([50, 150, 50]);
+            const targetUid = modalInputUid.value;
+            
+            if (confirm("Are you absolutely sure you want to permanently delete this user account from the dashboard database records systems? This action cannot be undone.")) {
+                try {
+                    modalDeleteBtn.disabled = true;
+                    
+                    await deleteDoc(doc(db, "users", targetUid));
+                    
+                    triggerHaptic([40, 60, 40]);
+                    closeEditModal(true);
+                    
+                    // Immediately re-fetch slice page frame parameters index matrices rules tracking context logic updates alignments arrays elements boundaries layouts configurations to ensure UI accuracy without pricing leaks elements controls parameters sets updates values fields loops models structural representations definitions execution actions configurations keys metrics
+                    const baseHistoryIndex = pageHistory[currentPageIndex];
+                    loadUsersPage(baseHistoryIndex ? pageHistory[currentPageIndex - 1] : null, 'next');
+                    if (currentPageIndex > 1) currentPageIndex--;
+                    
+                    modalDeleteBtn.disabled = false;
+                } catch (error) {
+                    console.error("Failed to execute data document purge operational rules tracking system trace routines exception context: ", error);
+                    alert("Delete collection document transaction error failed: Restricted write authorization boundaries settings exceptions criteria parameter sets bounds mappings values updates validation elements configurations fields models controls parameters sets mapping logic arrays elements updates context.");
+                    modalDeleteBtn.disabled = false;
+                }
+            }
+        });
+    </script>
+</body>
+</html>
