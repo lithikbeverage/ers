@@ -639,7 +639,7 @@
         let isFetchingSearch = false;
         let hasMoreSearch = true;
         let currentSearchKeyword = "";
-        let useKeywordsArray = true; // Tracks if we should try 'keywords' array first
+        let useSearchTokens = true; // Tracks if we should try 'searchTokens' map first
 
         const loadSuggestions = async (isLoadMore = false) => {
             if (isFetchingSearch || (!hasMoreSearch && isLoadMore)) return;
@@ -660,14 +660,19 @@
 
             try {
                 const keywordLower = currentSearchKeyword.toLowerCase();
-                let q;
+                let q = collection(db, "inventory");
                 
-                // Primary: Try searching utilizing "keywords" array
-                if (useKeywordsArray) {
+                // Primary: Try searching utilizing "searchTokens" map (matches inventory.html)
+                if (useSearchTokens) {
+                    const searchWords = keywordLower.replace(/[.\/\\~*\[\]]/g, ' ').split(/[\s\-_]+/).filter(w => w.trim().length > 0);
+                    searchWords.forEach(word => {
+                        q = query(q, where(`searchTokens.${word}`, "==", true));
+                    });
+                    
                     if (lastVisibleDoc) {
-                        q = query(collection(db, "inventory"), where("keywords", "array-contains", keywordLower), startAfter(lastVisibleDoc), limit(10));
+                        q = query(q, startAfter(lastVisibleDoc), limit(10));
                     } else {
-                        q = query(collection(db, "inventory"), where("keywords", "array-contains", keywordLower), limit(10));
+                        q = query(q, limit(10));
                     }
                 } else {
                     // Fallback: Name Prefix
@@ -682,17 +687,18 @@
                 try {
                     snap = await getDocs(q);
                 } catch (err) {
-                    if (useKeywordsArray) {
-                        console.warn("Keywords array search failed, falling back to name prefix search.", err);
-                        useKeywordsArray = false; // Disable for future requests
+                    if (useSearchTokens) {
+                        console.warn("SearchTokens map search failed, falling back to name prefix search.", err);
+                        useSearchTokens = false; // Disable for future requests
                         
                         // Retry with fallback
+                        let fallbackQ;
                         if (lastVisibleDoc) {
-                            q = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), startAfter(lastVisibleDoc), limit(10));
+                            fallbackQ = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), startAfter(lastVisibleDoc), limit(10));
                         } else {
-                            q = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), limit(10));
+                            fallbackQ = query(collection(db, "inventory"), where("name", ">=", currentSearchKeyword), where("name", "<=", currentSearchKeyword + "\uf8ff"), orderBy("name"), limit(10));
                         }
-                        snap = await getDocs(q);
+                        snap = await getDocs(fallbackQ);
                     } else {
                         throw err;
                     }
