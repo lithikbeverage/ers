@@ -14,6 +14,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         /* Shared Core Theme */
@@ -69,7 +70,6 @@
         .header-icon-btn { background: rgba(30, 64, 175, 0.1); color: var(--primary-color); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border: 1px solid rgba(30, 64, 175, 0.2); }
         .header-icon-btn:active { transform: scale(0.95); }
 
-        /* FIXED: Added flex-direction: column to ensure bottom-nav stays at bottom on mobile */
         .layout-container { display: flex; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
         
         /* Navigation */
@@ -146,9 +146,9 @@
         /* --- PDF EXPORT CONTAINERS (HIDDEN BUT RENDERABLE) -- */
         /* ---------------------------------------------------- */
         
-        /* Fixed invisible container off-screen to generate crisp PDFs without disrupting UI */
+        /* Fixed invisible container to safely generate crisp PDFs without disrupting UI */
         .pdf-export-container {
-            position: fixed;
+            position: absolute;
             left: -9999px;
             top: 0;
             width: 210mm; /* Strict A4 Width */
@@ -218,6 +218,7 @@
         .rpt-table th { background-color: #f1f5f9; font-weight: bold; }
         .rpt-table td.num { text-align: right; }
         .rpt-table tr.total-row { font-weight: bold; background-color: #e2e8f0; }
+        .rpt-table tr.page-break { page-break-after: always; break-after: page; }
 
     </style>
 </head>
@@ -300,6 +301,21 @@
                             </div>
                         </div>
 
+                        <!-- Graphical Charts Added Here -->
+                        <div class="fin-card" style="grid-column: 1 / -1; display: flex; flex-direction: column; gap: 20px;">
+                            <div class="fin-header">
+                                <span>Visual Analytics</span>
+                            </div>
+                            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                                <div style="flex: 1; min-width: 250px; height: 280px; position: relative;">
+                                    <canvas id="barChart"></canvas>
+                                </div>
+                                <div style="flex: 1; min-width: 250px; height: 280px; position: relative;">
+                                    <canvas id="pieChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
                     </div>
                     
                     <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem; line-height: 1.5; padding: 0 20px;">
@@ -322,12 +338,12 @@
         <div class="form-group">
             <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px;">Select a date range to generate documents for your auditor.</p>
             
-            <div class="row-inputs">
-                <div class="input-wrapper">
+            <div class="row-inputs" style="display: flex; gap: 15px; flex-wrap: wrap;">
+                <div class="input-wrapper" style="flex: 1; min-width: 150px;">
                     <label>Start Date *</label>
                     <input type="date" id="repStart">
                 </div>
-                <div class="input-wrapper">
+                <div class="input-wrapper" style="flex: 1; min-width: 150px;">
                     <label>End Date *</label>
                     <input type="date" id="repEnd">
                 </div>
@@ -557,7 +573,7 @@
             if (e.state && e.state.modal) document.getElementById(e.state.modal).classList.add('active');
         });
 
-        // Dates Setup (Accounting for Local Timezone properly)
+        // Dates Setup
         const now = new Date();
         const thisMStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const thisMEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
@@ -582,18 +598,53 @@
             }
         });
 
-        // --- DASHBOARD AGGREGATION LOGIC (WITH INDEX FALLBACK) ---
-        // Using robust fallback algorithm to prevent '0' errors if Firestore Indexes are missing.
+        // --- DASHBOARD AGGREGATION & CHARTS LOGIC ---
+        let globalBarChart = null;
+        let globalPieChart = null;
+
+        function updateCharts(dThis, dLast) {
+            const barCtx = document.getElementById('barChart').getContext('2d');
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+
+            if (globalBarChart) globalBarChart.destroy();
+            if (globalPieChart) globalPieChart.destroy();
+
+            // Bar Chart (This vs Last Month)
+            globalBarChart = new Chart(barCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Sales', 'Purchases', 'Expenses', 'Profit'],
+                    datasets: [
+                        { label: 'This Month', data: [dThis.salesTotal, dThis.purchasesTotal, dThis.expensesTotal, dThis.profit], backgroundColor: '#1e40af' },
+                        { label: 'Last Month', data: [dLast.salesTotal, dLast.purchasesTotal, dLast.expensesTotal, dLast.profit], backgroundColor: '#94a3b8' }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // Pie Chart (This Month Breakdown)
+            globalPieChart = new Chart(pieCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Purchases', 'Expenses', 'Net Profit'],
+                    datasets: [{
+                        data: [dThis.purchasesTotal, dThis.expensesTotal, Math.max(0, dThis.profit)],
+                        backgroundColor: ['#f59e0b', '#ef4444', '#10b981'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
         async function getSafeAggregate(colName, where1, where2, sumField) {
             const q = query(collection(db, colName), where1, where2);
             try {
-                // Try low-read server aggregation first
                 const agg = await getAggregateFromServer(q, { total: sum(sumField) });
                 return agg.data().total || 0;
             } catch (err) {
-                console.warn(`Server aggregation failed on '${colName}'. Missing Index? Triggering client-side fallback fetch.`, err);
+                console.warn(`Server aggregation failed on '${colName}'. Fallback to Client side.`, err);
                 try {
-                    // Client-side fallback to ensure calculations work flawlessly
                     const snap = await getDocs(q);
                     let localTotal = 0;
                     snap.forEach(doc => {
@@ -605,20 +656,15 @@
                     });
                     return localTotal;
                 } catch(fallbackErr) {
-                    console.error("Fallback Failed", fallbackErr);
                     return 0;
                 }
             }
         }
 
         async function fetchAggregateData(startDt, endDt, startStr, endStr) {
-            // 1. Sales (date field is Timestamp)
             const salesTotal = await getSafeAggregate("sales", where("date", ">=", startDt), where("date", "<=", endDt), "totals.grand");
-            // 2. Purchases (date field is YYYY-MM-DD string)
             const purchasesTotal = await getSafeAggregate("purchases", where("date", ">=", startStr), where("date", "<=", endStr), "grandTotal");
-            // 3. Expenses (dateStr field is YYYY-MM-DD string)
             const expensesTotal = await getSafeAggregate("expanse", where("dateStr", ">=", startStr), where("dateStr", "<=", endStr), "amount");
-
             const profit = salesTotal - purchasesTotal - expensesTotal;
             return { salesTotal, purchasesTotal, expensesTotal, profit };
         }
@@ -643,24 +689,40 @@
             const pLast = document.getElementById('valLastProfit');
             pLast.innerText = `₹${formatINR(dLast.profit)}`;
             pLast.className = 'fin-val ' + (dLast.profit >= 0 ? 'profit-positive' : 'profit-negative');
+
+            updateCharts(dThis, dLast);
         }
 
-        // --- PDF EXPORT ENGINE VIA HTML2PDF ---
+        // --- PDF EXPORT ENGINE VIA HTML2PDF (WITH MULTI-PAGE FIX) ---
         function executePdfDownload(elementId, filename) {
             return new Promise((resolve) => {
                 const element = document.getElementById(elementId);
-                // Configuration for crisp, high-quality PDF 
+                
+                // MULTI-PAGE BLANK FIX: html, body overflow must be disabled during generation
+                const htmlEl = document.documentElement;
+                const bodyEl = document.body;
+                
+                const origHtmlHeight = htmlEl.style.height;
+                const origHtmlOverflow = htmlEl.style.overflow;
+                const origBodyHeight = bodyEl.style.height;
+                const origBodyOverflow = bodyEl.style.overflow;
+                
+                htmlEl.style.height = 'auto'; htmlEl.style.overflow = 'visible';
+                bodyEl.style.height = 'auto'; bodyEl.style.overflow = 'visible';
+                
                 const opt = {
                     margin:       0.3,
                     filename:     `${filename}.pdf`,
                     image:        { type: 'jpeg', quality: 1 },
-                    html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                    html2canvas:  { scale: 2, useCORS: true, letterRendering: true, windowWidth: 1200 },
                     jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
                     pagebreak:    { mode: ['css', 'legacy'] }
                 };
                 
-                // Directly trigger download without print prompt
                 html2pdf().set(opt).from(element).save().then(() => {
+                    // Restore original App UI constraints
+                    htmlEl.style.height = origHtmlHeight; htmlEl.style.overflow = origHtmlOverflow;
+                    bodyEl.style.height = origBodyHeight; bodyEl.style.overflow = origBodyOverflow;
                     resolve(true);
                 });
             });
@@ -711,7 +773,6 @@
                     const num = (index + 1).toString().padStart(2, '0');
                     const desc = `<strong style="font-size:13px; display:block; color:#0f172a; padding-bottom: 3px;">${item.name}</strong><span style="font-size:11px; color:#475569;">GST: ${item.gstPercent}% | Base: ₹${item.baseTotal.toFixed(2)}</span>`;
                     
-                    // Handle natural page breaks on 5th items
                     let cls = ((index + 1) % 5 === 0 && index !== printItems.length - 1) ? 'class="page-break"' : '';
                     
                     tbody.innerHTML += `<tr ${cls} style="height: 25mm; max-height: 25mm;"><td>${num}.</td><td>${desc}</td><td class="text-center">-</td><td class="text-center">${item.qty.toString().padStart(2, '0')}</td><td class="text-right">₹${item.price.toFixed(2)}</td><td class="text-right" style="font-weight:900; color:#0f172a;">₹${item.finalTotal.toFixed(2)}</td></tr>`;
@@ -724,7 +785,6 @@
                 document.getElementById('prTransportTotal').innerText = `+₹${sale.totals.transport.toFixed(2)}`;
                 document.getElementById('prGrandTotal').innerText = `₹${sale.totals.grand.toFixed(2)}`;
                 
-                // Trigger Direct Download!
                 await executePdfDownload('printArea', `Invoice_${sale.invoiceNo}`);
                 
                 showToast("PDF Downloaded!", "success");
@@ -754,13 +814,12 @@
             if(!sDate || !eDate) { showToast("Date range required.", "error"); return; }
             
             const btnPdf = document.getElementById('btnExportPDF');
-            if(format === 'PDF') {
-                btnPdf.disabled = true; btnPdf.innerHTML = "Processing...";
-            }
+            if(format === 'PDF') { btnPdf.disabled = true; btnPdf.innerHTML = "Processing..."; }
             
             try {
                 let dataArray = [];
-                let headers = [];
+                // Unifying the Professional Breakdown Standard for both Sales & Purchases
+                const headers = ["Doc No", "Date", "Party Name", "Taxable Base", "CGST", "SGST", "Grand Total"];
                 let title = "";
 
                 if (type === 'Sales') {
@@ -771,13 +830,11 @@
                     const q = query(collection(db, "sales"), where("date", ">=", startDt), where("date", "<=", endDt), orderBy("date", "asc"));
                     const snap = await getDocs(q);
                     
-                    headers = ["Invoice No", "Date", "Customer", "Payment Mode", "Taxable Base", "CGST", "SGST", "Grand Total"];
                     snap.forEach(doc => {
                         const d = doc.data();
-                        let dStr = "N/A";
-                        if(d.date && d.date.toDate) dStr = d.date.toDate().toLocaleDateString('en-IN');
+                        let dStr = d.date && d.date.toDate ? d.date.toDate().toLocaleDateString('en-IN') : "N/A";
                         dataArray.push([
-                            d.invoiceNo, dStr, d.customer.name, d.paymentMode, 
+                            d.invoiceNo, dStr, d.customer.name, 
                             (d.totals.base||0).toFixed(2), (d.totals.cgst||0).toFixed(2), (d.totals.sgst||0).toFixed(2), (d.totals.grand||0).toFixed(2)
                         ]);
                     });
@@ -787,11 +844,19 @@
                     const q = query(collection(db, "purchases"), where("date", ">=", sDate), where("date", "<=", eDate), orderBy("date", "asc"));
                     const snap = await getDocs(q);
                     
-                    headers = ["Receipt No", "Date", "Supplier", "GST %", "Grand Total"];
                     snap.forEach(doc => {
                         const d = doc.data();
+                        
+                        // Strict Purchase GST reverse-calculation
+                        let gTotal = d.grandTotal || 0;
+                        let gstRate = parseFloat(d.gstPercentage) || 0;
+                        let baseTotal = gTotal / (1 + (gstRate / 100));
+                        let taxTotal = gTotal - baseTotal;
+                        let c_sgst = taxTotal / 2;
+
                         dataArray.push([
-                            d.receiptNo, d.date, d.supplierName, `${d.gstPercentage||0}%`, (d.grandTotal||0).toFixed(2)
+                            d.receiptNo, d.date, d.supplierName, 
+                            baseTotal.toFixed(2), c_sgst.toFixed(2), c_sgst.toFixed(2), gTotal.toFixed(2)
                         ]);
                     });
                 }
@@ -827,28 +892,41 @@
                     
                     let thead = '<tr>';
                     headers.forEach((h, i) => {
-                        let cls = (i > 3 && type==='Sales') || (i > 2 && type==='Purchases') ? 'class="num"' : '';
+                        let cls = i >= 3 ? 'class="num"' : '';
                         thead += `<th ${cls}>${h}</th>`;
                     });
                     thead += '</tr>';
                     document.getElementById('rptTableHead').innerHTML = thead;
 
                     let tbody = '';
-                    let gTotal = 0;
-                    dataArray.forEach(row => {
-                        tbody += '<tr>';
+                    let gBase = 0, gCGST = 0, gSGST = 0, gTotal = 0;
+
+                    dataArray.forEach((row, rowIndex) => {
+                        // Multi-page Natural PDF breaks for lists exceeding ~25 elements
+                        let breakClass = (rowIndex > 0 && rowIndex % 25 === 0) ? 'class="page-break"' : '';
+                        tbody += `<tr ${breakClass}>`;
                         row.forEach((col, i) => {
-                            let cls = (i > 3 && type==='Sales') || (i > 2 && type==='Purchases') ? 'class="num"' : '';
+                            let cls = i >= 3 ? 'class="num"' : '';
                             tbody += `<td ${cls}>${col}</td>`;
                         });
                         tbody += '</tr>';
-                        gTotal += parseFloat(row[row.length - 1] || 0);
+
+                        gBase += parseFloat(row[3] || 0);
+                        gCGST += parseFloat(row[4] || 0);
+                        gSGST += parseFloat(row[5] || 0);
+                        gTotal += parseFloat(row[6] || 0);
                     });
                     
-                    tbody += `<tr class="total-row"><td colspan="${headers.length - 1}" class="num">TOTAL:</td><td class="num">${gTotal.toFixed(2)}</td></tr>`;
+                    tbody += `<tr class="total-row">
+                        <td colspan="3" class="num">TOTAL:</td>
+                        <td class="num">${gBase.toFixed(2)}</td>
+                        <td class="num">${gCGST.toFixed(2)}</td>
+                        <td class="num">${gSGST.toFixed(2)}</td>
+                        <td class="num">${gTotal.toFixed(2)}</td>
+                    </tr>`;
+                    
                     document.getElementById('rptTableBody').innerHTML = tbody;
 
-                    // Trigger PDF download directly!
                     await executePdfDownload('reportPrintArea', `${type}_Report`);
                     showToast("PDF Downloaded!", "success");
                 }
