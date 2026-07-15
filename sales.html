@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Sales Ledger - LITHIK BEVERAGE</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a">
+    <link rel="apple-touch-icon" href="images/icon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Shared Core Theme */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --bg-nav: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary-color: #1e40af;
+            --accent-color: #0ea5e9;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --border-color: #e2e8f0;
+            --input-bg: #f1f5f9;
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --skeleton-base: #e2e8f0;
+            --skeleton-shine: #f8fafc;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #020617;
+                --bg-surface: #0f172a;
+                --bg-nav: #0f172a;
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --primary-color: #3b82f6;
+                --accent-color: #0ea5e9;
+                --border-color: #1e293b;
+                --input-bg: #1e293b;
+                --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+                --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+                --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+                --skeleton-base: #1e293b;
+                --skeleton-shine: #334155;
+            }
+        }
+
+        /* Reset & Base Layout */
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        html, body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; width: 100vw; overflow: hidden; }
+        *::-webkit-scrollbar { display: none !important; }
+        * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+        header, .material-symbols-outlined, .nav-item, .btn-primary, .btn-secondary {
+            -webkit-user-select: none; user-select: none;
+        }
+
+        .material-symbols-outlined { display: inline-flex; align-items: center; justify-content: center; }
+
+        /* Layout Structure */
+        #app-shell { display: flex; height: 100%; width: 100%; position: absolute; inset: 0; flex-direction: column; overflow: hidden; }
+        
+        header { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-surface); padding: 12px 20px; border-bottom: 1px solid var(--border-color); z-index: 10; flex-shrink: 0; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .header-right { display: flex; align-items: center; gap: 12px; }
+        
+        .company-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; box-shadow: var(--shadow-sm); }
+        h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; color: var(--primary-color); margin:0; }
+        
+        /* Header Filters & Icons */
+        .header-date-picker { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none; cursor: pointer; transition: all 0.2s; height: 38px; }
+        .header-date-picker:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .header-date-picker.active-filter { background: rgba(30, 64, 175, 0.05); color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; }
+        .clear-date-btn { display: none; background: rgba(239, 68, 68, 0.1); border: none; color: var(--danger-color); cursor: pointer; height: 38px; width: 38px; border-radius: 10px; align-items: center; justify-content: center; transition: all 0.2s; position: relative; z-index: 10; }
+        .clear-date-btn.active { display: flex; }
+        .mobile-filter-icon { display: none; }
+        
+        .summary-icon { background: rgba(16, 185, 129, 0.1); color: var(--success-color); border-radius: 10px; padding: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; border: 1px solid rgba(16, 185, 129, 0.2); transition: all 0.2s;}
+        .summary-icon:active { transform: scale(0.95); }
+
+        .layout-container { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+        
+        /* Navigation */
+        nav.sidebar { display: none; width: 260px; background-color: var(--bg-nav); border-right: 1px solid var(--border-color); flex-direction: column; padding: 20px 0; overflow-y: auto; }
+        nav.sidebar .nav-item { display: flex; align-items: center; text-decoration: none; color: var(--text-muted); padding: 14px 24px; gap: 16px; font-size: 1rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
+        nav.sidebar .nav-item:hover, nav.sidebar .nav-item.active { background-color: rgba(59, 130, 246, 0.05); color: var(--primary-color); border-right: 3px solid var(--primary-color); }
+        
+        nav.bottom-nav { display: flex; background-color: var(--bg-nav); border-top: 1px solid var(--border-color); min-height: 65px; height: calc(65px + env(safe-area-inset-bottom)); width: 100%; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; padding: 0 10px; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); position: relative; z-index: 100; }
+        nav.bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); min-width: 72px; padding: 8px 4px; gap: 4px; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; cursor: pointer; }
+        nav.bottom-nav .nav-item.active { color: var(--primary-color); }
+        .nav-icon { width: 24px; height: 24px; fill: currentColor; }
+
+        /* Main Scroll Area */
+        .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px; background-color: var(--bg-body); position: relative; }
+        .container-inner { max-width: 800px; margin: 0 auto; width: 100%; }
+
+        /* Search & Actions */
+        .top-actions { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
+        .search-container { flex: 1; display: flex; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 16px; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
+        .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .search-container input { border: none; background: transparent; width: 100%; padding: 14px 0 14px 12px; color: var(--text-main); font-size: 1rem; outline: none; font-family: 'Inter', sans-serif; }
+        .search-container input::placeholder { color: var(--text-muted); }
+
+        .btn-fab { background: var(--primary-color); color: white; border: none; width: 48px; height: 48px; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: var(--shadow-md); transition: all 0.2s; flex-shrink: 0; }
+        .btn-fab:active { transform: scale(0.95); }
+
+        /* Sales List Cards */
+        .sales-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+        .sale-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
+        
+        .sc-header { display: flex; justify-content: space-between; align-items: flex-start; }
+        .sc-inv { font-weight: 800; font-size: 1.15rem; color: var(--primary-color); margin-bottom: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;}
+        .sc-inv:active { opacity: 0.7; }
+        .sc-customer { font-size: 0.95rem; color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;}
+        .sc-items { font-size: 0.8rem; color: var(--text-muted); }
+        
+        .sc-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; background: var(--input-bg); padding: 4px 8px; border-radius: 6px; text-align: right;}
+        .badge-pay { font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; margin-top: 6px;}
+        .pay-cash { background: rgba(16, 185, 129, 0.1); color: var(--success-color); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .pay-online { background: rgba(14, 165, 233, 0.1); color: var(--accent-color); border: 1px solid rgba(14, 165, 233, 0.2); }
+        .pay-credit { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); border: 1px solid rgba(245, 158, 11, 0.2); }
+
+        .sc-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; }
+        .sc-total { font-size: 1.4rem; font-weight: 900; color: var(--success-color); }
+        
+        .sc-actions { display: flex; gap: 10px; }
+        .btn-card-action { background: var(--input-bg); border: 1px solid var(--border-color); width: 38px; height: 38px; border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; }
+        .btn-card-action:active { transform: scale(0.9); }
+        .btn-print { color: var(--primary-color); background: rgba(30, 64, 175, 0.1); border-color: rgba(30, 64, 175, 0.2); }
+        .btn-delete { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
+
+        /* Skeletons */
+        .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Mini Popup Modals */
+        .mini-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(15, 23, 42, 0.6); z-index: 4000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(4px); }
+        .mini-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .mini-modal-content { background: var(--bg-surface); width: 92%; max-width: 400px; border-radius: 24px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid var(--border-color); }
+        .mini-modal-overlay.active .mini-modal-content { transform: scale(1); }
+        
+        /* Summary Grid */
+        .summary-grid { display: grid; gap: 12px; margin-top: 20px; margin-bottom: 24px;}
+        .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: var(--input-bg); border-radius: 12px; border: 1px solid var(--border-color); }
+        .sum-row.grand { background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3); }
+        .sum-label { font-size: 0.9rem; font-weight: 600; color: var(--text-muted); display: flex; align-items: center; gap: 6px;}
+        .sum-val { font-size: 1.15rem; font-weight: 800; color: var(--text-main); }
+        .sum-row.grand .sum-label { color: var(--success-color); }
+        .sum-row.grand .sum-val { color: var(--success-color); font-size: 1.4rem;}
+
+        .btn-primary { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--primary-color); color: white; font-size: 1.1em; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
+        .btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Toasts */
+        .toast-msg { position: fixed; top: 20px; left: 50%; transform: translate(-50%, -20px); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; display: none; font-weight: 600; font-size: 0.95em; align-items: center; gap: 10px; opacity: 0; transition: all 0.3s; box-shadow: var(--shadow-lg); }
+        .toast-msg.error { background: var(--danger-color); }
+        .toast-msg.success { background: var(--success-color); }
+        .toast-msg.show { display: flex; opacity: 1; transform: translate(-50%, 0); }
+
+        #scrollLoader { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; justify-content: center; gap: 10px; }
+
+        @media (min-width: 768px) {
+            #app-shell { flex-direction: column; }
+            .layout-container { flex-direction: row; }
+            nav.bottom-nav { display: none; }
+            nav.sidebar { display: flex; }
+            .sales-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 767px) {
+            .header-date-picker { position: absolute; left: 0; top: 0; width: 38px; height: 38px; opacity: 0; z-index: 5; padding: 0; margin: 0; }
+            .mobile-filter-icon { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); transition: all 0.2s; }
+            .mobile-filter-icon.active-filter { background: rgba(30, 64, 175, 0.05); color: var(--primary-color); border-color: var(--primary-color); }
+        }
+
+        /* ---------------------------------------------------- */
+        /* --- PROFESSIONAL PRINT INVOICE LAYOUT (B&W REPLICA) --- */
+        /* ---------------------------------------------------- */
+        #printArea { display: none; }
+
+        @media print {
+            #app-shell, .toast-msg { display: none !important; }
+            @page { size: A4 portrait; margin: 0mm; }
+            body * { visibility: hidden; }
+            body { background: white; color: black; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            #printArea, #printArea * { visibility: visible; }
+            #printArea { display: block !important; position: relative; width: 100%; max-width: 210mm; min-height: 100vh; margin: 0 auto; padding: 0; padding-bottom: 320px !important; background: white; color: #000; box-sizing: border-box; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+            .print-top-band { background-color: #f0f9ff !important; padding: 25px 40px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #3b82f6 !important; }
+            .brand-logo-print { max-width: 70px; height: auto; border-radius: 8px; margin-bottom: 10px; display: block; }
+            .print-header-left { flex: 1; padding-right: 15px; }
+            .print-brand { display: flex; flex-direction: column; gap: 2px; margin-bottom: 25px; }
+            .print-brand h2 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #1e40af !important; line-height: 1;}
+            .print-invoice-to { margin-top: 10px; }
+            .section-label { font-size: 10px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; color: #64748b; }
+            .print-invoice-to h3 { margin: 0 0 8px 0; font-size: 17px; font-weight: bold; color: #0f172a;}
+            .print-invoice-to p { margin: 3px 0; font-size: 12px; color: #334155;}
+            .print-invoice-to p strong { display: inline-block; width: 75px; font-size: 10px; text-transform: uppercase; color: #0f172a;}
+
+            .print-header-right { flex: 0 0 35%; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+            .invoice-title-text { font-size: 28px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; line-height: 1; color: #1e40af !important;}
+            .invoice-no-text { font-size: 13px; font-weight: 800; margin: 10px 0 15px 0; color: #1e40af; background-color: #dbeafe !important; padding: 6px 12px; border-radius: 4px; display: inline-block;}
+            .invoice-date-box { text-align: right; display: flex; flex-direction: column; align-items: flex-end; margin-top: 5px;}
+            .invoice-date-box span { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;}
+            .invoice-date-box strong { font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 4px;}
+
+            .print-table-container { padding: 0 40px; display: block; width: 100%; box-sizing: border-box; }
+            .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; } 
+            .print-table th { background-color: #f1f5f9 !important; padding: 12px 10px; font-size: 11px; text-transform: uppercase; text-align: left; color: #0f172a; font-weight: 800; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; }
+            .print-table td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; font-size: 12px; vertical-align: middle; color: #0f172a;}
+            .print-table th.text-right, .print-table td.text-right { text-align: right; padding-right: 15px; }
+            .print-table th.text-center, .print-table td.text-center { text-align: center; }
+
+            .print-table tbody tr:nth-child(5n):not(:last-child) { page-break-after: always; break-after: page; }
+            .print-table tbody tr { page-break-inside: avoid; break-inside: avoid; height: 25mm !important; max-height: 25mm !important; overflow: hidden; }
+
+            .print-middle-section { display: flex; justify-content: space-between; padding: 15px 40px; margin-top: 0; page-break-inside: avoid; break-inside: avoid; position: fixed !important; bottom: 105px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999; }
+            .print-left-footer-info { width: 45%; }
+            .thanks-box { background-color: #f8fafc !important; padding: 15px; margin-bottom: 15px; border-left: 4px solid #1e40af; border-radius: 4px;} 
+            .thanks-box strong { display: block; font-size: 13px; margin-bottom: 5px; color: #0f172a;}
+            .thanks-box p { margin: 0; font-size: 10px; color: #475569; line-height: 1.5; }
+            .payment-methods p { margin: 6px 0; font-size: 11px; font-weight: bold; color: #0f172a;}
+            .payment-methods span { display: block; font-weight: normal; font-size: 11px; color: #475569; margin-top: 2px;}
+
+            .print-totals-box { width: 40%; }
+            .totals-grid { width: 100%; border-collapse: collapse; }
+            .totals-grid td { padding: 6px 15px 6px 10px; font-size: 12px; border: none; font-weight: bold; color: #475569;}
+            .totals-grid .t-label { text-align: right; }
+            .totals-grid .t-val { text-align: right; color: #0f172a; }
+            .totals-grid .t-grand-row { background-color: #f1f5f9 !important; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1;}
+            .totals-grid .t-grand-row td { font-size: 16px; font-weight: 900; color: #1e40af !important; padding: 10px 15px 10px 10px; } 
+
+            .print-signature-area { display: flex; justify-content: space-between; padding: 0 40px; margin-top: 0; page-break-inside: avoid; break-inside: avoid; position: fixed !important; bottom: 35px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999; }
+            .sign-box { text-align: center; width: 220px; }
+            .sign-box div.sign-placeholder { border-bottom: 1px solid #000; height: 35px; margin-bottom: 8px; width: 100%; }
+            .sign-box p { margin: 0; font-size: 11px; font-weight: bold; color: #000;}
+            
+            .print-absolute-footer { background-color: #f1f5f9 !important; padding: 12px 40px; display: flex; justify-content: center; align-items: center; margin-top: 0; page-break-inside: avoid; break-inside: avoid; position: fixed !important; bottom: 0; left: 0; right: 0; width: 100%; box-sizing: border-box; z-index: 999; border-top: 1px solid #e2e8f0; }
+            .print-absolute-footer p { margin: 0; font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;}
+        }
+    </style>
+</head>
+<body>
+
+    <div class="toast-msg error" id="errorToast"><span class="material-symbols-outlined">error</span><span id="errorToastText">Error</span></div>
+    <div class="toast-msg success" id="successToast"><span class="material-symbols-outlined">check_circle</span><span id="successToastText">Success</span></div>
+
+    <div id="app-shell">
+        <header>
+            <div class="header-left">
+                <img src="images/icon.png" alt="Logo" class="company-logo" onerror="this.src='https://via.placeholder.com/40'">
+                <h1>SALES LEDGER</h1>
+            </div>
+            <div class="header-right">
+                <div class="date-filter-container" style="display: flex; align-items: center; gap: 6px; position: relative;">
+                    <div class="mobile-filter-icon" id="mobileFilterIcon">
+                        <span class="material-symbols-outlined" style="font-size: 22px;">filter_alt</span>
+                    </div>
+                    <input type="date" id="masterDateFilter" class="header-date-picker active-filter" title="Filter by Date" onchange="vibrateApp(10); applyDateFilter(this.value)">
+                    <button id="clearDateBtn" class="clear-date-btn active" onclick="vibrateApp(10); clearDateFilter()" title="Clear Filter">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+                    </button>
+                </div>
+                <!-- Daily Summary Icon -->
+                <div class="summary-icon" onclick="vibrateApp(20); openSummaryModal()" title="Daily Summary">
+                    <span class="material-symbols-outlined" style="font-size: 24px;">query_stats</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="layout-container">
+            <nav class="sidebar" id="desktop-nav"></nav>
+
+            <div class="main-scroll-area" id="mainScroll">
+                <div class="container-inner">
+                    
+                    <div class="top-actions">
+                        <div class="search-container">
+                            <span class="material-symbols-outlined">search</span>
+                            <input type="text" id="searchInput" placeholder="Search Customer or Invoice..." autocomplete="off">
+                        </div>
+                        <!-- Redirects to Billing Desk -->
+                        <button class="btn-fab" onclick="vibrateApp(20); window.location.href='bill.html'" title="Create New Invoice">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+
+                    <div class="sales-grid" id="salesGrid">
+                        <!-- Loaded dynamically -->
+                    </div>
+                    
+                    <div id="scrollLoader">
+                        <span class="skeleton" style="width:16px; height:16px; border-radius:50%;"></span> Loading records...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="bottom-nav" id="mobile-nav"></nav>
+    </div>
+
+    <!-- Mini Popup - Daily Summary -->
+    <div class="mini-modal-overlay" id="miniModalSummary">
+        <div class="mini-modal-content" style="max-width: 350px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <h3 style="margin: 0; font-size: 1.2rem; font-weight: 800; color: var(--text-main);">Sales Summary</h3>
+                <button onclick="closeMiniModal('miniModalSummary')" style="background:none; border:none; color:var(--text-muted); cursor:pointer; padding:4px; display:flex;"><span class="material-symbols-outlined">close</span></button>
+            </div>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0;" id="summaryDateLabel">For Selected Date</p>
+            
+            <div class="summary-grid">
+                <div class="sum-row">
+                    <span class="sum-label"><span class="material-symbols-outlined" style="font-size:18px; color:var(--success-color);">payments</span> Cash Sales</span>
+                    <span class="sum-val" id="sumCash">₹0</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label"><span class="material-symbols-outlined" style="font-size:18px; color:var(--accent-color);">account_balance</span> Online Sales</span>
+                    <span class="sum-val" id="sumOnline">₹0</span>
+                </div>
+                <div class="sum-row">
+                    <span class="sum-label"><span class="material-symbols-outlined" style="font-size:18px; color:var(--warning-color);">pending_actions</span> Credit Sales</span>
+                    <span class="sum-val" id="sumCredit">₹0</span>
+                </div>
+                <div class="sum-row grand">
+                    <span class="sum-label"><span class="material-symbols-outlined" style="font-size:20px;">monitoring</span> Total Revenue</span>
+                    <span class="sum-val" id="sumTotal">₹0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Popup - Delete Confirmation -->
+    <div class="mini-modal-overlay" id="miniModalDelete">
+        <div class="mini-modal-content">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--danger-color);">delete_forever</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Delete Invoice?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5;">This will permanently delete the bill and <strong>automatically return</strong> the sold items back to your inventory stock.</p>
+                <input type="hidden" id="deleteTargetId">
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeMiniModal('miniModalDelete')" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                    <button type="button" id="btnConfirmDelete" class="btn-primary" onclick="executeDeleteSale()" style="flex: 1; background: var(--danger-color); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); border: none; padding: 12px;">Reverse Sale</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EXACT COPY OF BILL.HTML PRINT AREA -->
+    <div id="printArea">
+        <div class="print-top-band">
+            <div class="print-header-left">
+                <div class="print-brand">
+                    <img src="images/icon.png" class="brand-logo-print" alt="Logo">
+                    <h2>LITHIK BEVERAGE</h2>
+                    <p style="font-weight: normal; margin-top: 4px; line-height: 1.4;">
+                        No 202, ideal home colony, gudapakkam,<br>
+                        puduchatram, Thiruvallur,<br>
+                        Tamil Nadu - 600124
+                    </p>
+                    <p style="font-weight: normal; margin-top: 2px;"><strong>Ph:</strong> 7200719392</p>
+                    <div style="margin-top: 10px;"><span style="font-size: 11px; font-weight: bold; color: #000; border: 1px solid #999; padding: 5px 10px; border-radius: 4px; background-color: #fff; letter-spacing: 0.5px;">GSTIN: 33BFIPL2226K1ZJ</span></div>
+                </div>
+                
+                <div class="print-invoice-to">
+                    <p class="section-label">BILLED TO</p>
+                    <h3 id="prName">Customer Name</h3>
+                    <p><strong>PHONE :</strong> <span id="prPhone"></span></p>
+                    <p><strong>ADDRESS :</strong> <span id="prAddress"></span></p>
+                </div>
+            </div>
+
+            <div class="print-header-middle"></div>
+            
+            <div class="print-header-right">
+                <h1 class="invoice-title-text">TAX INVOICE</h1>
+                <p class="invoice-no-text">No. <span id="prInvNo">GST-XXXX</span></p>
+                
+                <div class="invoice-date-box">
+                    <span style="display:block;">Invoice Date</span>
+                    <strong id="prDate">DD-MM-YYYY</strong>
+                </div>
+
+                <div class="invoice-product-code">
+                    <span>Print Time</span>
+                    <strong id="prPrintTime">N/A</strong>
+                </div>
+                
+                <img id="prQrCode" src="" alt="Invoice QR" style="width: 95px; height: 95px; display: none; border: 2px solid #3b82f6; padding: 4px; background: white; border-radius: 8px; margin-top: 20px;" onerror="this.style.display='none'">
+            </div>
+        </div>
+
+        <div class="print-table-container">
+            <table class="print-table">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 45%;">Item Description</th>
+                        <th style="width: 10%;" class="text-center">HSN</th>
+                        <th style="width: 10%;" class="text-center">Qty</th>
+                        <th style="width: 15%;" class="text-right">Rate(Inc)</th>
+                        <th style="width: 15%;" class="text-right">Total</th>
+                    </tr>
+                </thead>
+                <tbody id="prTableBody"></tbody>
+            </table>
+        </div>
+
+        <div class="print-middle-section">
+            <div class="print-left-footer-info">
+                <div class="thanks-box">
+                    <strong>Thank you for your business!</strong>
+                    <p>1. Goods once sold will not be taken back.<br>2. All disputes subject to local jurisdiction.</p>
+                </div>
+                
+                <div class="payment-methods">
+                    <p>Payment Mode:<br><span id="prPaymentMode">Cash / UPI / Bank Transfer</span></p>
+                </div>
+            </div>
+            
+            <div class="print-totals-box">
+                <table class="totals-grid">
+                    <tr><td class="t-label">Taxable Amount</td><td class="t-val" id="prBaseTotal">₹0.00</td></tr>
+                    <tr><td class="t-label">CGST</td><td class="t-val" id="prCgstTotal">₹0.00</td></tr>
+                    <tr><td class="t-label">SGST</td><td class="t-val" id="prSgstTotal">₹0.00</td></tr>
+                    <tr><td class="t-label">Discount</td><td class="t-val" id="prDiscountTotal">-₹0.00</td></tr>
+                    <tr><td class="t-label">Transport</td><td class="t-val" id="prTransportTotal">+₹0.00</td></tr>
+                    <tr class="t-grand-row"><td class="t-label">TOTAL :</td><td class="t-val" id="prGrandTotal">₹0.00</td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="print-signature-area">
+            <div class="sign-box">
+                <p style="margin-bottom: 25px;">Customer Signature</p>
+                <div class="sign-placeholder"></div>
+            </div>
+            <div class="sign-box">
+                <p style="margin-bottom: 25px;">For LITHIK BEVERAGE</p>
+                <div class="sign-placeholder"></div>
+                <p>Authorized Signatory</p>
+            </div>
+        </div>
+
+        <div class="print-absolute-footer">
+            <p>System Generated Invoice • Powered by Goorac Software Solutions</p>
+        </div>
+    </div>
+
+    <script type="module">
+        import { app, db } from './config.js';
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+        import { collection, doc, getDocs, query, orderBy, limit, startAfter, where, runTransaction, increment } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        // Navigation Setup
+        const navItems = [
+            { name: 'Dashboard', path: 'index.html', icon: '<path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>' },
+            { name: 'Billing', path: 'bill.html', icon: '<path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>' },
+            { name: 'Production', path: 'production.html', icon: '<path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.36 8.04A5.994 5.994 0 000 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96zM10 17l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>' },
+            { name: 'Inventory', path: 'inventory.html', icon: '<path d="M20 2H4c-1.1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-.9-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>' },
+            { name: 'Purchase', path: 'purchase.html', icon: '<path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>' },
+            { name: 'Sales', path: 'sales.html', icon: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>' },
+            { name: 'Parties', path: 'parties.html', icon: '<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>' },
+            { name: 'Expenses', path: 'expenses.html', icon: '<path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>' },
+            { name: 'Accounts', path: 'accounts.html', icon: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>' },
+            { name: 'Labour', path: 'attendance.html', icon: '<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>' }
+        ];
+
+        const desktopNav = document.getElementById('desktop-nav');
+        const mobileNav = document.getElementById('mobile-nav');
+        const currentPath = window.location.pathname.split('/').pop() || 'sales.html';
+
+        navItems.forEach(item => {
+            const isActive = currentPath === item.path ? 'active' : '';
+            const html = `<a href="${item.path}" class="nav-item ${isActive}"><svg class="nav-icon" viewBox="0 0 24 24">${item.icon}</svg><span>${item.name}</span></a>`;
+            desktopNav.innerHTML += html;
+            mobileNav.innerHTML += html;
+        });
+
+        // Utilities
+        window.vibrateApp = function(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); };
+        
+        window.showToast = function(msg, type = "success") {
+            vibrateApp(type === "error" ? 40 : 20);
+            const toast = document.getElementById(type === "error" ? 'errorToast' : 'successToast');
+            document.getElementById(type === "error" ? 'errorToastText' : 'successToastText').innerText = msg;
+            toast.style.display = 'flex';
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.style.display = 'none', 300); }, 3000);
+        };
+
+        const formatINR = (val) => Number(val).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        // Modals
+        window.openMiniModal = function(id) { vibrateApp(20); document.getElementById(id).classList.add('active'); };
+        window.closeMiniModal = function(id) { document.getElementById(id).classList.remove('active'); };
+
+        window.addEventListener('popstate', () => {
+            document.querySelectorAll('.mini-modal-overlay.active').forEach(m => m.classList.remove('active'));
+        });
+
+        // Global Variables
+        let currentUser = null;
+        let salesCache = [];
+        let lastVisibleDoc = null;
+        let isFetching = false;
+        let hasMore = true;
+        let currentSearch = '';
+        
+        // Smart Date Filter Initialization (Local Timezone Fix)
+        const today = new Date();
+        let filterDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        document.getElementById('masterDateFilter').value = filterDate;
+
+        window.applyDateFilter = function(val) {
+            filterDate = val;
+            const input = document.getElementById('masterDateFilter');
+            const clearBtn = document.getElementById('clearDateBtn');
+            const mobileIcon = document.getElementById('mobileFilterIcon');
+            
+            if (val) {
+                input.classList.add('active-filter');
+                if(mobileIcon) mobileIcon.classList.add('active-filter');
+                clearBtn.classList.add('active');
+            } else {
+                input.classList.remove('active-filter');
+                if(mobileIcon) mobileIcon.classList.remove('active-filter');
+                clearBtn.classList.remove('active');
+            }
+            loadSales(false);
+        };
+
+        window.clearDateFilter = function() {
+            document.getElementById('masterDateFilter').value = '';
+            applyDateFilter('');
+        };
+
+        // Auth
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                loadSales();
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+        // --- FETCH ENGINE ---
+        function renderSkeletons() {
+            const grid = document.getElementById('salesGrid');
+            let html = '';
+            for(let i=0; i<4; i++) {
+                html += `
+                <div class="sale-card" style="box-shadow: none; border-color: transparent; background: var(--input-bg);">
+                    <div class="skeleton" style="height:20px; width:60%; margin-bottom:12px; border-radius:4px;"></div>
+                    <div class="skeleton" style="height:14px; width:40%; margin-bottom:20px; border-radius:4px;"></div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="skeleton" style="height:35px; width:30%; border-radius:4px;"></div>
+                        <div class="skeleton" style="height:35px; width:20%; border-radius:12px;"></div>
+                    </div>
+                </div>`;
+            }
+            grid.innerHTML = html;
+        }
+
+        async function loadSales(isLoadMore = false) {
+            if (isLoadMore) {
+                if (isFetching || !hasMore) return;
+                isFetching = true;
+                document.getElementById('scrollLoader').style.display = 'flex';
+            } else {
+                hasMore = true;
+                lastVisibleDoc = null;
+                salesCache = [];
+                isFetching = true;
+                renderSkeletons();
+            }
+
+            try {
+                let q = collection(db, "sales");
+                
+                // Smart Filter Logic: If Date is active, load ALL for that date (No Limit). If clear, paginate 10.
+                if (filterDate !== '') {
+                    const start = new Date(filterDate);
+                    start.setHours(0,0,0,0);
+                    const end = new Date(filterDate);
+                    end.setHours(23,59,59,999);
+                    
+                    q = query(q, where("date", ">=", start), where("date", "<=", end), orderBy("date", "desc"));
+                } else {
+                    q = query(q, orderBy("createdAt", "desc"), isLoadMore && lastVisibleDoc ? startAfter(lastVisibleDoc) : limit(10));
+                }
+
+                const snap = await getDocs(q);
+                
+                if (snap.empty) {
+                    hasMore = false;
+                    if (!isLoadMore) {
+                        document.getElementById('salesGrid').innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:40px;">No sales found for this period.</div>';
+                    }
+                    document.getElementById('scrollLoader').style.display = 'none';
+                    isFetching = false;
+                    return;
+                }
+
+                lastVisibleDoc = snap.docs[snap.docs.length - 1];
+                if (filterDate !== '') hasMore = false; // Disable pagination if we loaded all for the day
+
+                const newItems = [];
+                snap.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    if(!salesCache.find(p => p.id === doc.id)) {
+                        newItems.push(data);
+                        salesCache.push(data);
+                    }
+                });
+
+                // Client-side search application (Because SearchTokens wasn't used in bill.html)
+                let renderItems = newItems;
+                if (currentSearch.trim() !== '') {
+                    const searchLower = currentSearch.toLowerCase();
+                    renderItems = newItems.filter(s => 
+                        (s.invoiceNo && s.invoiceNo.toLowerCase().includes(searchLower)) || 
+                        (s.customer && s.customer.name && s.customer.name.toLowerCase().includes(searchLower))
+                    );
+                }
+
+                if (isLoadMore) renderSalesAppend(renderItems);
+                else renderSales(renderItems);
+                
+                document.getElementById('scrollLoader').style.display = 'none';
+
+            } catch (err) {
+                console.error(err);
+                showToast("Error loading records.", "error");
+            } finally {
+                isFetching = false;
+            }
+        }
+
+        document.getElementById('mainScroll').addEventListener('scroll', (e) => {
+            if (filterDate !== '') return; // Don't paginate if showing full day
+            const el = e.target;
+            if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) loadSales(true); 
+        });
+
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value.trim();
+                // Re-render from cache to filter instantly
+                const searchLower = currentSearch.toLowerCase();
+                const filtered = salesCache.filter(s => 
+                    (s.invoiceNo && s.invoiceNo.toLowerCase().includes(searchLower)) || 
+                    (s.customer && s.customer.name && s.customer.name.toLowerCase().includes(searchLower))
+                );
+                renderSales(filtered);
+            }, 300); 
+        });
+
+        // --- RENDER CARDS ---
+        function generateCardHTML(item) {
+            let dStr = "N/A";
+            if (item.date && item.date.toDate) {
+                const dObj = item.date.toDate();
+                dStr = `${dObj.getDate().toString().padStart(2, '0')}-${(dObj.getMonth()+1).toString().padStart(2, '0')}-${dObj.getFullYear()}`;
+            }
+
+            const cName = item.customer ? item.customer.name : 'Cash Customer';
+            const itemsCount = item.items ? item.items.length : 0;
+            const grand = item.totals ? item.totals.grand : 0;
+            
+            let payClass = "pay-cash";
+            if(item.paymentMode === "Online") payClass = "pay-online";
+            if(item.paymentMode === "Credit") payClass = "pay-credit";
+
+            return `
+                <div class="sale-card">
+                    <div class="sc-header">
+                        <div class="sc-inv" onclick="vibrateApp(10); printSale('${item.id}')">${item.invoiceNo}</div>
+                        <div class="sc-date">${dStr}</div>
+                    </div>
+                    <div>
+                        <div class="sc-customer"><span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);">person</span> ${cName}</div>
+                        <div class="sc-items">${itemsCount} Products Included</div>
+                        <div class="badge-pay ${payClass}">${item.paymentMode}</div>
+                    </div>
+                    <div class="sc-footer">
+                        <div class="sc-total">₹${formatINR(grand)}</div>
+                        <div class="sc-actions">
+                            <button class="btn-card-action btn-print" onclick="vibrateApp(20); printSale('${item.id}')" title="Print Invoice">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">print</span>
+                            </button>
+                            <button class="btn-card-action btn-delete" onclick="vibrateApp(20); confirmDeleteSale('${item.id}')" title="Delete Sale & Return Stock">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSales(items) { document.getElementById('salesGrid').innerHTML = items.length === 0 && currentSearch !== '' ? '<div style="text-align:center; color:var(--text-muted); padding:40px;">No matches found in loaded data.</div>' : items.map(generateCardHTML).join(''); }
+        function renderSalesAppend(items) { document.getElementById('salesGrid').insertAdjacentHTML('beforeend', items.map(generateCardHTML).join('')); }
+
+        // --- DAILY SUMMARY MATH ---
+        window.openSummaryModal = function() {
+            let cash = 0, online = 0, credit = 0, total = 0;
+            
+            // Math is perfectly accurate because we downloaded ALL sales for the selected date into salesCache.
+            salesCache.forEach(sale => {
+                const amount = sale.totals ? sale.totals.grand : 0;
+                total += amount;
+                if (sale.paymentMode === "Cash") cash += amount;
+                else if (sale.paymentMode === "Online") online += amount;
+                else if (sale.paymentMode === "Credit") credit += amount;
+            });
+
+            document.getElementById('sumCash').innerText = `₹${formatINR(cash)}`;
+            document.getElementById('sumOnline').innerText = `₹${formatINR(online)}`;
+            document.getElementById('sumCredit').innerText = `₹${formatINR(credit)}`;
+            document.getElementById('sumTotal').innerText = `₹${formatINR(total)}`;
+
+            let label = "For All Time";
+            if (filterDate) {
+                const d = new Date(filterDate);
+                label = `For ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+            }
+            document.getElementById('summaryDateLabel').innerText = label;
+
+            openMiniModal('miniModalSummary');
+        };
+
+        // --- INSTANT REPRINT ENGINE ---
+        window.printSale = function(id) {
+            const sale = salesCache.find(s => s.id === id);
+            if (!sale) { showToast("Error finding bill details.", "error"); return; }
+
+            document.getElementById('prName').innerText = sale.customer.name || 'Cash Customer';
+            document.getElementById('prPhone').innerText = sale.customer.phone || 'N/A';
+            document.getElementById('prAddress').innerText = sale.customer.address || 'N/A';
+            document.getElementById('prPaymentMode').innerText = sale.paymentMode;
+            document.getElementById('prInvNo').innerText = sale.invoiceNo;
+            
+            let dObj = sale.date && sale.date.toDate ? sale.date.toDate() : new Date();
+            const dateFormatted = `${dObj.getDate().toString().padStart(2, '0')}-${(dObj.getMonth()+1).toString().padStart(2, '0')}-${dObj.getFullYear()}`;
+            document.getElementById('prDate').innerText = dateFormatted;
+
+            const printTimeObj = new Date();
+            const timeFormatted = printTimeObj.toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit', hour12: true });
+            document.getElementById('prPrintTime').innerText = timeFormatted;
+
+            const qrTextData = `LITHIK BEVERAGE\nInv No: ${sale.invoiceNo}\nDate: ${dateFormatted}\nBilled To: ${sale.customer.name}\nTotal Amount: Rs. ${sale.totals.grand.toFixed(2)}`;
+            const qrCodeImg = document.getElementById('prQrCode');
+            qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrTextData)}`;
+            qrCodeImg.style.display = 'block';
+
+            const tbody = document.getElementById('prTableBody');
+            tbody.innerHTML = '';
+            
+            // Extract items and apply exact layout padding from bill.html
+            let printItems = [...sale.items];
+            const maxRowsPerPage = 5;
+            const remainder = printItems.length % maxRowsPerPage;
+            
+            if (remainder !== 0 || printItems.length === 0) {
+                const padCount = printItems.length === 0 ? maxRowsPerPage : (maxRowsPerPage - remainder);
+                for(let i = 0; i < padCount; i++) {
+                    printItems.push({ isEmptyRow: true });
+                }
+            }
+
+            printItems.forEach((item, index) => {
+                if (item.isEmptyRow) {
+                    tbody.innerHTML += `
+                        <tr style="height: 25mm; max-height: 25mm;">
+                            <td style="border-bottom: 1px solid #e2e8f0;"></td><td style="border-bottom: 1px solid #e2e8f0;"></td>
+                            <td style="border-bottom: 1px solid #e2e8f0;"></td><td style="border-bottom: 1px solid #e2e8f0;"></td>
+                            <td style="border-bottom: 1px solid #e2e8f0;"></td><td style="border-bottom: 1px solid #e2e8f0;"></td>
+                        </tr>
+                    `;
+                    return;
+                }
+                const num = (index + 1).toString().padStart(2, '0');
+                const desc = `
+                    <strong style="font-size:13px; display:block; color:#0f172a; padding-bottom: 3px;">${item.name}</strong>
+                    <span style="font-size:11px; color:#475569;">GST: ${item.gstPercent}% | Base: ₹${item.baseTotal.toFixed(2)}</span>
+                `;
+                tbody.innerHTML += `
+                    <tr style="height: 25mm; max-height: 25mm;">
+                        <td>${num}.</td>
+                        <td>${desc}</td>
+                        <td class="text-center">-</td>
+                        <td class="text-center">${item.qty.toString().padStart(2, '0')}</td>
+                        <td class="text-right">₹${item.price.toFixed(2)}</td>
+                        <td class="text-right" style="font-weight:900; color:#0f172a;">₹${item.finalTotal.toFixed(2)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('prBaseTotal').innerText = `₹${sale.totals.base.toFixed(2)}`;
+            document.getElementById('prCgstTotal').innerText = `₹${sale.totals.cgst.toFixed(2)}`;
+            document.getElementById('prSgstTotal').innerText = `₹${sale.totals.sgst.toFixed(2)}`;
+            document.getElementById('prDiscountTotal').innerText = `-₹${sale.totals.discount.toFixed(2)}`;
+            document.getElementById('prTransportTotal').innerText = `+₹${sale.totals.transport.toFixed(2)}`;
+            document.getElementById('prGrandTotal').innerText = `₹${sale.totals.grand.toFixed(2)}`;
+
+            setTimeout(() => { window.print(); }, 200); // Slight delay ensures QR renders
+        };
+
+        // --- DELETE TRANSACTION & STOCK REVERSAL ---
+        window.confirmDeleteSale = function(id) {
+            document.getElementById('deleteTargetId').value = id;
+            openMiniModal('miniModalDelete');
+        };
+
+        window.executeDeleteSale = async function() {
+            vibrateApp(30);
+            const id = document.getElementById('deleteTargetId').value;
+            if(!id) return;
+            
+            const sale = salesCache.find(s => s.id === id);
+            if(!sale) return;
+
+            const btn = document.getElementById('btnConfirmDelete');
+            btn.disabled = true; btn.innerText = "Reversing Stock...";
+
+            try {
+                // Strict Server-Side Transaction Processing
+                await runTransaction(db, async (transaction) => {
+                    const saleRef = doc(db, "sales", id);
+                    
+                    // 1. Loop through sold items and return them to Inventory
+                    sale.items.forEach(item => {
+                        if(item.invId) {
+                            const invRef = doc(db, "inventory", item.invId);
+                            transaction.update(invRef, { qty: increment(item.qty), lastUpdated: new Date().toISOString() });
+                        }
+                    });
+
+                    // 2. Delete the Sale Record
+                    transaction.delete(saleRef);
+                });
+
+                showToast("Sale Deleted & Stock Returned!", "success");
+                closeMiniModal('miniModalDelete');
+                
+                // Refresh data
+                currentSearch = '';
+                document.getElementById('searchInput').value = '';
+                loadSales();
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to reverse sale.", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Reverse Sale";
+            }
+        };
+
+    </script>
+</body>
+</html>
