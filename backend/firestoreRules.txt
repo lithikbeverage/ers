@@ -1,0 +1,29 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper Function: Checks if the authenticated user has the admin claim
+    function isAdmin() {
+      return request.auth != null && request.auth.token.admin == true;
+    }
+
+    // Helper Function: Checks if user is authenticated at all
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // --- COLLECTION RULES ---
+
+    // Apply strict Admin-Only access to all collections
+    match /{document=**} {
+      allow read, write: if isAdmin();
+    }
+
+    // Optional: If you have public data that anyone can read, 
+    // you would add a specific block before the catch-all match above:
+    // match /publicData/{doc} {
+    //   allow read: if true;
+    // }
+  }
+}
