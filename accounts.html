@@ -59,7 +59,8 @@
         .material-symbols-outlined { display: inline-flex; align-items: center; justify-content: center; }
 
         /* Layout Structure */
-        #app-shell { display: flex; height: 100%; width: 100%; position: absolute; inset: 0; flex-direction: column; overflow: hidden; }
+        /* PROFESSIONAL FIX: Added background-color and z-index: 1 to properly obscure the PDF render layer */
+        #app-shell { display: flex; height: 100%; width: 100%; position: absolute; inset: 0; flex-direction: column; overflow: hidden; background-color: var(--bg-body); z-index: 1; }
         
         header { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-surface); padding: 12px 20px; border-bottom: 1px solid var(--border-color); z-index: 10; flex-shrink: 0; }
         .header-left { display: flex; align-items: center; gap: 12px; }
@@ -146,18 +147,20 @@
         /* --- PDF EXPORT CONTAINERS (HIDDEN BUT RENDERABLE) -- */
         /* ---------------------------------------------------- */
         
-        /* Fixed invisible container to safely generate crisp PDFs without disrupting UI */
+        /* PROFESSIONAL FIX: Kept at (0,0) for correct rendering coordinates, but layered safely behind UI using z-index */
         .pdf-export-container {
             position: absolute;
-            left: -9999px;
+            left: 0;
             top: 0;
             width: 210mm; /* Strict A4 Width */
+            min-height: 297mm; /* Ensure it computes full A4 size preventing cutoff */
             background: white;
             color: #000;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             box-sizing: border-box;
-            z-index: -9999;
+            z-index: -9999; /* This safely hides it directly behind #app-shell */
             padding-bottom: 40px;
+            pointer-events: none;
         }
 
         /* SINGLE BILL EXACT LAYOUT inside PDF Container */
@@ -693,67 +696,37 @@
             updateCharts(dThis, dLast);
         }
 
-        // --- PDF EXPORT ENGINE VIA HTML2PDF (WITH ENTIRELY DIFFERENT LOGIC TO FIX BLANK PAGES) ---
+        // --- PROFESSIONAL PDF ENGINE ---
         function executePdfDownload(elementId, filename) {
             return new Promise((resolve) => {
                 const element = document.getElementById(elementId);
                 
-                // NEW FOOLPROOF LOGIC: html2canvas creates blank pages on mobile/complex apps 
-                // when elements are positioned off-screen (left: -9999px) or when the viewport 
-                // is narrower than the A4 container. We fix this by temporarily taking over the viewport.
+                // Professional Fix: NO UI flashing, NO blank pages.
+                // Because we styled .pdf-export-container at top:0, left:0, and z-index:-9999, 
+                // html2canvas accurately maps the coordinates without needing to hide/show the UI.
                 
-                // 1. Save original container state
-                const originalCssText = element.style.cssText;
+                const opt = {
+                    margin:       0.2, 
+                    filename:     `${filename}.pdf`,
+                    image:        { type: 'jpeg', quality: 1 },
+                    html2canvas:  { 
+                        scale: 2, 
+                        useCORS: true, 
+                        letterRendering: true,
+                        scrollY: 0, // Strictly forces capture at Top-0 
+                        scrollX: 0, // Strictly forces capture at Left-0
+                        backgroundColor: '#ffffff' // Ensures no transparent/blank backgrounds bleed through
+                    },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+                    pagebreak:    { mode: ['css', 'legacy'] }
+                };
                 
-                // 2. Bring container strictly into view, set desktop-like width, highest z-index
-                element.style.cssText = 'position: absolute; left: 0; top: 0; width: 210mm; background: white; z-index: 999999; display: block; padding-bottom: 40px; margin: 0;';
-                
-                // 3. Hide all conflicting app elements to prevent height/scroll interference
-                const appShell = document.getElementById('app-shell');
-                const origShellDisplay = appShell.style.display;
-                appShell.style.display = 'none';
-                
-                const htmlEl = document.documentElement;
-                const bodyEl = document.body;
-                
-                const origHtmlHeight = htmlEl.style.height;
-                const origHtmlOverflow = htmlEl.style.overflow;
-                const origBodyHeight = bodyEl.style.height;
-                const origBodyOverflow = bodyEl.style.overflow;
-                
-                htmlEl.style.height = 'auto'; htmlEl.style.overflow = 'visible';
-                bodyEl.style.height = 'auto'; bodyEl.style.overflow = 'visible';
-                
-                // Allow the DOM a brief moment to re-render the layout before capturing
-                setTimeout(() => {
-                    window.scrollTo(0, 0);
-                    
-                    const opt = {
-                        margin:       [0.2, 0.2, 0.2, 0.2],
-                        filename:     `${filename}.pdf`,
-                        image:        { type: 'jpeg', quality: 1 },
-                        html2canvas:  { 
-                            scale: 2, 
-                            useCORS: true, 
-                            letterRendering: true,
-                            scrollY: 0,
-                            windowWidth: 850 // Forces a wider context, preventing mobile cropping
-                        },
-                        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
-                        pagebreak:    { mode: ['css', 'legacy'] }
-                    };
-                    
-                    html2pdf().set(opt).from(element).save().then(() => {
-                        // Restore original App UI constraints safely
-                        element.style.cssText = originalCssText;
-                        appShell.style.display = origShellDisplay;
-                        
-                        htmlEl.style.height = origHtmlHeight; htmlEl.style.overflow = origHtmlOverflow;
-                        bodyEl.style.height = origBodyHeight; bodyEl.style.overflow = origBodyOverflow;
-                        
-                        resolve(true);
-                    });
-                }, 200); // 200ms delay ensures fonts and layout are fully painted
+                html2pdf().set(opt).from(element).save().then(() => {
+                    resolve(true);
+                }).catch(err => {
+                    console.error("PDF Export Error:", err);
+                    resolve(false);
+                });
             });
         }
 
