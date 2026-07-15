@@ -6,10 +6,11 @@
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#020617",
-  "theme_color": "#1e40af",
+  "theme_color": "#0f172a",
   "categories": [
     "productivity",
-    "business"
+    "business",
+    "finance"
   ],
   "icons": [
     {
@@ -27,16 +28,37 @@
   ],
   "shortcuts": [
     {
-      "name": "Billing",
+      "name": "New Bill",
       "short_name": "Billing",
       "url": "bill.html",
-      "icons": [{ "src": "images/icon.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "images/icon.png",
+          "sizes": "192x192"
+        }
+      ]
     },
     {
-      "name": "Production",
+      "name": "Production Log",
       "short_name": "Production",
       "url": "production.html",
-      "icons": [{ "src": "images/icon.png", "sizes": "192x192" }]
+      "icons": [
+        {
+          "src": "images/icon.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Check Inventory",
+      "short_name": "Inventory",
+      "url": "inventory.html",
+      "icons": [
+        {
+          "src": "images/icon.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
