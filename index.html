@@ -59,7 +59,7 @@
         header, .material-symbols-outlined, .nav-item { -webkit-user-select: none; user-select: none; }
         .material-symbols-outlined { display: inline-flex; align-items: center; justify-content: center; }
 
-        /* Robust PWA Mobile Shell Fix */
+        /* Robust PWA Mobile Shell Fix - Prevents bottom nav from disappearing */
         #app-shell { display: flex; height: 100%; width: 100%; position: absolute; inset: 0; flex-direction: column; overflow: hidden; background-color: var(--bg-body); z-index: 1; }
         
         header { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-surface); padding: 12px 20px; border-bottom: 1px solid var(--border-color); z-index: 10; flex-shrink: 0; }
@@ -104,9 +104,6 @@
         .profit-positive { color: var(--success-color) !important; }
         .profit-negative { color: var(--danger-color) !important; }
         .metric-neutral { color: var(--accent-color) !important; }
-
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle;}
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* Skeleton Loading Animation */
         .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; color: transparent !important; display: inline-block; width: 60px; height: 20px; }
@@ -322,6 +319,7 @@
             // Setup Accurate Local Dates
             const now = new Date();
             const localOffset = now.getTimezoneOffset() * 60000;
+            const localNow = new Date(now.getTime() - localOffset);
             
             // --- TODAY CALCULATION ---
             const todayStartObj = new Date(now.getFullYear(), now.getMonth(), now.getDate());
