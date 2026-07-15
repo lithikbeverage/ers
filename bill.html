@@ -177,22 +177,22 @@
                 min-height: 100vh;
                 margin: 0 auto; 
                 padding: 0; 
-                padding-bottom: 260px !important; /* Stops main content before fixed footers */
+                padding-bottom: 320px !important; /* Increased padding to stop main content before fixed footers and avoid edge-case overlap */
                 background: white; color: #000;
                 box-sizing: border-box;
                 -webkit-print-color-adjust: exact !important; 
                 print-color-adjust: exact !important;
             }
 
-            /* Top Band Header (Highly Professional Re-alignment) */
+            /* Top Band Header (Highly Professional Re-alignment with Yellow Shade) */
             .print-top-band {
-                background-color: #f8fafc !important; 
+                background-color: #fefce8 !important; /* Professional light shade yellow */
                 padding: 25px 40px;
                 display: flex;
                 justify-content: space-between;
                 align-items: flex-start;
                 margin-bottom: 25px;
-                border-bottom: 3px solid #1e40af;
+                border-bottom: 3px solid #eab308 !important; /* Gold/Yellow Border */
             }
             
             /* Restrict Logo Size in Print Layout */
@@ -205,7 +205,7 @@
             }
 
             /* Header Left Side */
-            .print-header-left { flex: 1; padding-right: 20px; }
+            .print-header-left { flex: 1; padding-right: 15px; }
             .print-brand { display: flex; flex-direction: column; gap: 2px; margin-bottom: 25px; }
             .print-brand h2 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #1e40af !important; line-height: 1;}
             
@@ -215,11 +215,14 @@
             .print-invoice-to p { margin: 3px 0; font-size: 12px; color: #334155;}
             .print-invoice-to p strong { display: inline-block; width: 75px; font-size: 10px; text-transform: uppercase; color: #0f172a;}
 
+            /* Header Middle Side (QR Code Area) */
+            .print-header-middle { flex: 0 0 15%; display: flex; justify-content: center; align-items: flex-start; padding-top: 5px; }
+
             /* Header Right Side */
             .print-header-right { flex: 0 0 35%; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
             
             .invoice-title-text { font-size: 28px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; line-height: 1; color: #1e40af !important;}
-            .invoice-no-text { font-size: 13px; font-weight: 800; margin: 10px 0 15px 0; color: #0f172a; background-color: #e2e8f0 !important; padding: 6px 12px; border-radius: 4px; display: inline-block;}
+            .invoice-no-text { font-size: 13px; font-weight: 800; margin: 10px 0 15px 0; color: #0f172a; background-color: #fde047 !important; padding: 6px 12px; border-radius: 4px; display: inline-block;}
             
             .invoice-date-box { text-align: right; display: flex; flex-direction: column; align-items: flex-end; margin-top: 10px;}
             .invoice-date-box span { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;}
@@ -468,6 +471,10 @@
                     <p><strong>PHONE :</strong> <span id="prPhone"></span></p>
                     <p><strong>ADDRESS :</strong> <span id="prAddress"></span></p>
                 </div>
+            </div>
+
+            <div class="print-header-middle">
+                <img id="prQrCode" src="" alt="Invoice QR" style="width: 95px; height: 95px; display: none; border: 2px solid #eab308; padding: 4px; background: white; border-radius: 8px;" onerror="this.style.display='none'">
             </div>
             
             <div class="print-header-right">
@@ -874,7 +881,15 @@
             document.getElementById('prInvNo').innerText = invNo;
             
             let dObj = new Date(document.getElementById('cDate').value);
-            document.getElementById('prDate').innerText = `${dObj.getDate().toString().padStart(2, '0')}-${(dObj.getMonth()+1).toString().padStart(2, '0')}-${dObj.getFullYear()}`;
+            const dateFormatted = `${dObj.getDate().toString().padStart(2, '0')}-${(dObj.getMonth()+1).toString().padStart(2, '0')}-${dObj.getFullYear()}`;
+            document.getElementById('prDate').innerText = dateFormatted;
+
+            // Generate QR Code dynamically
+            const customerName = document.getElementById('cName').value || 'Cash Customer';
+            const qrTextData = `LITHIK BEVERAGE\nInv No: ${invNo}\nDate: ${dateFormatted}\nBilled To: ${customerName}\nTotal Amount: Rs. ${billTotals.grand.toFixed(2)}`;
+            const qrCodeImg = document.getElementById('prQrCode');
+            qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrTextData)}`;
+            qrCodeImg.style.display = 'block';
 
             const tbody = document.getElementById('prTableBody');
             tbody.innerHTML = '';
