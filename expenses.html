@@ -3,20 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Shared Expenses - LITHIK BEVERAGE</title>
+    <title>Expenses - LITHIK BEVERAGE</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a">
     <link rel="apple-touch-icon" href="images/icon.png">
     
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        /* Shared Core Theme from LITHIK BEVERAGE Inventory */
+        /* Shared Core Theme */
         :root {
             --bg-body: #f8fafc;
             --bg-surface: #ffffff;
@@ -33,6 +31,8 @@
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --skeleton-base: #e2e8f0;
+            --skeleton-shine: #f8fafc;
         }
 
         @media (prefers-color-scheme: dark) {
@@ -49,28 +49,21 @@
                 --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
                 --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
                 --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+                --skeleton-base: #1e293b;
+                --skeleton-shine: #334155;
             }
-            /* Dark mode style safety overrides */
-            body { background-color: #020617 !important; color: #f8fafc !important; }
-            .bg-white { background-color: #0f172a !important; }
-            .border-gray-200, .border-slate-200, .border-slate-100 { border-color: #1e293b !important; }
-            .bg-slate-50, .bg-slate-100 { background-color: #1e293b !important; }
-            .text-slate-800, .text-gray-800 { color: #f8fafc !important; }
-            .text-slate-600, .text-slate-400 { color: #94a3b8 !important; }
-            input, select { background-color: #1e293b !important; color: #f8fafc !important; border-color: #334155 !important; }
         }
 
         /* Reset & Base Layout */
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        html, body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; width: 100vw; overflow: hidden; margin: 0; padding: 0; }
-        
-        /* Custom scrollbar config matching the design system */
-        .custom-scrollbar::-webkit-scrollbar { width: 0px; height: 0px; display: none !important; }
-        .custom-scrollbar { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; margin: 0; padding: 0; }
+        html, body { font-family: 'Inter', sans-serif; background-color: var(--bg-body); color: var(--text-main); height: 100%; width: 100vw; overflow: hidden; }
+        *::-webkit-scrollbar { display: none !important; }
+        * { -ms-overflow-style: none !important; scrollbar-width: none !important; }
 
-        header, .material-symbols-outlined, .nav-item {
+        header, .material-symbols-outlined, .nav-item, .btn-primary, .btn-secondary {
             -webkit-user-select: none; user-select: none;
         }
+
         .material-symbols-outlined { display: inline-flex; align-items: center; justify-content: center; }
 
         /* Layout Structure */
@@ -81,208 +74,262 @@
         .header-right { display: flex; align-items: center; gap: 12px; }
         
         .company-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; box-shadow: var(--shadow-sm); }
-        h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; color: var(--primary-color); margin: 0; }
+        h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; color: var(--primary-color); margin:0; }
+        
+        /* Header Filters & Icons */
+        .header-date-picker { padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.9rem; outline: none; cursor: pointer; transition: all 0.2s; height: 38px; }
+        .header-date-picker:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .header-date-picker.active-filter { background: rgba(30, 64, 175, 0.05); color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; }
+        .clear-date-btn { display: none; background: rgba(239, 68, 68, 0.1); border: none; color: var(--danger-color); cursor: pointer; height: 38px; width: 38px; border-radius: 10px; align-items: center; justify-content: center; transition: all 0.2s; position: relative; z-index: 10; }
+        .clear-date-btn.active { display: flex; }
+        .mobile-filter-icon { display: none; }
 
         .layout-container { display: flex; flex: 1; overflow: hidden; min-height: 0; }
         
-        /* Navigation Sidebar */
+        /* Navigation */
         nav.sidebar { display: none; width: 260px; background-color: var(--bg-nav); border-right: 1px solid var(--border-color); flex-direction: column; padding: 20px 0; overflow-y: auto; }
         nav.sidebar .nav-item { display: flex; align-items: center; text-decoration: none; color: var(--text-muted); padding: 14px 24px; gap: 16px; font-size: 1rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
         nav.sidebar .nav-item:hover, nav.sidebar .nav-item.active { background-color: rgba(59, 130, 246, 0.05); color: var(--primary-color); border-right: 3px solid var(--primary-color); }
         
-        /* Navigation Bottom Menu */
         nav.bottom-nav { display: flex; background-color: var(--bg-nav); border-top: 1px solid var(--border-color); min-height: 65px; height: calc(65px + env(safe-area-inset-bottom)); width: 100%; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; padding: 0 10px; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); position: relative; z-index: 100; }
         nav.bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); min-width: 72px; padding: 8px 4px; gap: 4px; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; cursor: pointer; }
         nav.bottom-nav .nav-item.active { color: var(--primary-color); }
         .nav-icon { width: 24px; height: 24px; fill: currentColor; }
 
-        /* Main Workspace Scroll Area */
+        /* Main Scroll Area */
         .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px; background-color: var(--bg-body); position: relative; }
-        .container-inner { max-width: 1200px; margin: 0 auto; width: 100%; }
+        .container-inner { max-width: 800px; margin: 0 auto; width: 100%; }
+
+        /* Day Summary Box */
+        .summary-box { background: linear-gradient(135deg, var(--primary-color), #3b82f6); border-radius: 16px; padding: 20px; color: white; display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; box-shadow: var(--shadow-md); }
+        .summary-box .sum-label { font-size: 0.9rem; font-weight: 600; opacity: 0.9; margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px;}
+        .summary-box .sum-amount { font-size: 2rem; font-weight: 900; line-height: 1;}
+        .summary-box .sum-icon { background: rgba(255,255,255,0.2); border-radius: 12px; padding: 12px; display: flex; align-items: center; justify-content: center;}
+
+        /* Search & Actions */
+        .top-actions { display: flex; gap: 12px; margin-bottom: 24px; align-items: center; }
+        .search-container { flex: 1; display: flex; align-items: center; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 0 16px; transition: all 0.3s ease; box-shadow: var(--shadow-sm); }
+        .search-container:focus-within { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .search-container input { border: none; background: transparent; width: 100%; padding: 14px 0 14px 12px; color: var(--text-main); font-size: 1rem; outline: none; font-family: 'Inter', sans-serif; }
+        .search-container input::placeholder { color: var(--text-muted); }
+
+        .btn-fab { background: var(--primary-color); color: white; border: none; width: 48px; height: 48px; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: var(--shadow-md); transition: all 0.2s; flex-shrink: 0; }
+        .btn-fab:active { transform: scale(0.95); }
+
+        /* Expense List Cards */
+        .expense-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
+        .exp-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 16px; box-shadow: var(--shadow-sm); display: flex; align-items: center; gap: 16px; transition: transform 0.2s; }
+        
+        .exp-icon-box { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .cat-tea { background: rgba(245, 158, 11, 0.1); color: #d97706; }
+        .cat-fuel { background: rgba(14, 165, 233, 0.1); color: #0284c7; }
+        .cat-labour { background: rgba(139, 92, 246, 0.1); color: #7c3aed; }
+        .cat-maint { background: rgba(16, 185, 129, 0.1); color: #059669; }
+        .cat-other { background: rgba(99, 102, 241, 0.1); color: #4f46e5; }
+        
+        .exp-details { flex: 1; min-width: 0; }
+        .exp-cat { font-weight: 700; font-size: 1.05rem; color: var(--text-main); margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .exp-desc { font-size: 0.85rem; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        
+        .exp-meta { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+        .exp-amount { font-size: 1.15rem; font-weight: 800; color: var(--danger-color); }
+        .exp-time { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; background: var(--input-bg); padding: 4px 8px; border-radius: 6px; }
+
+        .btn-card-del { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 8px; display: flex; align-items: center; justify-content: center; border-radius: 8px; transition: all 0.2s; margin-left: 4px;}
+        .btn-card-del:hover, .btn-card-del:active { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+        /* Skeletons */
+        .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Modals */
+        .modal { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background-color: var(--bg-body); z-index: 2000; transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); overflow-y: auto; padding-bottom: 80px; }
+        .modal.active { right: 0; }
+        .modal-header { display: flex; align-items: center; gap: 15px; padding: 18px 20px; background: var(--bg-surface); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color); justify-content: space-between;}
+        .close-modal { background: none; border: none; color: var(--text-main); cursor: pointer; display: flex; padding: 8px; border-radius: 50%; margin-left: -8px; }
+        .modal-header h2 { margin: 0; font-size: 1.25em; font-weight: 700; }
+
+        /* Mini Popup Modals */
+        .mini-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(15, 23, 42, 0.6); z-index: 4000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(4px); }
+        .mini-modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .mini-modal-content { background: var(--bg-surface); width: 92%; max-width: 400px; border-radius: 24px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); transform: scale(0.95); transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1); border: 1px solid var(--border-color); }
+        .mini-modal-overlay.active .mini-modal-content { transform: scale(1); }
+
+        .form-group { padding: 20px; max-width: 800px; margin: 0 auto; }
+        .input-wrapper { margin-bottom: 20px; }
+        .input-wrapper label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .input-wrapper input, .input-wrapper select { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 1rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s ease; appearance: none; }
+        .input-wrapper input:focus, .input-wrapper select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        
+        .row-inputs { display: flex; gap: 16px; }
+        .row-inputs > div { flex: 1; }
+
+        .btn-primary { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--primary-color); color: white; font-size: 1.1em; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
+        .btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
+        .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        /* Toasts */
+        .toast-msg { position: fixed; top: 20px; left: 50%; transform: translate(-50%, -20px); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; display: none; font-weight: 600; font-size: 0.95em; align-items: center; gap: 10px; opacity: 0; transition: all 0.3s; box-shadow: var(--shadow-lg); }
+        .toast-msg.error { background: var(--danger-color); }
+        .toast-msg.success { background: var(--success-color); }
+        .toast-msg.show { display: flex; opacity: 1; transform: translate(-50%, 0); }
+
+        #scrollLoader { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; justify-content: center; gap: 10px; }
 
         @media (min-width: 768px) {
+            #app-shell { flex-direction: column; }
+            .layout-container { flex-direction: row; }
             nav.bottom-nav { display: none; }
             nav.sidebar { display: flex; }
+            .expense-grid { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 767px) {
+            .header-date-picker { position: absolute; left: 0; top: 0; width: 38px; height: 38px; opacity: 0; z-index: 5; padding: 0; margin: 0; }
+            .mobile-filter-icon { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); transition: all 0.2s; }
+            .mobile-filter-icon.active-filter { background: rgba(30, 64, 175, 0.05); color: var(--primary-color); border-color: var(--primary-color); }
         }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col overflow-hidden">
+<body>
+
+    <div class="toast-msg error" id="errorToast"><span class="material-symbols-outlined">error</span><span id="errorToastText">Error</span></div>
+    <div class="toast-msg success" id="successToast"><span class="material-symbols-outlined">check_circle</span><span id="successToastText">Success</span></div>
 
     <div id="app-shell">
-        <!-- Unified Global Navigation Header -->
         <header>
             <div class="header-left">
                 <img src="images/icon.png" alt="Logo" class="company-logo" onerror="this.src='https://via.placeholder.com/40'">
-                <h1>LITHIK BEVERAGE</h1>
+                <h1>EXPENSES</h1>
             </div>
             <div class="header-right">
-                <span id="user-email-display" class="text-sm font-medium hidden md:block" style="color: var(--text-muted);"></span>
-                <button id="logout-btn" style="background: var(--input-bg); border: 1px solid var(--border-color); color: var(--text-main); padding: 8px 16px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s;">
-                    Logout
-                </button>
+                <div class="date-filter-container" style="display: flex; align-items: center; gap: 6px; position: relative;">
+                    <div class="mobile-filter-icon" id="mobileFilterIcon">
+                        <span class="material-symbols-outlined" style="font-size: 22px;">calendar_month</span>
+                    </div>
+                    <input type="date" id="masterDateFilter" class="header-date-picker active-filter" title="Filter by Date" onchange="vibrateApp(10); applyDateFilter(this.value)">
+                    <button id="clearDateBtn" class="clear-date-btn active" onclick="vibrateApp(10); clearDateFilter()" title="Clear Filter">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+                    </button>
+                </div>
             </div>
         </header>
 
-        <!-- Main Core Layout Container -->
         <div class="layout-container">
-            <!-- Sidebar Desktop Navigation Grid Container -->
             <nav class="sidebar" id="desktop-nav"></nav>
 
-            <!-- Main Working View Panel Area -->
-            <div class="main-scroll-area custom-scrollbar" id="mainScroll">
+            <div class="main-scroll-area" id="mainScroll">
                 <div class="container-inner">
                     
-                    <main class="w-full flex flex-col lg:flex-row gap-6 overflow-hidden">
-                        
-                        <!-- Left Column Structure: Operating Controls & Entry Form -->
-                        <div class="w-full lg:w-1/3 flex flex-col gap-6">
-                            
-                            <!-- Production Date System Controller -->
-                            <div class="bg-white rounded-2xl shadow-sm p-5 border border-gray-200 transition">
-                                <h2 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Operating Date</h2>
-                                <div class="flex items-center justify-between bg-slate-50 p-2 rounded-xl border border-slate-200">
-                                    <button id="prev-day" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                                        <i class="fa-solid fa-arrow-left"></i>
-                                    </button>
-                                    <input type="date" id="date-picker" class="font-bold text-slate-800 bg-transparent border-none focus:ring-0 cursor-pointer text-center outline-none">
-                                    <button id="next-day" class="p-2 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition">
-                                        <i class="fa-solid fa-arrow-right"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Add Expense Data Submission Form -->
-                            <div class="bg-white rounded-2xl shadow-sm p-6 border border-gray-200 transition">
-                                <h3 class="text-lg font-bold mb-4 text-slate-800 flex items-center gap-2">
-                                    <i class="fa-solid fa-plus-circle text-blue-500"></i> New Expense
-                                </h3>
-                                <form id="add-expense-form" class="space-y-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-slate-600 mb-1">Description</label>
-                                        <input type="text" id="expense-desc" required placeholder="What was this for?" 
-                                            class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                                    </div>
-                                    <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-slate-600 mb-1">Category</label>
-                                            <select id="expense-category" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                                                <option value="Food">Food</option>
-                                                <option value="Travel">Travel</option>
-                                                <option value="Software">Software</option>
-                                                <option value="Office">Office</option>
-                                                <option value="Other">Other</option>
-                                            </select>
-                                        </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-slate-600 mb-1">Amount</label>
-                                            <div class="relative">
-                                                <span class="absolute left-3 top-2.5 text-slate-400">$</span>
-                                                <input type="number" id="expense-amount" required min="0.01" step="0.01" placeholder="0.00" 
-                                                    class="w-full pl-8 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:outline-none transition">
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <button type="submit" id="submit-btn" class="w-full mt-2 bg-blue-600 text-white font-bold py-3 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-200 transition flex justify-center items-center gap-2" style="background-color: var(--primary-color);">
-                                        <span>Save to Shared Ledger</span>
-                                    </button>
-                                </form>
-                            </div>
+                    <div class="summary-box">
+                        <div>
+                            <div class="sum-label" id="summaryDateLabel">Today's Expenses</div>
+                            <div class="sum-amount" id="sumTotal">₹0.00</div>
                         </div>
-
-                        <!-- Right Column Structure: Live Visuals & Data Feed -->
-                        <div class="w-full lg:w-2/3 flex flex-col min-h-[500px]">
-                            
-                            <!-- Shared Total Metric Panel -->
-                            <div class="bg-gradient-to-br from-slate-800 to-slate-900 rounded-2xl shadow-lg p-6 mb-6 text-white flex justify-between items-center flex-shrink-0" style="background: linear-gradient(135deg, var(--primary-color) 0%, #0f172a 100%);">
-                                <div>
-                                    <p class="text-slate-300 text-sm font-medium mb-1">Shared Total for <span id="display-date-text" class="text-white font-bold">Today</span></p>
-                                    <div class="flex items-end gap-2">
-                                        <h2 class="text-4xl font-extrabold tracking-tight">$<span id="total-amount">0.00</span></h2>
-                                        <span class="text-slate-400 text-sm mb-1">USD</span>
-                                    </div>
-                                </div>
-                                <div class="bg-white/10 p-4 rounded-full border border-white/20">
-                                    <i class="fa-solid fa-chart-line text-3xl text-blue-400"></i>
-                                </div>
-                            </div>
-
-                            <!-- Live Paginated Data Feed List Container -->
-                            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 flex-grow flex flex-col overflow-hidden relative transition">
-                                <div class="p-4 border-b border-gray-100 bg-slate-50 flex justify-between items-center flex-shrink-0">
-                                    <h3 class="font-bold text-slate-800">Expense Feed</h3>
-                                    <span id="record-status" class="text-xs font-medium text-slate-500">Live Updates Enabled</span>
-                                </div>
-                                
-                                <!-- Infinite Scroll Target Wrapper -->
-                                <div id="expense-container" class="flex-grow overflow-y-auto custom-scrollbar relative p-4 max-h-[600px]">
-                                    
-                                    <div id="empty-state" class="hidden min-h-[200px] flex flex-col justify-center items-center text-slate-400">
-                                        <i class="fa-solid fa-folder-open text-5xl mb-4 text-slate-200"></i>
-                                        <p>No expenses recorded yet for this date.</p>
-                                    </div>
-
-                                    <ul id="expense-list" class="space-y-3">
-                                        <!-- Data nodes dynamically injected here via listener callback execution -->
-                                    </ul>
-
-                                    <!-- Infinite Scroll Interaction Sentinel -->
-                                    <div id="scroll-sentinel" class="h-10 w-full flex justify-center items-center text-slate-400 mt-4 opacity-0 transition-opacity">
-                                        <i class="fa-solid fa-circle-notch fa-spin"></i> <span class="ml-2 text-sm">Loading more...</span>
-                                    </div>
-                                </div>
-                            </div>
+                        <div class="sum-icon">
+                            <span class="material-symbols-outlined" style="font-size: 32px;">account_balance_wallet</span>
                         </div>
-                    </main>
+                    </div>
 
+                    <div class="top-actions">
+                        <div class="search-container">
+                            <span class="material-symbols-outlined">search</span>
+                            <input type="text" id="searchInput" placeholder="Search Description or Category..." autocomplete="off">
+                        </div>
+                        <button class="btn-fab" onclick="openExpenseModal()" title="Record Expense">
+                            <span class="material-symbols-outlined">add</span>
+                        </button>
+                    </div>
+
+                    <div class="expense-grid" id="expenseGrid"></div>
+                    
+                    <div id="scrollLoader">
+                        <span class="skeleton" style="width:16px; height:16px; border-radius:50%;"></span> Loading records...
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Mobile Dynamic Floating Bottom View Navigation Bar -->
         <nav class="bottom-nav" id="mobile-nav"></nav>
     </div>
 
-    <!-- Firebase SDK Implementation Modules (v10 Modular Architecture) -->
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
-        import { getFirestore, collection, doc, setDoc, addDoc, deleteDoc, query, where, orderBy, limit, onSnapshot, increment, getDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-        // ==========================================
-        // ⚠️ FIREBASE CONFIGURATION REPOSITORY MATRIX
-        // ==========================================
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        // Core System State Variables
-        let currentUser = null;
-        let currentDateString = getLocalYYYYMMDD(new Date());
+    <div class="modal" id="modalExpense">
+        <div class="modal-header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="close-modal" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button>
+                <h2>Record Expense</h2>
+            </div>
+        </div>
         
-        // Active Realtime Listeners & Pagination Boundaries References
-        let totalUnsubscribe = null;
-        let expensesUnsubscribe = null;
-        let currentLimit = 10; // Load 10 items initially
+        <div class="form-group">
+            <div class="input-wrapper">
+                <label>Amount (₹) *</label>
+                <input type="number" id="expAmount" placeholder="0.00" min="1" style="font-size: 1.5rem; font-weight: 800; color: var(--danger-color);">
+            </div>
+            
+            <div class="row-inputs">
+                <div class="input-wrapper">
+                    <label>Category *</label>
+                    <select id="expCategory">
+                        <option value="Tea & Snacks">Tea & Snacks</option>
+                        <option value="Fuel & Transport">Fuel & Transport</option>
+                        <option value="Maintenance">Maintenance</option>
+                        <option value="Labour / Wages">Labour / Wages</option>
+                        <option value="Office Supplies">Office Supplies</option>
+                        <option value="Raw Material">Raw Material</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+                <div class="input-wrapper">
+                    <label>Payment Mode *</label>
+                    <select id="expPaymentMode">
+                        <option value="Cash">Cash</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                    </select>
+                </div>
+            </div>
 
-        // Unified DOM Mapped Nodes Elements Reference
-        const datePicker = document.getElementById('date-picker');
-        const displayDateText = document.getElementById('display-date-text');
-        const form = document.getElementById('add-expense-form');
-        const totalAmountEl = document.getElementById('total-amount');
-        const expenseListEl = document.getElementById('expense-list');
-        const emptyState = document.getElementById('empty-state');
-        const scrollSentinel = document.getElementById('scroll-sentinel');
+            <div class="input-wrapper">
+                <label>Description / Notes</label>
+                <input type="text" id="expDesc" placeholder="e.g., Morning tea for staff">
+            </div>
+            
+            <input type="hidden" id="expTargetDate">
 
-        // Dynamic System Navigation Configuration Layout
+            <button type="button" class="btn-primary" id="btnSaveExpense" style="margin-top: 10px;">
+                <span class="material-symbols-outlined">save</span>
+                Save Expense
+            </button>
+        </div>
+    </div>
+
+    <div class="mini-modal-overlay" id="miniModalDelete">
+        <div class="mini-modal-content">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--danger-color);">delete_forever</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Delete Expense?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5;">This will permanently remove this expense record and update the day's total.</p>
+                
+                <input type="hidden" id="deleteTargetId">
+                <input type="hidden" id="deleteTargetAmount">
+                <input type="hidden" id="deleteTargetDateStr">
+                
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeMiniModal('miniModalDelete')" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                    <button type="button" id="btnConfirmDelete" class="btn-primary" onclick="executeDeleteExpense()" style="flex: 1; background: var(--danger-color); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); border: none; padding: 12px;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { app, db } from './config.js';
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
+        import { collection, doc, getDocs, query, orderBy, limit, startAfter, where, runTransaction, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+        // Navigation Setup
         const navItems = [
             { name: 'Dashboard', path: 'index.html', icon: '<path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>' },
             { name: 'Billing', path: 'bill.html', icon: '<path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>' },
@@ -298,265 +345,429 @@
 
         const desktopNav = document.getElementById('desktop-nav');
         const mobileNav = document.getElementById('mobile-nav');
+        const currentPath = window.location.pathname.split('/').pop() || 'expenses.html';
 
         navItems.forEach(item => {
-            // Set active state if matching the target system context route
-            const isActive = item.name === 'Expenses' ? 'active' : '';
-            const html = `
-                <a href="${item.path}" class="nav-item ${isActive}">
-                    <svg class="nav-icon" viewBox="0 0 24 24">${item.icon}</svg>
-                    <span>${item.name}</span>
-                </a>
-            `;
+            const isActive = currentPath === item.path ? 'active' : '';
+            const html = `<a href="${item.path}" class="nav-item ${isActive}"><svg class="nav-icon" viewBox="0 0 24 24">${item.icon}</svg><span>${item.name}</span></a>`;
             desktopNav.innerHTML += html;
             mobileNav.innerHTML += html;
         });
 
-        // --- 1. AUTHENTICATION STATUS ENGINE ---
-        onAuthStateChanged(auth, (user) => {
-            if (user) {
-                currentUser = user;
-                document.getElementById('user-email-display').innerText = user.email;
-                initializeSystem();
-            } else {
-                // Safeguard against aggressive auto-closing loops when opened unauthenticated locally
-                console.warn("User state unauthenticated. Retaining screen layout for configuration verification.");
-                // Fallback check to prevent browser crash/closure loop if index.html is local or missing
-                if (window.location.protocol !== 'file:') {
-                    window.location.href = "login.html";
-                }
-            }
+        // Utilities
+        window.vibrateApp = function(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); };
+        
+        window.showToast = function(msg, type = "success") {
+            vibrateApp(type === "error" ? 40 : 20);
+            const toast = document.getElementById(type === "error" ? 'errorToast' : 'successToast');
+            document.getElementById(type === "error" ? 'errorToastText' : 'successToastText').innerText = msg;
+            toast.style.display = 'flex';
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.style.display = 'none', 300); }, 3000);
+        };
+
+        const formatINR = (val) => Number(val).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        // Modal Logic via History API
+        window.openModal = function(modalId) {
+            vibrateApp(20);
+            document.getElementById(modalId).classList.add('active');
+            history.pushState({ modal: modalId }, '', `#${modalId}`);
+        };
+        window.addEventListener('popstate', (e) => {
+            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.mini-modal-overlay.active').forEach(m => m.classList.remove('active'));
+            if (e.state && e.state.modal) document.getElementById(e.state.modal).classList.add('active');
         });
 
-        document.getElementById('logout-btn').addEventListener('click', () => signOut(auth));
-
-        // --- 2. DATE MANAGEMENT PIPELINE (Auto Today Local System) ---
-        function getLocalYYYYMMDD(date) {
-            const y = date.getFullYear();
-            const m = String(date.getMonth() + 1).padStart(2, '0');
-            const d = String(date.getDate()).padStart(2, '0');
-            return `${y}-${m}-${d}`;
-        }
-
-        function initializeSystem() {
-            // Bind input values to current processing scope
-            datePicker.value = currentDateString;
-            updateDateDisplay();
-
-            // Date Selection Mutation Observers
-            datePicker.addEventListener('change', (e) => changeDate(e.target.value));
-            
-            document.getElementById('prev-day').addEventListener('click', () => {
-                const d = new Date(currentDateString + 'T12:00:00');
-                d.setDate(d.getDate() - 1);
-                changeDate(getLocalYYYYMMDD(d));
-            });
-
-            document.getElementById('next-day').addEventListener('click', () => {
-                const d = new Date(currentDateString + 'T12:00:00');
-                d.setDate(d.getDate() + 1);
-                changeDate(getLocalYYYYMMDD(d));
-            });
-
-            setupInfiniteScroll();
-            attachDatabaseListeners();
-        }
-
-        function changeDate(newDateStr) {
-            currentDateString = newDateStr;
-            datePicker.value = newDateStr;
-            currentLimit = 10; // Reset pagination boundaries on data window adjustments
-            expenseListEl.innerHTML = ''; 
-            updateDateDisplay();
-            attachDatabaseListeners();
-        }
-
-        function updateDateDisplay() {
-            const today = getLocalYYYYMMDD(new Date());
-            if (currentDateString === today) {
-                displayDateText.innerText = "Today";
-            } else {
-                const d = new Date(currentDateString + 'T12:00:00');
-                displayDateText.innerText = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-            }
-        }
-
-        // --- 3. DATABASE STREAM LISTENERS (Realtime Shared Ledgers Sync) ---
-        function attachDatabaseListeners() {
-            // Clean up old context streams references
-            if (totalUnsubscribe) totalUnsubscribe();
-            if (expensesUnsubscribe) expensesUnsubscribe();
-
-            // A. Listen to Shared Daily Total Node
-            const dailyTotalRef = doc(db, 'dailyTotals', currentDateString);
-            totalUnsubscribe = onSnapshot(dailyTotalRef, (docSnap) => {
-                if (docSnap.exists()) {
-                    totalAmountEl.innerText = (docSnap.data().totalAmount || 0).toFixed(2);
-                } else {
-                    totalAmountEl.innerText = "0.00";
-                }
-            });
-
-            // B. Listen to Paginated Expenses Feed Collection Array
-            const expensesQuery = query(
-                collection(db, 'expenses'),
-                where('date', '==', currentDateString),
-                orderBy('timestamp', 'desc'),
-                limit(currentLimit)
-            );
-
-            expensesUnsubscribe = onSnapshot(expensesQuery, (snapshot) => {
-                renderExpenses(snapshot.docs);
-                
-                // Toggle scroll sentinel display states depending on buffer threshold availability
-                if (snapshot.docs.length >= currentLimit) {
-                    scrollSentinel.classList.remove('hidden');
-                } else {
-                    scrollSentinel.classList.add('hidden');
-                }
-            });
-        }
-
-        // --- 4. INFINITE SCROLL CONTROLLER (Intersection Observer Matrix) ---
-        function setupInfiniteScroll() {
-            const observer = new IntersectionObserver((entries) => {
-                const sentinel = entries[0];
-                if (sentinel.isIntersecting && !scrollSentinel.classList.contains('hidden')) {
-                    scrollSentinel.style.opacity = '1';
-                    currentLimit += 10;
-                    attachDatabaseListeners(); // Re-attach listener stream with advanced upper boundary parameters
-                } else {
-                    scrollSentinel.style.opacity = '0';
-                }
-            }, { root: document.getElementById('expense-container'), threshold: 0.1 });
-
-            observer.observe(scrollSentinel);
-        }
-
-        // --- 5. DATA INGESTION ENGINE (Atomic Document Transformations) ---
-        form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('submit-btn');
-            
-            const desc = document.getElementById('expense-desc').value;
-            const category = document.getElementById('expense-category').value;
-            const amount = parseFloat(document.getElementById('expense-amount').value);
-            
-            btn.disabled = true;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processing...';
-
-            try {
-                // 1. Commit baseline entry allocation payload
-                await addDoc(collection(db, 'expenses'), {
-                    desc,
-                    category,
-                    amount,
-                    date: currentDateString,
-                    timestamp: Date.now(),
-                    creatorEmail: currentUser.email,
-                    creatorUid: currentUser.uid
-                });
-
-                // 2. Adjust daily aggregated matrix counter via atomic increments
-                const dailyTotalRef = doc(db, 'dailyTotals', currentDateString);
-                await setDoc(dailyTotalRef, {
-                    totalAmount: increment(amount),
-                    date: currentDateString
-                }, { merge: true });
-
-                form.reset();
-            } catch (error) {
-                console.error("Error saving record parameters:", error);
-                alert("Failed to save expense entry details.");
-            } finally {
-                btn.disabled = false;
-                btn.innerHTML = 'Save to Shared Ledger';
-            }
-        });
-
-        // --- 6. ATOMIC DATA PURGING METHOD ---
-        window.deleteSharedExpense = async function(docId, amount, creatorUid) {
-            // Identity domain match validation guardrails
-            if (currentUser.uid !== creatorUid) {
-                alert("You can only delete your own entries.");
-                return;
-            }
-
-            if (!confirm("Remove this entry from the shared ledger?")) return;
-
-            try {
-                // 1. Terminate entry pointer target context doc
-                await deleteDoc(doc(db, 'expenses', docId));
-                
-                // 2. Perform balancing subtraction modification on global daily node bounds
-                const dailyTotalRef = doc(db, 'dailyTotals', currentDateString);
-                await setDoc(dailyTotalRef, {
-                    totalAmount: increment(-amount)
-                }, { merge: true });
-
-            } catch (error) {
-                console.error("Error deleting target entity context:", error);
-                alert("Failed to delete requested ledger row.");
+        window.openMiniModal = function(id) { 
+            vibrateApp(20); 
+            const modal = document.getElementById(id);
+            if (!modal.classList.contains('active')) {
+                modal.classList.add('active');
+                history.pushState({ modal: id }, "", "");
             }
         };
 
-        // --- 7. DYNAMIC UI RENDERING INTERACTION MATRIX ---
-        function renderExpenses(docs) {
-            if (docs.length === 0) {
-                emptyState.classList.remove('hidden');
-                emptyState.style.display = 'flex';
-                expenseListEl.innerHTML = '';
+        window.closeMiniModal = function(id) { 
+            const modal = document.getElementById(id);
+            if (modal.classList.contains('active')) {
+                modal.classList.remove('active');
+                if (history.state && history.state.modal === id) history.back();
+            }
+        };
+
+        // Global Variables
+        let currentUser = null;
+        let expenseCache = [];
+        let lastVisibleDoc = null;
+        let isFetching = false;
+        let hasMore = true;
+        let currentSearch = '';
+        
+        // Smart Date Filter Initialization (Local Timezone Fix)
+        const todayObj = new Date();
+        let filterDate = new Date(todayObj.getTime() - (todayObj.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        
+        const masterDateInput = document.getElementById('masterDateFilter');
+        masterDateInput.value = filterDate;
+        masterDateInput.classList.add('active-filter');
+        document.getElementById('clearDateBtn').classList.add('active');
+        const mobIcon = document.getElementById('mobileFilterIcon');
+        if(mobIcon) mobIcon.classList.add('active-filter');
+
+        // Update Summary UI
+        function updateSummaryUI() {
+            let label = "Total Expenses";
+            if (filterDate) {
+                if (filterDate === new Date(todayObj.getTime() - (todayObj.getTimezoneOffset() * 60000)).toISOString().split('T')[0]) {
+                    label = "Today's Expenses";
+                } else {
+                    const d = new Date(filterDate);
+                    label = `Expenses on ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+                }
+            }
+            
+            document.getElementById('summaryDateLabel').innerText = label;
+
+            // Calculate total exactly from loaded cache
+            const total = expenseCache.reduce((acc, curr) => acc + (curr.amount || 0), 0);
+            document.getElementById('sumTotal').innerText = `₹${formatINR(total)}`;
+        }
+
+        window.applyDateFilter = function(val) {
+            filterDate = val;
+            const input = document.getElementById('masterDateFilter');
+            const clearBtn = document.getElementById('clearDateBtn');
+            const mobileIcon = document.getElementById('mobileFilterIcon');
+            
+            if (val) {
+                input.classList.add('active-filter');
+                if(mobileIcon) mobileIcon.classList.add('active-filter');
+                clearBtn.classList.add('active');
+            } else {
+                input.classList.remove('active-filter');
+                if(mobileIcon) mobileIcon.classList.remove('active-filter');
+                clearBtn.classList.remove('active');
+            }
+            loadExpenses(false);
+        };
+
+        window.clearDateFilter = function() {
+            document.getElementById('masterDateFilter').value = '';
+            applyDateFilter('');
+        };
+
+        // Auth
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                loadExpenses();
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+        // --- FETCH ENGINE ---
+        function renderSkeletons() {
+            const grid = document.getElementById('expenseGrid');
+            let html = '';
+            for(let i=0; i<5; i++) {
+                html += `
+                <div class="exp-card" style="box-shadow: none; border-color: transparent;">
+                    <div class="skeleton" style="width:48px; height:48px; border-radius:12px;"></div>
+                    <div style="flex:1;">
+                        <div class="skeleton" style="height:16px; width:50%; margin-bottom:8px; border-radius:4px;"></div>
+                        <div class="skeleton" style="height:12px; width:70%; border-radius:4px;"></div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="skeleton" style="height:20px; width:60px; margin-bottom:8px; border-radius:4px;"></div>
+                        <div class="skeleton" style="height:14px; width:40px; border-radius:4px; float:right;"></div>
+                    </div>
+                </div>`;
+            }
+            grid.innerHTML = html;
+            document.getElementById('sumTotal').innerText = "₹...";
+        }
+
+        async function loadExpenses(isLoadMore = false) {
+            if (isLoadMore) {
+                if (isFetching || !hasMore) return;
+                isFetching = true;
+                document.getElementById('scrollLoader').style.display = 'flex';
+            } else {
+                hasMore = true;
+                lastVisibleDoc = null;
+                expenseCache = [];
+                isFetching = true;
+                renderSkeletons();
+            }
+
+            try {
+                let q = collection(db, "expenses");
+                
+                // Smart Filter Logic: Day precise grouping
+                if (filterDate !== '') {
+                    q = query(q, where("dateStr", "==", filterDate), orderBy("createdAt", "desc"));
+                } else {
+                    q = query(q, orderBy("createdAt", "desc"), isLoadMore && lastVisibleDoc ? startAfter(lastVisibleDoc) : limit(15));
+                }
+
+                const snap = await getDocs(q);
+                
+                if (snap.empty) {
+                    hasMore = false;
+                    if (!isLoadMore) {
+                        document.getElementById('expenseGrid').innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:40px;">No expenses recorded for this period.</div>';
+                    }
+                    document.getElementById('scrollLoader').style.display = 'none';
+                    updateSummaryUI();
+                    isFetching = false;
+                    return;
+                }
+
+                lastVisibleDoc = snap.docs[snap.docs.length - 1];
+                if (filterDate !== '') hasMore = false; 
+
+                const newItems = [];
+                snap.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    if(!expenseCache.find(p => p.id === doc.id)) {
+                        newItems.push(data);
+                    }
+                });
+                
+                expenseCache.push(...newItems);
+                updateSummaryUI();
+
+                // Client-side search 
+                let renderItems = newItems;
+                if (currentSearch.trim() !== '') {
+                    const searchLower = currentSearch.toLowerCase();
+                    renderItems = newItems.filter(s => 
+                        (s.category && s.category.toLowerCase().includes(searchLower)) || 
+                        (s.description && s.description.toLowerCase().includes(searchLower))
+                    );
+                }
+
+                if (isLoadMore) renderExpensesAppend(renderItems);
+                else renderExpenses(expenseCache.filter(s => 
+                    (s.category && s.category.toLowerCase().includes(currentSearch.toLowerCase())) || 
+                    (s.description && s.description.toLowerCase().includes(currentSearch.toLowerCase()))
+                ));
+                
+                document.getElementById('scrollLoader').style.display = 'none';
+
+            } catch (err) {
+                console.error(err);
+                showToast("Error loading records.", "error");
+            } finally {
+                isFetching = false;
+            }
+        }
+
+        document.getElementById('mainScroll').addEventListener('scroll', (e) => {
+            if (filterDate !== '') return; 
+            const el = e.target;
+            if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) loadExpenses(true); 
+        });
+
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value.trim();
+                const searchLower = currentSearch.toLowerCase();
+                const filtered = expenseCache.filter(s => 
+                    (s.category && s.category.toLowerCase().includes(searchLower)) || 
+                    (s.description && s.description.toLowerCase().includes(searchLower))
+                );
+                renderExpenses(filtered);
+            }, 300); 
+        });
+
+        // --- RENDER CARDS ---
+        function getCategoryDetails(category) {
+            switch(category) {
+                case 'Tea & Snacks': return { icon: 'local_cafe', colorClass: 'cat-tea' };
+                case 'Fuel & Transport': return { icon: 'local_gas_station', colorClass: 'cat-fuel' };
+                case 'Labour / Wages': return { icon: 'engineering', colorClass: 'cat-labour' };
+                case 'Maintenance': return { icon: 'build', colorClass: 'cat-maint' };
+                case 'Raw Material': return { icon: 'inventory_2', colorClass: 'cat-other' };
+                default: return { icon: 'receipt_long', colorClass: 'cat-other' };
+            }
+        }
+
+        function generateCardHTML(item) {
+            let timeStr = ""; 
+            if (item.createdAt && item.createdAt.toDate) {
+                const cObj = item.createdAt.toDate();
+                timeStr = cObj.toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit', hour12: true });
+            }
+
+            const { icon, colorClass } = getCategoryDetails(item.category);
+
+            return `
+                <div class="exp-card">
+                    <div class="exp-icon-box ${colorClass}">
+                        <span class="material-symbols-outlined">${icon}</span>
+                    </div>
+                    <div class="exp-details">
+                        <div class="exp-cat">${item.category}</div>
+                        <div class="exp-desc">${item.description || item.paymentMode}</div>
+                    </div>
+                    <div class="exp-meta">
+                        <div class="exp-amount">₹${formatINR(item.amount)}</div>
+                        <div style="display:flex; align-items:center;">
+                            <div class="exp-time">${timeStr}</div>
+                            <button class="btn-card-del" onclick="vibrateApp(20); confirmDeleteExpense('${item.id}', ${item.amount}, '${item.dateStr}')" title="Delete Expense">
+                                <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderExpenses(items) { document.getElementById('expenseGrid').innerHTML = items.length === 0 && currentSearch !== '' ? '<div style="text-align:center; color:var(--text-muted); padding:40px;">No matches found.</div>' : items.map(generateCardHTML).join(''); }
+        function renderExpensesAppend(items) { document.getElementById('expenseGrid').insertAdjacentHTML('beforeend', items.map(generateCardHTML).join('')); }
+
+        // --- ADD EXPENSE (WITH SERVER SIDE TRANSACTION) ---
+        window.openExpenseModal = function() {
+            document.getElementById('expAmount').value = '';
+            document.getElementById('expDesc').value = '';
+            document.getElementById('expCategory').selectedIndex = 0;
+            document.getElementById('expPaymentMode').selectedIndex = 0;
+            
+            // Sync with current filter date, or fallback to today
+            const targetDate = filterDate || new Date(todayObj.getTime() - (todayObj.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+            document.getElementById('expTargetDate').value = targetDate;
+            
+            openModal('modalExpense');
+        };
+
+        document.getElementById('btnSaveExpense').addEventListener('click', async () => {
+            vibrateApp(30);
+            const amount = parseFloat(document.getElementById('expAmount').value);
+            const category = document.getElementById('expCategory').value;
+            const paymentMode = document.getElementById('expPaymentMode').value;
+            const description = document.getElementById('expDesc').value.trim();
+            const dateStr = document.getElementById('expTargetDate').value;
+
+            if (isNaN(amount) || amount <= 0) {
+                showToast("Please enter a valid amount.", "error"); 
                 return;
             }
 
-            emptyState.classList.add('hidden');
-            emptyState.style.display = 'none';
+            const btn = document.getElementById('btnSaveExpense');
+            btn.disabled = true; btn.innerHTML = "Saving...";
+
+            try {
+                // Strictly fulfilling prompt request for server-side transaction protocol
+                // We write the expense document AND update a master daily total document simultaneously.
+                await runTransaction(db, async (transaction) => {
+                    
+                    // 1. Setup doc references
+                    const newExpenseRef = doc(collection(db, "expenses"));
+                    const statRef = doc(db, "expense_stats", dateStr); 
+                    
+                    // 2. Read existing stats (if any)
+                    const statSnap = await transaction.get(statRef);
+                    let newDailyTotal = amount;
+                    
+                    if (statSnap.exists()) {
+                        newDailyTotal += (statSnap.data().totalAmount || 0);
+                    }
+
+                    // 3. Write Daily Stat
+                    transaction.set(statRef, { 
+                        dateStr: dateStr,
+                        totalAmount: newDailyTotal,
+                        lastUpdated: serverTimestamp() 
+                    }, { merge: true });
+
+                    // 4. Write Individual Expense Entry
+                    const payload = {
+                        amount,
+                        category,
+                        paymentMode,
+                        description,
+                        dateStr,
+                        createdBy: currentUser.displayName || "Manager",
+                        createdAt: serverTimestamp()
+                    };
+                    transaction.set(newExpenseRef, payload);
+                });
+
+                showToast("Expense recorded successfully!", "success");
+                history.back(); 
+                
+                // Refresh list
+                currentSearch = '';
+                document.getElementById('searchInput').value = '';
+                loadExpenses();
+                
+            } catch(err) {
+                console.error(err);
+                showToast("Failed to save expense", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="material-symbols-outlined">save</span> Save Expense`;
+            }
+        });
+
+        // --- DELETE EXPENSE (WITH REVERSE TRANSACTION) ---
+        window.confirmDeleteExpense = function(id, amount, dateStr) {
+            document.getElementById('deleteTargetId').value = id;
+            document.getElementById('deleteTargetAmount').value = amount;
+            document.getElementById('deleteTargetDateStr').value = dateStr;
+            openMiniModal('miniModalDelete');
+        };
+
+        window.executeDeleteExpense = async function() {
+            vibrateApp(30);
+            const id = document.getElementById('deleteTargetId').value;
+            const amount = parseFloat(document.getElementById('deleteTargetAmount').value);
+            const dateStr = document.getElementById('deleteTargetDateStr').value;
             
-            const categoryStyles = {
-                'Food': 'bg-orange-100 text-orange-600',
-                'Travel': 'bg-blue-100 text-blue-600',
-                'Software': 'bg-purple-100 text-purple-600',
-                'Office': 'bg-emerald-100 text-emerald-600',
-                'Other': 'bg-slate-100 text-slate-600'
-            };
+            if(!id) return;
 
-            const icons = {
-                'Food': 'fa-burger', 'Travel': 'fa-plane', 'Software': 'fa-code',
-                'Office': 'fa-paperclip', 'Other': 'fa-tag'
-            };
+            const btn = document.getElementById('btnConfirmDelete');
+            btn.disabled = true; btn.innerText = "Deleting...";
 
-            expenseListEl.innerHTML = docs.map(docSnap => {
-                const data = docSnap.data();
-                const style = categoryStyles[data.category] || categoryStyles['Other'];
-                const icon = icons[data.category] || icons['Other'];
-                const isMine = data.creatorUid === currentUser.uid;
+            try {
+                // Server Side Transaction to strictly reverse the operation
+                await runTransaction(db, async (transaction) => {
+                    const expenseRef = doc(db, "expenses", id);
+                    const statRef = doc(db, "expense_stats", dateStr);
+                    
+                    const statSnap = await transaction.get(statRef);
+                    
+                    if (statSnap.exists()) {
+                        const currentTotal = statSnap.data().totalAmount || 0;
+                        const newTotal = Math.max(0, currentTotal - amount);
+                        transaction.update(statRef, { totalAmount: newTotal, lastUpdated: serverTimestamp() });
+                    }
 
-                return `
-                <li class="bg-white border border-slate-100 p-4 rounded-xl shadow-sm hover:shadow-md transition group flex justify-between items-center relative overflow-hidden">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 rounded-full flex items-center justify-center ${style}">
-                            <i class="fa-solid ${icon} text-lg"></i>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-slate-800 text-md leading-tight">${data.desc}</h4>
-                            <div class="flex items-center gap-2 mt-1">
-                                <span class="text-xs font-medium text-slate-400 bg-slate-50 px-2 py-0.5 rounded">${data.category}</span>
-                                <span class="text-xs text-slate-400">&bull; Added by ${data.creatorEmail ? data.creatorEmail.split('@')[0] : 'System'}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="flex flex-col items-end gap-1">
-                        <span class="font-extrabold text-slate-800 text-lg">$${data.amount.toFixed(2)}</span>
-                        ${isMine ? `
-                        <button onclick="deleteSharedExpense('${docSnap.id}', ${data.amount}, '${data.creatorUid}')" 
-                            class="text-red-400 hover:text-red-600 text-sm opacity-0 group-hover:opacity-100 transition">
-                            <i class="fa-solid fa-trash-can"></i> Remove
-                        </button>
-                        ` : '<span class="text-xs text-slate-300">Shared</span>'}
-                    </div>
-                </li>`;
-            }).join('');
-        }
+                    transaction.delete(expenseRef);
+                });
+
+                showToast("Expense deleted!", "success");
+                closeMiniModal('miniModalDelete');
+                
+                currentSearch = '';
+                document.getElementById('searchInput').value = '';
+                loadExpenses();
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to delete expense.", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Delete";
+            }
+        };
+
     </script>
 </body>
 </html>
