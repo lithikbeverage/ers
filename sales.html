@@ -115,23 +115,19 @@
 
         /* Sales List Cards */
         .sales-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .sale-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 14px; }
+        .sale-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
         
-        .sc-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+        .sc-header { display: flex; justify-content: space-between; align-items: flex-start; }
         .sc-inv { font-weight: 800; font-size: 1.15rem; color: var(--primary-color); margin-bottom: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;}
         .sc-inv:active { opacity: 0.7; }
-        .sc-customer { font-size: 0.95rem; color: var(--text-main); font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;}
-        .sc-items { font-size: 0.85rem; color: var(--text-muted); background: var(--input-bg); padding: 10px 14px; border-radius: 10px; line-height: 1.4; border: 1px solid var(--border-color); }
+        .sc-customer { font-size: 0.95rem; color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;}
+        .sc-items { font-size: 0.8rem; color: var(--text-muted); }
         
-        .sc-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; background: var(--input-bg); padding: 4px 8px; border-radius: 6px; text-align: right; display: inline-block;}
+        .sc-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; background: var(--input-bg); padding: 4px 8px; border-radius: 6px; text-align: right;}
         .badge-pay { font-size: 0.7rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; text-transform: uppercase; letter-spacing: 0.5px; display: inline-block; margin-top: 6px;}
         .pay-cash { background: rgba(16, 185, 129, 0.1); color: var(--success-color); border: 1px solid rgba(16, 185, 129, 0.2); }
         .pay-online { background: rgba(14, 165, 233, 0.1); color: var(--accent-color); border: 1px solid rgba(14, 165, 233, 0.2); }
         .pay-credit { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); border: 1px solid rgba(245, 158, 11, 0.2); }
-
-        .sc-details-box { display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; color: var(--text-muted); margin-top: 2px; }
-        .sc-detail-row { display: flex; align-items: center; gap: 6px; }
-        .sc-detail-row .material-symbols-outlined { font-size: 16px; color: var(--primary-color); }
 
         .sc-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; }
         .sc-total { font-size: 1.4rem; font-weight: 900; color: var(--success-color); }
@@ -270,12 +266,11 @@
                     <div class="mobile-filter-icon" id="mobileFilterIcon">
                         <span class="material-symbols-outlined" style="font-size: 22px;">filter_alt</span>
                     </div>
-                    <input type="date" id="masterDateFilter" class="header-date-picker" title="Filter by Date" onchange="vibrateApp(10); applyDateFilter(this.value)">
-                    <button id="clearDateBtn" class="clear-date-btn" onclick="vibrateApp(10); clearDateFilter()" title="Clear Filter">
+                    <input type="date" id="masterDateFilter" class="header-date-picker active-filter" title="Filter by Date" onchange="vibrateApp(10); applyDateFilter(this.value)">
+                    <button id="clearDateBtn" class="clear-date-btn active" onclick="vibrateApp(10); clearDateFilter()" title="Clear Filter">
                         <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
                     </button>
                 </div>
-                <!-- Daily Summary Icon -->
                 <div class="summary-icon" onclick="vibrateApp(20); openSummaryModal()" title="Daily Summary">
                     <span class="material-symbols-outlined" style="font-size: 24px;">query_stats</span>
                 </div>
@@ -293,15 +288,13 @@
                             <span class="material-symbols-outlined">search</span>
                             <input type="text" id="searchInput" placeholder="Search Customer or Invoice..." autocomplete="off">
                         </div>
-                        <!-- Redirects to Billing Desk -->
                         <button class="btn-fab" onclick="vibrateApp(20); window.location.href='bill.html'" title="Create New Invoice">
                             <span class="material-symbols-outlined">add</span>
                         </button>
                     </div>
 
                     <div class="sales-grid" id="salesGrid">
-                        <!-- Loaded dynamically -->
-                    </div>
+                        </div>
                     
                     <div id="scrollLoader">
                         <span class="skeleton" style="width:16px; height:16px; border-radius:50%;"></span> Loading records...
@@ -313,7 +306,6 @@
         <nav class="bottom-nav" id="mobile-nav"></nav>
     </div>
 
-    <!-- Mini Popup - Daily Summary -->
     <div class="mini-modal-overlay" id="miniModalSummary">
         <div class="mini-modal-content" style="max-width: 350px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
@@ -324,26 +316,25 @@
             
             <div class="summary-grid">
                 <div class="sum-row">
-                    <span class="sum-label"><span class="material-symbols-outlined" style="font-size:18px; color:var(--success-color); slide-in">payments</span> Cash Sales</span>
-                    <span class="sum-val" id="sumCash">₹0.00</span>
+                    <span class="sum-label"><span class="material-symbols-outlined" style="font-size:18px; color:var(--success-color);">payments</span> Cash Sales</span>
+                    <span class="sum-val" id="sumCash">₹0</span>
                 </div>
                 <div class="sum-row">
                     <span class="sum-label"><span class="material-symbols-outlined" style="font-size:18px; color:var(--accent-color);">account_balance</span> Online Sales</span>
-                    <span class="sum-val" id="sumOnline">₹0.00</span>
+                    <span class="sum-val" id="sumOnline">₹0</span>
                 </div>
                 <div class="sum-row">
                     <span class="sum-label"><span class="material-symbols-outlined" style="font-size:18px; color:var(--warning-color);">pending_actions</span> Credit Sales</span>
-                    <span class="sum-val" id="sumCredit">₹0.00</span>
+                    <span class="sum-val" id="sumCredit">₹0</span>
                 </div>
                 <div class="sum-row grand">
                     <span class="sum-label"><span class="material-symbols-outlined" style="font-size:20px;">monitoring</span> Total Revenue</span>
-                    <span class="sum-val" id="sumTotal">₹0.00</span>
+                    <span class="sum-val" id="sumTotal">₹0</span>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Mini Popup - Delete Confirmation -->
     <div class="mini-modal-overlay" id="miniModalDelete">
         <div class="mini-modal-content">
             <div style="text-align: center;">
@@ -361,7 +352,6 @@
         </div>
     </div>
 
-    <!-- EXACT COPY OF BILL.HTML PRINT AREA -->
     <div id="printArea">
         <div class="print-top-band">
             <div class="print-header-left">
@@ -492,10 +482,10 @@
             mobileNav.innerHTML += html;
         });
 
-        // App Utility Functions
+        // Utilities
         window.vibrateApp = function(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); };
         
-        window.showToast = function(msg, type = "error") {
+        window.showToast = function(msg, type = "success") {
             vibrateApp(type === "error" ? 40 : 20);
             const toast = document.getElementById(type === "error" ? 'errorToast' : 'successToast');
             document.getElementById(type === "error" ? 'errorToastText' : 'successToastText').innerText = msg;
@@ -504,403 +494,464 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.style.display = 'none', 300); }, 3000);
         };
 
-        const formatCurrency = (val) => Number(val).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        
-        const formatCardDate = (dateVal) => {
-            if (!dateVal) return "N/A";
-            const d = dateVal.toDate ? dateVal.toDate() : new Date(dateVal);
-            return d.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const formatINR = (val) => Number(val).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        // Robust client-side sort to guarantee latest bill at the top
+        const sortByLatest = (list) => {
+            return list.sort((a, b) => {
+                let timeA = 0;
+                if (a.createdAt) {
+                    timeA = a.createdAt.toDate ? a.createdAt.toDate().getTime() : new Date(a.createdAt).getTime();
+                } else if (a.date) {
+                    timeA = a.date.toDate ? a.date.toDate().getTime() : new Date(a.date).getTime();
+                }
+                
+                let timeB = 0;
+                if (b.createdAt) {
+                    timeB = b.createdAt.toDate ? b.createdAt.toDate().getTime() : new Date(b.createdAt).getTime();
+                } else if (b.date) {
+                    timeB = b.date.toDate ? b.date.toDate().getTime() : new Date(b.date).getTime();
+                }
+                return timeB - timeA;
+            });
         };
 
-        // Authentication Guard
-        const auth = getAuth(app);
-        onAuthStateChanged(auth, (user) => {
-            if (!user) { window.location.replace('login.html'); }
+        // Stack-based modal manager supporting Mobile back button integration
+        let openModalsStack = [];
+
+        window.openMiniModal = function(id) { 
+            vibrateApp(20); 
+            const modal = document.getElementById(id);
+            if (modal && !modal.classList.contains('active')) {
+                modal.classList.add('active'); 
+                openModalsStack.push(id);
+                history.pushState({ modalId: id }, '');
+            }
+        };
+
+        window.closeMiniModal = function(id) { 
+            const modal = document.getElementById(id);
+            if (modal && modal.classList.contains('active')) {
+                modal.classList.remove('active'); 
+                openModalsStack = openModalsStack.filter(mId => mId !== id);
+                if (history.state && history.state.modalId === id) {
+                    history.back();
+                }
+            }
+        };
+
+        window.addEventListener('popstate', (event) => {
+            if (openModalsStack.length > 0) {
+                const topModalId = openModalsStack.pop();
+                const modal = document.getElementById(topModalId);
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+            }
         });
 
-        // State Machine Management
+        // Global Variables
+        let currentUser = null;
         let salesCache = [];
         let lastVisibleDoc = null;
         let isFetching = false;
         let hasMore = true;
-        let currentDateFilter = "";
-        let currentSearchQuery = "";
-        const recordsLimit = 10;
-
-        // MOBILE BACK BUTTON MODAL CLOSURE SUPPORT PROTOCOL
-        window.openMiniModal = function(modalId) {
-            vibrateApp(15);
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-            modal.classList.add('active');
+        let currentSearch = '';
+        
+        // Smart Date Filter Initialization (Local Timezone Fix)
+        const today = new Date();
+        let filterDate = new Date(today.getTime() - (today.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        
+        function initDateFilter() {
+            const input = document.getElementById('masterDateFilter');
+            input.value = filterDate;
+            const clearBtn = document.getElementById('clearDateBtn');
+            const mobileIcon = document.getElementById('mobileFilterIcon');
             
-            // Push functional state marker into operational browser history stack
-            history.pushState({ openModalId: modalId }, "");
-        };
-
-        window.closeMiniModal = function(modalId, isPopStateAction = false) {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-            modal.classList.remove('active');
-            
-            // Clean up programmatic navigation tracks smoothly
-            if (!isPopStateAction && history.state && history.state.openModalId === modalId) {
-                history.back();
+            if (filterDate) {
+                input.classList.add('active-filter');
+                if(mobileIcon) mobileIcon.classList.add('active-filter');
+                clearBtn.classList.add('active');
+            } else {
+                input.classList.remove('active-filter');
+                if(mobileIcon) mobileIcon.classList.remove('active-filter');
+                clearBtn.classList.remove('active');
             }
+        }
+        initDateFilter();
+
+        window.applyDateFilter = function(val) {
+            filterDate = val;
+            const input = document.getElementById('masterDateFilter');
+            const clearBtn = document.getElementById('clearDateBtn');
+            const mobileIcon = document.getElementById('mobileFilterIcon');
+            
+            if (val) {
+                input.classList.add('active-filter');
+                if(mobileIcon) mobileIcon.classList.add('active-filter');
+                clearBtn.classList.add('active');
+            } else {
+                input.classList.remove('active-filter');
+                if(mobileIcon) mobileIcon.classList.remove('active-filter');
+                clearBtn.classList.remove('active');
+            }
+            loadSales(false);
         };
 
-        // Standardized Global Document State Routing Observer
-        window.addEventListener('popstate', (event) => {
-            const activeOverlays = document.querySelectorAll('.mini-modal-overlay.active');
-            activeOverlays.forEach(overlay => {
-                closeMiniModal(overlay.id, true);
-            });
+        window.clearDateFilter = function() {
+            document.getElementById('masterDateFilter').value = '';
+            applyDateFilter('');
+        };
+
+        // Auth
+        const auth = getAuth(app);
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUser = user;
+                loadSales();
+            } else {
+                window.location.replace('login.html');
+            }
         });
 
-        // Initialize / Reload Pipeline
-        async function initSalesLoad() {
-            salesCache = [];
-            lastVisibleDoc = null;
-            hasMore = true;
-            document.getElementById('salesGrid').innerHTML = '';
-            await fetchSalesRecords(false);
-            calculateAndRenderSummary();
+        // --- FETCH ENGINE ---
+        function renderSkeletons() {
+            const grid = document.getElementById('salesGrid');
+            let html = '';
+            for(let i=0; i<4; i++) {
+                html += `
+                <div class="sale-card" style="box-shadow: none; border-color: transparent; background: var(--input-bg);">
+                    <div class="skeleton" style="height:20px; width:60%; margin-bottom:12px; border-radius:4px;"></div>
+                    <div class="skeleton" style="height:14px; width:40%; margin-bottom:20px; border-radius:4px;"></div>
+                    <div style="display:flex; justify-content:space-between;">
+                        <div class="skeleton" style="height:35px; width:30%; border-radius:4px;"></div>
+                        <div class="skeleton" style="height:35px; width:20%; border-radius:12px;"></div>
+                    </div>
+                </div>`;
+            }
+            grid.innerHTML = html;
         }
 
-        // Fetch Pipeline arranged by latest created bill at the top time-wise
-        async function fetchSalesRecords(isLoadMore = false) {
-            if (isFetching || (!hasMore && isLoadMore)) return;
-            isFetching = true;
-            
-            const loader = document.getElementById('scrollLoader');
-            loader.style.display = 'flex';
+        async function loadSales(isLoadMore = false) {
+            if (isLoadMore) {
+                if (isFetching || !hasMore) return;
+                isFetching = true;
+                document.getElementById('scrollLoader').style.display = 'flex';
+            } else {
+                hasMore = true;
+                lastVisibleDoc = null;
+                salesCache = [];
+                isFetching = true;
+                renderSkeletons();
+            }
 
             try {
                 let q = collection(db, "sales");
-
-                if (currentDateFilter) {
-                    const startOfDay = new Date(currentDateFilter);
-                    startOfDay.setHours(0,0,0,0);
-                    const endOfDay = new Date(currentDateFilter);
-                    endOfDay.setHours(23,59,59,999);
-                    q = query(q, where("date", ">=", startOfDay), where("date", "<=", endOfDay));
-                }
-
-                // Strictly enforced sequencing parameter: Sort by latest transaction time window directly at top
-                q = query(q, orderBy("date", "desc"));
-
-                if (isLoadMore && lastVisibleDoc) {
-                    q = query(q, startAfter(lastVisibleDoc), limit(recordsLimit));
+                
+                // Smart Filter Logic: If Date is active, load ALL for that date (No Limit). If clear, paginate 10.
+                if (filterDate !== '') {
+                    const start = new Date(filterDate);
+                    start.setHours(0,0,0,0);
+                    const end = new Date(filterDate);
+                    end.setHours(23,59,59,999);
+                    
+                    q = query(q, where("date", ">=", start), where("date", "<=", end), orderBy("date", "desc"));
                 } else {
-                    q = query(q, limit(recordsLimit));
+                    q = query(q, orderBy("createdAt", "desc"), isLoadMore && lastVisibleDoc ? startAfter(lastVisibleDoc) : limit(10));
                 }
 
                 const snap = await getDocs(q);
-                loader.style.display = 'none';
-
+                
                 if (snap.empty) {
-                    if (!isLoadMore) {
-                        document.getElementById('salesGrid').innerHTML = `
-                            <div style="grid-column: 1/-1; text-align: center; padding: 40px var(--text-muted); font-weight: 500;">
-                                <span class="material-symbols-outlined" style="font-size: 48px; display:block; margin: 0 auto 12px auto; opacity: 0.5;">receipt_long</span>
-                                No sales transactions verified for this cycle.
-                            </div>`;
-                    }
                     hasMore = false;
+                    if (!isLoadMore) {
+                        document.getElementById('salesGrid').innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:40px;">No sales found for this period.</div>';
+                    }
+                    document.getElementById('scrollLoader').style.display = 'none';
                     isFetching = false;
                     return;
                 }
 
                 lastVisibleDoc = snap.docs[snap.docs.length - 1];
-                if (snap.docs.length < recordsLimit) hasMore = false;
+                if (filterDate !== '') hasMore = false; // Disable pagination if we loaded all for the day
 
-                snap.forEach(docSnap => {
-                    const data = docSnap.data();
-                    data.id = docSnap.id;
-                    salesCache.push(data);
+                const newItems = [];
+                snap.forEach(doc => {
+                    const data = { id: doc.id, ...doc.data() };
+                    if(!salesCache.find(p => p.id === doc.id)) {
+                        newItems.push(data);
+                        salesCache.push(data);
+                    }
                 });
 
-                renderSalesGrid();
+                // Apply deep sorting algorithm
+                salesCache = sortByLatest(salesCache);
 
-            } catch(e) {
-                console.error("Critical extraction failure:", e);
-                showToast("System error mapping transaction entries.");
+                // Client-side search application (enhanced to support Phone and Address searching)
+                let renderItems = newItems;
+                if (currentSearch.trim() !== '') {
+                    const searchLower = currentSearch.toLowerCase();
+                    renderItems = salesCache.filter(s => 
+                        (s.invoiceNo && s.invoiceNo.toLowerCase().includes(searchLower)) || 
+                        (s.customer && s.customer.name && s.customer.name.toLowerCase().includes(searchLower)) ||
+                        (s.customer && s.customer.phone && s.customer.phone.toLowerCase().includes(searchLower)) ||
+                        (s.customer && s.customer.address && s.customer.address.toLowerCase().includes(searchLower))
+                    );
+                } else {
+                    renderItems = sortByLatest(newItems);
+                }
+
+                if (isLoadMore) renderSalesAppend(renderItems);
+                else renderSales(renderItems);
+                
+                document.getElementById('scrollLoader').style.display = 'none';
+
+            } catch (err) {
+                console.error(err);
+                showToast("Error loading records.", "error");
+            } finally {
+                isFetching = false;
             }
-            isFetching = false;
         }
 
-        // Render Cards with Address, Phone Number, Items, and complete Transaction Specs
-        function renderSalesGrid() {
-            const grid = document.getElementById('salesGrid');
-            grid.innerHTML = '';
+        document.getElementById('mainScroll').addEventListener('scroll', (e) => {
+            if (filterDate !== '') return; // Don't paginate if showing full day
+            const el = e.target;
+            if (el.scrollHeight - el.scrollTop <= el.clientHeight + 100) loadSales(true); 
+        });
 
-            const filtered = salesCache.filter(item => {
-                const searchLower = currentSearchQuery.toLowerCase();
-                const invNo = (item.invoiceNo || '').toLowerCase();
-                const custName = (item.customer?.name || '').toLowerCase();
-                const custPhone = (item.customer?.phone || '').toLowerCase();
-                return invNo.includes(searchLower) || custName.includes(searchLower) || custPhone.includes(searchLower);
-            });
+        let searchTimeout;
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                currentSearch = e.target.value.trim();
+                // Re-render from cache to filter instantly
+                const searchLower = currentSearch.toLowerCase();
+                const filtered = salesCache.filter(s => 
+                    (s.invoiceNo && s.invoiceNo.toLowerCase().includes(searchLower)) || 
+                    (s.customer && s.customer.name && s.customer.name.toLowerCase().includes(searchLower)) ||
+                    (s.customer && s.customer.phone && s.customer.phone.toLowerCase().includes(searchLower)) ||
+                    (s.customer && s.customer.address && s.customer.address.toLowerCase().includes(searchLower))
+                );
+                renderSales(filtered);
+            }, 300); 
+        });
 
-            if(filtered.length === 0) {
-                grid.innerHTML = `<div style="grid-column:1/-1; text-align:center; padding:30px; color:var(--text-muted);">No records match search parameters.</div>`;
-                return;
+        // --- RENDER CARDS ---
+        function generateCardHTML(item) {
+            let dStr = "N/A";
+            if (item.date && item.date.toDate) {
+                const dObj = item.date.toDate();
+                dStr = `${dObj.getDate().toString().padStart(2, '0')}-${(dObj.getMonth()+1).toString().padStart(2, '0')}-${dObj.getFullYear()}`;
             }
 
-            filtered.forEach(sale => {
-                const payBadgeClass = sale.paymentMode === 'Cash' ? 'pay-cash' : (sale.paymentMode === 'Online' ? 'pay-online' : 'pay-credit');
-                const itemsString = sale.items ? sale.items.map(i => `${i.name} (x${i.qty})`).join(', ') : 'No structured units';
-                
-                grid.innerHTML += `
-                    <div class="sale-card">
-                        <div class="sc-header">
-                            <div>
-                                <div class="sc-inv" onclick="vibrateApp(10); window.printInvoice('${sale.id}')" title="Inspect/Print Document">
-                                    <span class="material-symbols-outlined" style="font-size:18px;">receipt</span> ${sale.invoiceNo || 'GST-XXXX'}
-                                </div>
-                                <div class="sc-customer">
-                                    <span class="material-symbols-outlined" style="font-size:16px;">person</span> ${sale.customer?.name || 'Cash Customer'}
-                                </div>
-                            </div>
-                            <div style="text-align: right;">
-                                <div class="sc-date">${formatCardDate(sale.date)}</div>
-                                <div><span class="badge-pay ${payBadgeClass}">${sale.paymentMode || 'Cash'}</span></div>
-                            </div>
-                        </div>
+            const cName = item.customer ? item.customer.name : 'Cash Customer';
+            const cPhone = item.customer && item.customer.phone ? item.customer.phone : 'N/A';
+            const cAddress = item.customer && item.customer.address ? item.customer.address : 'N/A';
+            const itemsCount = item.items ? item.items.length : 0;
+            const grand = item.totals ? item.totals.grand : 0;
+            
+            let payClass = "pay-cash";
+            if(item.paymentMode === "Online") payClass = "pay-online";
+            if(item.paymentMode === "Credit") payClass = "pay-credit";
 
-                        <div class="sc-details-box">
-                            <div class="sc-detail-row">
-                                <span class="material-symbols-outlined">call</span>
-                                <span>${sale.customer?.phone || 'No Mobile Track'}</span>
-                            </div>
-                            <div class="sc-detail-row">
-                                <span class="material-symbols-outlined">location_on</span>
-                                <span>${sale.customer?.address || 'No Address Provided'}</span>
-                            </div>
+            return `
+                <div class="sale-card">
+                    <div class="sc-header">
+                        <div class="sc-inv" onclick="vibrateApp(10); printSale('${item.id}')">${item.invoiceNo}</div>
+                        <div class="sc-date">${dStr}</div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px;">
+                        <div class="sc-customer"><span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);">person</span> ${cName}</div>
+                        <div class="sc-phone" style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                            <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);">call</span>
+                            <span>${cPhone}</span>
                         </div>
-
-                        <div class="sc-items">
-                            <strong>Units:</strong> ${itemsString}
+                        <div class="sc-address" style="font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px; line-height: 1.3;">
+                            <span class="material-symbols-outlined" style="font-size: 18px; color: var(--text-muted);">home</span>
+                            <span>${cAddress}</span>
                         </div>
-
-                        <div class="sc-footer">
-                            <div class="sc-total">₹${formatCurrency(sale.totals?.grand || 0)}</div>
-                            <div class="sc-actions">
-                                <button class="btn-card-action btn-print" onclick="vibrateApp(10); window.printInvoice('${sale.id}')" title="Print Tax Invoice">
-                                    <span class="material-symbols-outlined">print</span>
-                                </button>
-                                <button class="btn-card-action btn-delete" onclick="vibrateApp(15); window.confirmDeleteSale('${sale.id}')" title="Reverse/Delete Transaction">
-                                    <span class="material-symbols-outlined">delete</span>
-                                </button>
-                            </div>
+                        <div class="sc-items" style="margin-top: 4px;">${itemsCount} Products Included</div>
+                        <div><div class="badge-pay ${payClass}">${item.paymentMode}</div></div>
+                    </div>
+                    <div class="sc-footer">
+                        <div class="sc-total">₹${formatINR(grand)}</div>
+                        <div class="sc-actions">
+                            <button class="btn-card-action btn-print" onclick="vibrateApp(20); printSale('${item.id}')" title="Print Invoice">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">print</span>
+                            </button>
+                            <button class="btn-card-action btn-delete" onclick="vibrateApp(20); confirmDeleteSale('${item.id}')" title="Delete Sale & Return Stock">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">delete</span>
+                            </button>
                         </div>
                     </div>
-                `;
-            });
+                </div>
+            `;
         }
 
-        // Summary Statistics Calculations Engine
-        function calculateAndRenderSummary() {
-            let cashTotal = 0, onlineTotal = 0, creditTotal = 0;
-            
-            salesCache.forEach(sale => {
-                const amt = parseFloat(sale.totals?.grand) || 0;
-                if (sale.paymentMode === 'Cash') cashTotal += amt;
-                else if (sale.paymentMode === 'Online') onlineTotal += amt;
-                else if (sale.paymentMode === 'Credit') creditTotal += amt;
-            });
-
-            document.getElementById('sumCash').innerText = `₹${formatCurrency(cashTotal)}`;
-            document.getElementById('sumOnline').innerText = `₹${formatCurrency(onlineTotal)}`;
-            document.getElementById('sumCredit').innerText = `₹${formatCurrency(creditTotal)}`;
-            document.getElementById('sumTotal').innerText = `₹${formatCurrency(cashTotal + onlineTotal + creditTotal)}`;
-
-            const dateLabel = document.getElementById('summaryDateLabel');
-            if (currentDateFilter) {
-                const d = new Date(currentDateFilter);
-                dateLabel.innerText = `Compiled for data on ${d.toLocaleDateString('en-IN')}`;
-            } else {
-                dateLabel.innerText = "Aggregated active tracking block window";
-            }
+        function renderSales(items) { 
+            const sorted = sortByLatest([...items]);
+            document.getElementById('salesGrid').innerHTML = sorted.length === 0 && currentSearch !== '' ? '<div style="text-align:center; color:var(--text-muted); padding:40px;">No matches found in loaded data.</div>' : sorted.map(generateCardHTML).join(''); 
+        }
+        function renderSalesAppend(items) { 
+            const sorted = sortByLatest([...items]);
+            document.getElementById('salesGrid').insertAdjacentHTML('beforeend', sorted.map(generateCardHTML).join('')); 
         }
 
-        // Operational Event Triggers
-        window.applyDateFilter = function(value) {
-            currentDateFilter = value;
-            const clearBtn = document.getElementById('clearDateBtn');
-            const picker = document.getElementById('masterDateFilter');
-            const mIcon = document.getElementById('mobileFilterIcon');
-            
-            if (value) {
-                clearBtn.classList.add('active');
-                picker.classList.add('active-filter');
-                if (mIcon) mIcon.classList.add('active-filter');
-            } else {
-                clearBtn.classList.remove('active');
-                picker.classList.remove('active-filter');
-                if (mIcon) mIcon.classList.remove('active-filter');
-            }
-            initSalesLoad();
-        };
-
-        window.clearDateFilter = function() {
-            document.getElementById('masterDateFilter').value = '';
-            window.applyDateFilter('');
-        };
-
+        // --- DAILY SUMMARY MATH ---
         window.openSummaryModal = function() {
+            let cash = 0, online = 0, credit = 0, total = 0;
+            
+            // Math is perfectly accurate because we downloaded ALL sales for the selected date into salesCache.
+            salesCache.forEach(sale => {
+                const amount = sale.totals ? sale.totals.grand : 0;
+                total += amount;
+                if (sale.paymentMode === "Cash") cash += amount;
+                else if (sale.paymentMode === "Online") online += amount;
+                else if (sale.paymentMode === "Credit") credit += amount;
+            });
+
+            document.getElementById('sumCash').innerText = `₹${formatINR(cash)}`;
+            document.getElementById('sumOnline').innerText = `₹${formatINR(online)}`;
+            document.getElementById('sumCredit').innerText = `₹${formatINR(credit)}`;
+            document.getElementById('sumTotal').innerText = `₹${formatINR(total)}`;
+
+            let label = "For All Time";
+            if (filterDate) {
+                const d = new Date(filterDate);
+                label = `For ${d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+            }
+            document.getElementById('summaryDateLabel').innerText = label;
+
             openMiniModal('miniModalSummary');
         };
 
-        window.confirmDeleteSale = function(saleId) {
-            document.getElementById('deleteTargetId').value = saleId;
-            openMiniModal('miniModalDelete');
-        };
+        // --- INSTANT REPRINT ENGINE ---
+        window.printSale = function(id) {
+            const sale = salesCache.find(s => s.id === id);
+            if (!sale) { showToast("Error finding bill details.", "error"); return; }
 
-        // Transaction Reversal / Stock Synchronization Core Execution Routine
-        window.executeDeleteSale = async function() {
-            const saleId = document.getElementById('deleteTargetId').value;
-            if(!saleId) return;
-
-            const confirmBtn = document.getElementById('btnConfirmDelete');
-            confirmBtn.disabled = true;
-            confirmBtn.innerText = "Processing Return...";
-
-            try {
-                await runTransaction(db, async (transaction) => {
-                    const saleDocRef = doc(db, "sales", saleId);
-                    const saleSnapshot = await transaction.get(saleDocRef);
-                    
-                    if (!saleSnapshot.exists()) {
-                        throw new Error("Target transaction metadata does not exist.");
-                    }
-
-                    const saleData = saleSnapshot.data();
-                    
-                    // Revert stock figures safely using synchronous transaction tracking loops
-                    if(saleData.items && Array.isArray(saleData.items)) {
-                        for (const item of saleData.items) {
-                            if (item.invId) {
-                                const invDocRef = doc(db, "inventory", item.invId);
-                                transaction.update(invDocRef, {
-                                    qty: increment(item.qty)
-                                });
-                            }
-                        }
-                    }
-                    
-                    // Eliminate ledger point validation document entry
-                    transaction.delete(saleDocRef);
-                });
-
-                showToast("Sale reversed and stock inventory restored.", "success");
-                closeMiniModal('miniModalDelete');
-                initSalesLoad();
-
-            } catch(err) {
-                console.error("Critical Reversal Exception:", err);
-                showToast("Failed to process transaction rollbacks safely.");
-            } finally {
-                confirmBtn.disabled = false;
-                confirmBtn.innerText = "Reverse Sale";
-            }
-        };
-
-        // Precise Invoice Mirror Building Engine matching bill.html format protocols
-        window.printInvoice = function(saleId) {
-            const sale = salesCache.find(s => s.id === saleId);
-            if (!sale) { showToast("Print target data block out of cache index."); return; }
-
-            document.getElementById('prName').innerText = sale.customer?.name || 'Cash Customer';
-            document.getElementById('prPhone').innerText = sale.customer?.phone || 'N/A';
-            document.getElementById('prAddress').innerText = sale.customer?.address || 'N/A';
-            document.getElementById('prPaymentMode').innerText = sale.paymentMode || 'Cash';
-            document.getElementById('prInvNo').innerText = sale.invoiceNo || 'GST-XXXX';
+            document.getElementById('prName').innerText = sale.customer.name || 'Cash Customer';
+            document.getElementById('prPhone').innerText = sale.customer.phone || 'N/A';
+            document.getElementById('prAddress').innerText = sale.customer.address || 'N/A';
+            document.getElementById('prPaymentMode').innerText = sale.paymentMode;
+            document.getElementById('prInvNo').innerText = sale.invoiceNo;
             
-            const trDate = sale.date?.toDate ? sale.date.toDate() : new Date(sale.date);
-            document.getElementById('prDate').innerText = trDate.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
-            document.getElementById('prPrintTime').innerText = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            let dObj = sale.date && sale.date.toDate ? sale.date.toDate() : new Date();
+            const dateFormatted = `${dObj.getDate().toString().padStart(2, '0')}-${(dObj.getMonth()+1).toString().padStart(2, '0')}-${dObj.getFullYear()}`;
+            document.getElementById('prDate').innerText = dateFormatted;
 
-            // Generate Verification QR Payload
-            const qrTextPayload = `LITHIK BEVERAGE\nInv: ${sale.invoiceNo}\nCustomer: ${sale.customer?.name || 'Cash Customer'}\nTotal Value: Rs. ${(sale.totals?.grand || 0).toFixed(2)}`;
+            const printTimeObj = new Date();
+            const timeFormatted = printTimeObj.toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit', hour12: true });
+            document.getElementById('prPrintTime').innerText = timeFormatted;
+
+            const qrTextData = `LITHIK BEVERAGE\nInv No: ${sale.invoiceNo}\nDate: ${dateFormatted}\nBilled To: ${sale.customer.name}\nTotal Amount: Rs. ${sale.totals.grand.toFixed(2)}`;
             const qrCodeImg = document.getElementById('prQrCode');
-            qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrTextPayload)}`;
+            qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrTextData)}`;
             qrCodeImg.style.display = 'block';
 
             const tbody = document.getElementById('prTableBody');
             tbody.innerHTML = '';
-
-            let structuralRows = [...(sale.items || [])];
-            const maxPageRows = 5;
-            const balanceRows = structuralRows.length % maxPageRows;
-
-            if (balanceRows !== 0 || structuralRows.length === 0) {
-                const paddingCount = structuralRows.length === 0 ? maxPageRows : (maxPageRows - balanceRows);
-                for(let pr = 0; pr < paddingCount; pr++) {
-                    structuralRows.push({ isPaddingElement: true });
+            
+            // Extract items and apply exact layout padding from bill.html
+            let printItems = [...sale.items];
+            const maxRowsPerPage = 5;
+            const remainder = printItems.length % maxRowsPerPage;
+            
+            if (remainder !== 0 || printItems.length === 0) {
+                const padCount = printItems.length === 0 ? maxRowsPerPage : (maxRowsPerPage - remainder);
+                for(let i = 0; i < padCount; i++) {
+                    printItems.push({ isEmptyRow: true });
                 }
             }
 
-            structuralRows.forEach((item, index) => {
-                if (item.isPaddingElement) {
+            printItems.forEach((item, index) => {
+                if (item.isEmptyRow) {
                     tbody.innerHTML += `
                         <tr style="height: 25mm; max-height: 25mm;">
-                            <td style="border-bottom: 1px solid #e2e8f0;"></td>
-                            <td style="border-bottom: 1px solid #e2e8f0;"></td>
-                            <td style="border-bottom: 1px solid #e2e8f0;"></td>
-                            <td style="border-bottom: 1px solid #e2e8f0;"></td>
-                            <td style="border-bottom: 1px solid #e2e8f0;"></td>
-                            <td style="border-bottom: 1px solid #e2e8f0;"></td>
-                        </tr>`;
+                            <td style="border-bottom: 1px solid #e2e8f0;"></td><td style="border-bottom: 1px solid #e2e8f0;"></td>
+                            <td style="border-bottom: 1px solid #e2e8f0;"></td><td style="border-bottom: 1px solid #e2e8f0;"></td>
+                            <td style="border-bottom: 1px solid #e2e8f0;"></td><td style="border-bottom: 1px solid #e2e8f0;"></td>
+                        </tr>
+                    `;
                     return;
                 }
-
-                const itemNo = (index + 1).toString().padStart(2, '0');
-                const descriptionLayout = `
+                const num = (index + 1).toString().padStart(2, '0');
+                const desc = `
                     <strong style="font-size:13px; display:block; color:#0f172a; padding-bottom: 3px;">${item.name}</strong>
-                    <span style="font-size:11px; color:#475569;">GST Rate: ${item.gstPercent}% | Base Cost: ₹${(item.baseTotal || 0).toFixed(2)}</span>`;
-
+                    <span style="font-size:11px; color:#475569;">GST: ${item.gstPercent}% | Base: ₹${item.baseTotal.toFixed(2)}</span>
+                `;
                 tbody.innerHTML += `
                     <tr style="height: 25mm; max-height: 25mm;">
-                        <td>${itemNo}.</td>
-                        <td>${descriptionLayout}</td>
+                        <td>${num}.</td>
+                        <td>${desc}</td>
                         <td class="text-center">-</td>
                         <td class="text-center">${item.qty.toString().padStart(2, '0')}</td>
-                        <td class="text-right">₹${(item.price || 0).toFixed(2)}</td>
-                        <td class="text-right" style="font-weight:900; color:#0f172a;">₹${(item.finalTotal || 0).toFixed(2)}</td>
-                    </tr>`;
+                        <td class="text-right">₹${item.price.toFixed(2)}</td>
+                        <td class="text-right" style="font-weight:900; color:#0f172a;">₹${item.finalTotal.toFixed(2)}</td>
+                    </tr>
+                `;
             });
 
-            document.getElementById('prBaseTotal').innerText = `₹${(sale.totals?.base || 0).toFixed(2)}`;
-            document.getElementById('prCgstTotal').innerText = `₹${(sale.totals?.cgst || 0).toFixed(2)}`;
-            document.getElementById('prSgstTotal').innerText = `₹${(sale.totals?.sgst || 0).toFixed(2)}`;
-            document.getElementById('prDiscountTotal').innerText = `-₹${(sale.totals?.discount || 0).toFixed(2)}`;
-            document.getElementById('prTransportTotal').innerText = `+₹${(sale.totals?.transport || 0).toFixed(2)}`;
-            document.getElementById('prGrandTotal').innerText = `₹${(sale.totals?.grand || 0).toFixed(2)}`;
+            document.getElementById('prBaseTotal').innerText = `₹${sale.totals.base.toFixed(2)}`;
+            document.getElementById('prCgstTotal').innerText = `₹${sale.totals.cgst.toFixed(2)}`;
+            document.getElementById('prSgstTotal').innerText = `₹${sale.totals.sgst.toFixed(2)}`;
+            document.getElementById('prDiscountTotal').innerText = `-₹${sale.totals.discount.toFixed(2)}`;
+            document.getElementById('prTransportTotal').innerText = `+₹${sale.totals.transport.toFixed(2)}`;
+            document.getElementById('prGrandTotal').innerText = `₹${sale.totals.grand.toFixed(2)}`;
 
-            setTimeout(() => {
-                window.print();
-            }, 300);
+            setTimeout(() => { window.print(); }, 200); // Slight delay ensures QR renders
         };
 
-        // Real-Time Search Logic Filter Bindings
-        document.getElementById('searchInput').addEventListener('input', (e) => {
-            currentSearchQuery = e.target.value.trim();
-            renderSalesGrid();
-        });
+        // --- DELETE TRANSACTION & STOCK REVERSAL ---
+        window.confirmDeleteSale = function(id) {
+            document.getElementById('deleteTargetId').value = id;
+            openMiniModal('miniModalDelete');
+        };
 
-        // Main Element Scroll Pagination Listener Bound for Infinite Fetch Execution Loop
-        const scrollContainer = document.getElementById('mainScroll');
-        scrollContainer.addEventListener('scroll', () => {
-            if (scrollContainer.scrollTop + scrollContainer.clientHeight >= scrollContainer.scrollHeight - 30) {
-                if (hasMore && !isFetching) {
-                    fetchSalesRecords(true);
-                }
+        window.executeDeleteSale = async function() {
+            vibrateApp(30);
+            const id = document.getElementById('deleteTargetId').value;
+            if(!id) return;
+            
+            const sale = salesCache.find(s => s.id === id);
+            if(!sale) return;
+
+            const btn = document.getElementById('btnConfirmDelete');
+            btn.disabled = true; btn.innerText = "Reversing Stock...";
+
+            try {
+                // Strict Server-Side Transaction Processing
+                await runTransaction(db, async (transaction) => {
+                    const saleRef = doc(db, "sales", id);
+                    
+                    // 1. Loop through sold items and return them to Inventory
+                    sale.items.forEach(item => {
+                        if(item.invId) {
+                            const invRef = doc(db, "inventory", item.invId);
+                            transaction.update(invRef, { qty: increment(item.qty), lastUpdated: new Date().toISOString() });
+                        }
+                    });
+
+                    // 2. Delete the Sale Record
+                    transaction.delete(saleRef);
+                });
+
+                showToast("Sale Deleted & Stock Returned!", "success");
+                closeMiniModal('miniModalDelete');
+                
+                // Refresh data
+                currentSearch = '';
+                document.getElementById('searchInput').value = '';
+                loadSales();
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to reverse sale.", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Reverse Sale";
             }
-        });
-
-        // Initial Data Invocation Call
-        initSalesLoad();
+        };
 
     </script>
 </body>
