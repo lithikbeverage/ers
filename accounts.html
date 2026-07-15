@@ -13,6 +13,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         /* Shared Core Theme */
         :root {
@@ -62,19 +64,20 @@
         .header-left { display: flex; align-items: center; gap: 12px; }
         .header-right { display: flex; align-items: center; gap: 12px; }
         .company-logo { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; box-shadow: var(--shadow-sm); }
-        h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; color: var(--primary-color); margin:0; }
+        h1 { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; color: var(--primary-color); margin:0; text-transform: uppercase;}
 
         .header-icon-btn { background: rgba(30, 64, 175, 0.1); color: var(--primary-color); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; border: 1px solid rgba(30, 64, 175, 0.2); }
         .header-icon-btn:active { transform: scale(0.95); }
 
-        .layout-container { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+        /* FIXED: Added flex-direction: column to ensure bottom-nav stays at bottom on mobile */
+        .layout-container { display: flex; flex: 1; flex-direction: column; overflow: hidden; min-height: 0; }
         
         /* Navigation */
         nav.sidebar { display: none; width: 260px; background-color: var(--bg-nav); border-right: 1px solid var(--border-color); flex-direction: column; padding: 20px 0; overflow-y: auto; }
         nav.sidebar .nav-item { display: flex; align-items: center; text-decoration: none; color: var(--text-muted); padding: 14px 24px; gap: 16px; font-size: 1rem; font-weight: 500; transition: all 0.2s; cursor: pointer; }
         nav.sidebar .nav-item:hover, nav.sidebar .nav-item.active { background-color: rgba(59, 130, 246, 0.05); color: var(--primary-color); border-right: 3px solid var(--primary-color); }
         
-        nav.bottom-nav { display: flex; background-color: var(--bg-nav); border-top: 1px solid var(--border-color); min-height: 65px; height: calc(65px + env(safe-area-inset-bottom)); width: 100%; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; padding: 0 10px; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); position: relative; z-index: 100; }
+        nav.bottom-nav { display: flex; background-color: var(--bg-nav); border-top: 1px solid var(--border-color); min-height: 65px; height: calc(65px + env(safe-area-inset-bottom)); width: 100%; overflow-x: auto; overflow-y: hidden; scroll-behavior: smooth; padding: 0 10px; flex-shrink: 0; padding-bottom: env(safe-area-inset-bottom); position: relative; z-index: 100; margin-top: auto;}
         nav.bottom-nav .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: var(--text-muted); min-width: 72px; padding: 8px 4px; gap: 4px; font-size: 0.75rem; font-weight: 600; transition: all 0.2s; cursor: pointer; }
         nav.bottom-nav .nav-item.active { color: var(--primary-color); }
         .nav-icon { width: 24px; height: 24px; fill: currentColor; }
@@ -97,7 +100,7 @@
         .profit-positive { color: var(--success-color) !important; }
         .profit-negative { color: var(--danger-color) !important; }
 
-        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 24px; height: 24px; animation: spin 1s linear infinite; display: inline-block; }
+        .spinner { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid var(--primary-color); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle;}
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
         /* Modals */
@@ -130,6 +133,7 @@
         .toast-msg.success { background: var(--success-color); }
         .toast-msg.show { display: flex; opacity: 1; transform: translate(-50%, 0); }
 
+        /* Desktop Fixes */
         @media (min-width: 768px) {
             #app-shell { flex-direction: column; }
             .layout-container { flex-direction: row; }
@@ -139,78 +143,82 @@
         }
 
         /* ---------------------------------------------------- */
-        /* --- PROFESSIONAL PRINT STYLES (BILL & REPORT) --- */
+        /* --- PDF EXPORT CONTAINERS (HIDDEN BUT RENDERABLE) -- */
         /* ---------------------------------------------------- */
-        #printArea, #reportPrintArea { display: none; }
-
-        @media print {
-            #app-shell, .toast-msg, .modal, .mini-modal-overlay { display: none !important; }
-            @page { size: A4 portrait; margin: 0mm; }
-            body * { visibility: hidden; }
-            body { background: white; color: black; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            
-            /* Logic for printing single bill vs report */
-            body.print-bill #printArea, body.print-bill #printArea * { visibility: visible; }
-            body.print-report #reportPrintArea, body.print-report #reportPrintArea * { visibility: visible; }
-
-            /* SINGLE BILL EXACT LAYOUT (Copied from bill.html perfectly) */
-            #printArea { display: block !important; position: relative; width: 100%; max-width: 210mm; min-height: 100vh; margin: 0 auto; padding: 0; padding-bottom: 320px !important; background: white; color: #000; box-sizing: border-box; }
-            .print-top-band { background-color: #f0f9ff !important; padding: 25px 40px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #3b82f6 !important; }
-            .brand-logo-print { max-width: 70px; height: auto; border-radius: 8px; margin-bottom: 10px; display: block; }
-            .print-header-left { flex: 1; padding-right: 15px; }
-            .print-brand { display: flex; flex-direction: column; gap: 2px; margin-bottom: 25px; }
-            .print-brand h2 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #1e40af !important; line-height: 1;}
-            .print-invoice-to { margin-top: 10px; }
-            .section-label { font-size: 10px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; color: #64748b; }
-            .print-invoice-to h3 { margin: 0 0 8px 0; font-size: 17px; font-weight: bold; color: #0f172a;}
-            .print-invoice-to p { margin: 3px 0; font-size: 12px; color: #334155;}
-            .print-invoice-to p strong { display: inline-block; width: 75px; font-size: 10px; text-transform: uppercase; color: #0f172a;}
-            .print-header-right { flex: 0 0 35%; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
-            .invoice-title-text { font-size: 28px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; line-height: 1; color: #1e40af !important;}
-            .invoice-no-text { font-size: 13px; font-weight: 800; margin: 10px 0 15px 0; color: #1e40af; background-color: #dbeafe !important; padding: 6px 12px; border-radius: 4px; display: inline-block;}
-            .invoice-date-box { text-align: right; display: flex; flex-direction: column; align-items: flex-end; margin-top: 5px;}
-            .invoice-date-box span { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;}
-            .invoice-date-box strong { font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 4px;}
-            .print-table-container { padding: 0 40px; display: block; width: 100%; box-sizing: border-box; }
-            .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; } 
-            .print-table th { background-color: #f1f5f9 !important; padding: 12px 10px; font-size: 11px; text-transform: uppercase; text-align: left; color: #0f172a; font-weight: 800; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; }
-            .print-table td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; font-size: 12px; vertical-align: middle; color: #0f172a;}
-            .print-table th.text-right, .print-table td.text-right { text-align: right; padding-right: 15px; }
-            .print-table th.text-center, .print-table td.text-center { text-align: center; }
-            .print-table tbody tr:nth-child(5n):not(:last-child) { page-break-after: always; break-after: page; }
-            .print-table tbody tr { page-break-inside: avoid; break-inside: avoid; height: 25mm !important; max-height: 25mm !important; overflow: hidden; }
-            .print-middle-section { display: flex; justify-content: space-between; padding: 15px 40px; margin-top: 0; page-break-inside: avoid; break-inside: avoid; position: fixed !important; bottom: 105px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999; }
-            .print-left-footer-info { width: 45%; }
-            .thanks-box { background-color: #f8fafc !important; padding: 15px; margin-bottom: 15px; border-left: 4px solid #1e40af; border-radius: 4px;} 
-            .thanks-box strong { display: block; font-size: 13px; margin-bottom: 5px; color: #0f172a;}
-            .thanks-box p { margin: 0; font-size: 10px; color: #475569; line-height: 1.5; }
-            .payment-methods p { margin: 6px 0; font-size: 11px; font-weight: bold; color: #0f172a;}
-            .payment-methods span { display: block; font-weight: normal; font-size: 11px; color: #475569; margin-top: 2px;}
-            .print-totals-box { width: 40%; }
-            .totals-grid { width: 100%; border-collapse: collapse; }
-            .totals-grid td { padding: 6px 15px 6px 10px; font-size: 12px; border: none; font-weight: bold; color: #475569;}
-            .totals-grid .t-label { text-align: right; }
-            .totals-grid .t-val { text-align: right; color: #0f172a; }
-            .totals-grid .t-grand-row { background-color: #f1f5f9 !important; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1;}
-            .totals-grid .t-grand-row td { font-size: 16px; font-weight: 900; color: #1e40af !important; padding: 10px 15px 10px 10px; } 
-            .print-signature-area { display: flex; justify-content: space-between; padding: 0 40px; margin-top: 0; page-break-inside: avoid; break-inside: avoid; position: fixed !important; bottom: 35px; left: 0; right: 0; width: 100%; box-sizing: border-box; background-color: #fff; z-index: 999; }
-            .sign-box { text-align: center; width: 220px; }
-            .sign-box div.sign-placeholder { border-bottom: 1px solid #000; height: 35px; margin-bottom: 8px; width: 100%; }
-            .sign-box p { margin: 0; font-size: 11px; font-weight: bold; color: #000;}
-            .print-absolute-footer { background-color: #f1f5f9 !important; padding: 12px 40px; display: flex; justify-content: center; align-items: center; margin-top: 0; page-break-inside: avoid; break-inside: avoid; position: fixed !important; bottom: 0; left: 0; right: 0; width: 100%; box-sizing: border-box; z-index: 999; border-top: 1px solid #e2e8f0; }
-            .print-absolute-footer p { margin: 0; font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;}
-
-            /* TABULAR REPORT EXACT LAYOUT (Auditor Ready) */
-            #reportPrintArea { display: block !important; position: relative; width: 100%; padding: 20px; background: white; color: #000; box-sizing: border-box; }
-            .rpt-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px;}
-            .rpt-header h2 { margin: 0; font-size: 22px; font-weight: bold; text-transform: uppercase;}
-            .rpt-header p { margin: 5px 0 0 0; font-size: 12px; color: #333;}
-            .rpt-table { width: 100%; border-collapse: collapse; font-size: 10px; }
-            .rpt-table th, .rpt-table td { border: 1px solid #999; padding: 6px; text-align: left; }
-            .rpt-table th { background-color: #f1f5f9 !important; font-weight: bold; -webkit-print-color-adjust: exact; }
-            .rpt-table td.num { text-align: right; }
-            .rpt-table tr.total-row { font-weight: bold; background-color: #e2e8f0 !important; -webkit-print-color-adjust: exact;}
+        
+        /* Fixed invisible container off-screen to generate crisp PDFs without disrupting UI */
+        .pdf-export-container {
+            position: fixed;
+            left: -9999px;
+            top: 0;
+            width: 210mm; /* Strict A4 Width */
+            background: white;
+            color: #000;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            box-sizing: border-box;
+            z-index: -9999;
+            padding-bottom: 40px;
         }
+
+        /* SINGLE BILL EXACT LAYOUT inside PDF Container */
+        .print-top-band { background-color: #f0f9ff; padding: 25px 40px; display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; border-bottom: 3px solid #3b82f6; }
+        .brand-logo-print { max-width: 70px; height: auto; border-radius: 8px; margin-bottom: 10px; display: block; }
+        .print-header-left { flex: 1; padding-right: 15px; }
+        .print-brand { display: flex; flex-direction: column; gap: 2px; margin-bottom: 25px; }
+        .print-brand h2 { margin: 0; font-size: 26px; font-weight: 900; letter-spacing: -0.5px; color: #1e40af; line-height: 1;}
+        .print-invoice-to { margin-top: 10px; }
+        .section-label { font-size: 10px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 5px; color: #64748b; }
+        .print-invoice-to h3 { margin: 0 0 8px 0; font-size: 17px; font-weight: bold; color: #0f172a;}
+        .print-invoice-to p { margin: 3px 0; font-size: 12px; color: #334155;}
+        .print-invoice-to p strong { display: inline-block; width: 75px; font-size: 10px; text-transform: uppercase; color: #0f172a;}
+        .print-header-right { flex: 0 0 35%; text-align: right; display: flex; flex-direction: column; align-items: flex-end; }
+        .invoice-title-text { font-size: 28px; font-weight: 900; margin: 0; letter-spacing: 1px; text-transform: uppercase; line-height: 1; color: #1e40af;}
+        .invoice-no-text { font-size: 13px; font-weight: 800; margin: 10px 0 15px 0; color: #1e40af; background-color: #dbeafe; padding: 6px 12px; border-radius: 4px; display: inline-block;}
+        .invoice-date-box { text-align: right; display: flex; flex-direction: column; align-items: flex-end; margin-top: 5px;}
+        .invoice-date-box span { font-size: 10px; font-weight: 800; text-transform: uppercase; color: #64748b; letter-spacing: 0.5px;}
+        .invoice-date-box strong { font-size: 14px; font-weight: 800; color: #0f172a; margin-top: 4px;}
+        .print-table-container { padding: 0 40px; display: block; width: 100%; box-sizing: border-box; }
+        .print-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; } 
+        .print-table th { background-color: #f1f5f9; padding: 12px 10px; font-size: 11px; text-transform: uppercase; text-align: left; color: #0f172a; font-weight: 800; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1; }
+        .print-table td { border-bottom: 1px solid #e2e8f0; padding: 12px 10px; font-size: 12px; vertical-align: middle; color: #0f172a;}
+        .print-table th.text-right, .print-table td.text-right { text-align: right; padding-right: 15px; }
+        .print-table th.text-center, .print-table td.text-center { text-align: center; }
+        .print-table tbody tr.page-break { page-break-after: always; break-after: page; }
+        
+        .print-middle-section { display: flex; justify-content: space-between; padding: 15px 40px; margin-top: 30px; width: 100%; box-sizing: border-box; background-color: #fff; page-break-inside: avoid; }
+        .print-left-footer-info { width: 45%; }
+        .thanks-box { background-color: #f8fafc; padding: 15px; margin-bottom: 15px; border-left: 4px solid #1e40af; border-radius: 4px;} 
+        .thanks-box strong { display: block; font-size: 13px; margin-bottom: 5px; color: #0f172a;}
+        .thanks-box p { margin: 0; font-size: 10px; color: #475569; line-height: 1.5; }
+        .payment-methods p { margin: 6px 0; font-size: 11px; font-weight: bold; color: #0f172a;}
+        .payment-methods span { display: block; font-weight: normal; font-size: 11px; color: #475569; margin-top: 2px;}
+        
+        .print-totals-box { width: 40%; }
+        .totals-grid { width: 100%; border-collapse: collapse; }
+        .totals-grid td { padding: 6px 15px 6px 10px; font-size: 12px; border: none; font-weight: bold; color: #475569;}
+        .totals-grid .t-label { text-align: right; }
+        .totals-grid .t-val { text-align: right; color: #0f172a; }
+        .totals-grid .t-grand-row { background-color: #f1f5f9; border-top: 2px solid #cbd5e1; border-bottom: 2px solid #cbd5e1;}
+        .totals-grid .t-grand-row td { font-size: 16px; font-weight: 900; color: #1e40af; padding: 10px 15px 10px 10px; } 
+        
+        .print-signature-area { display: flex; justify-content: space-between; padding: 0 40px; margin-top: 60px; width: 100%; box-sizing: border-box; background-color: #fff; page-break-inside: avoid; }
+        .sign-box { text-align: center; width: 220px; }
+        .sign-box div.sign-placeholder { border-bottom: 1px solid #000; height: 35px; margin-bottom: 8px; width: 100%; }
+        .sign-box p { margin: 0; font-size: 11px; font-weight: bold; color: #000;}
+        
+        .print-absolute-footer { background-color: #f1f5f9; padding: 12px 40px; display: flex; justify-content: center; align-items: center; margin-top: 40px; width: 100%; box-sizing: border-box; border-top: 1px solid #e2e8f0; page-break-inside: avoid; }
+        .print-absolute-footer p { margin: 0; font-size: 9px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 1px;}
+
+        /* TABULAR REPORT EXACT LAYOUT (Auditor Ready) inside PDF Container */
+        .rpt-header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #000; padding-bottom: 10px; padding-top: 20px;}
+        .rpt-header h2 { margin: 0; font-size: 22px; font-weight: bold; text-transform: uppercase;}
+        .rpt-header p { margin: 5px 0 0 0; font-size: 12px; color: #333;}
+        .rpt-table { width: 90%; margin: 0 auto; border-collapse: collapse; font-size: 10px; }
+        .rpt-table th, .rpt-table td { border: 1px solid #999; padding: 8px; text-align: left; }
+        .rpt-table th { background-color: #f1f5f9; font-weight: bold; }
+        .rpt-table td.num { text-align: right; }
+        .rpt-table tr.total-row { font-weight: bold; background-color: #e2e8f0; }
+
     </style>
 </head>
 <body>
@@ -250,20 +258,20 @@
                             
                             <div class="fin-row">
                                 <span class="fin-label">Total Sales Revenue</span>
-                                <span class="fin-val" id="valThisSales"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valThisSales"><span class="spinner"></span></span>
                             </div>
                             <div class="fin-row">
                                 <span class="fin-label" style="display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size: 16px; color: var(--warning-color);">remove</span> Purchases (Raw)</span>
-                                <span class="fin-val" id="valThisPurchases"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valThisPurchases"><span class="spinner"></span></span>
                             </div>
                             <div class="fin-row">
                                 <span class="fin-label" style="display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size: 16px; color: var(--danger-color);">remove</span> Total Expenses</span>
-                                <span class="fin-val" id="valThisExpenses"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valThisExpenses"><span class="spinner"></span></span>
                             </div>
                             
                             <div class="fin-net-profit">
                                 <span class="fin-label">Net Profit</span>
-                                <span class="fin-val" id="valThisProfit"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valThisProfit"><span class="spinner"></span></span>
                             </div>
                         </div>
 
@@ -275,20 +283,20 @@
                             
                             <div class="fin-row">
                                 <span class="fin-label">Total Sales Revenue</span>
-                                <span class="fin-val" id="valLastSales"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valLastSales"><span class="spinner"></span></span>
                             </div>
                             <div class="fin-row">
                                 <span class="fin-label" style="display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size: 16px; color: var(--warning-color);">remove</span> Purchases (Raw)</span>
-                                <span class="fin-val" id="valLastPurchases"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valLastPurchases"><span class="spinner"></span></span>
                             </div>
                             <div class="fin-row">
                                 <span class="fin-label" style="display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size: 16px; color: var(--danger-color);">remove</span> Total Expenses</span>
-                                <span class="fin-val" id="valLastExpenses"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valLastExpenses"><span class="spinner"></span></span>
                             </div>
                             
                             <div class="fin-net-profit">
                                 <span class="fin-label">Net Profit</span>
-                                <span class="fin-val" id="valLastProfit"><span class="spinner" style="width:16px;height:16px;border-width:2px;"></span></span>
+                                <span class="fin-val" id="valLastProfit"><span class="spinner"></span></span>
                             </div>
                         </div>
 
@@ -349,17 +357,19 @@
         <div class="form-group">
             <input type="hidden" id="exportDocType">
             
-            <button class="btn-primary" style="margin-bottom: 12px; background: #e11d48;" onclick="executeExport('PDF')">
+            <button class="btn-primary" style="margin-bottom: 12px; background: #e11d48;" id="btnExportPDF" onclick="executeExport('PDF')">
                 <span class="material-symbols-outlined">picture_as_pdf</span>
-                Export as PDF (Print)
+                Download as PDF
             </button>
+            
             <button class="btn-primary" style="margin-bottom: 12px; background: #16a34a;" onclick="executeExport('EXCEL')">
                 <span class="material-symbols-outlined">table_view</span>
-                Export as Excel (CSV)
+                Download as Excel (CSV)
             </button>
+            
             <button class="btn-primary" style="background: #4f46e5;" onclick="executeExport('JSON')">
                 <span class="material-symbols-outlined">data_object</span>
-                Export as JSON
+                Download as JSON
             </button>
         </div>
     </div>
@@ -382,7 +392,7 @@
         </div>
     </div>
 
-    <div id="printArea">
+    <div class="pdf-export-container" id="printArea">
         <div class="print-top-band">
             <div class="print-header-left">
                 <div class="print-brand">
@@ -471,7 +481,7 @@
         </div>
     </div>
 
-    <div id="reportPrintArea">
+    <div class="pdf-export-container" id="reportPrintArea">
         <div class="rpt-header">
             <h2>LITHIK BEVERAGE</h2>
             <p id="rptTitle">Document Report</p>
@@ -525,17 +535,12 @@
         };
         const formatINR = (val) => Number(val || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
-        // Modals
+        // Modals & Navigation History Control
         window.openModal = function(modalId) {
             vibrateApp(20);
             document.getElementById(modalId).classList.add('active');
             history.pushState({ modal: modalId }, '', `#${modalId}`);
         };
-        window.addEventListener('popstate', (e) => {
-            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
-            document.querySelectorAll('.mini-modal-overlay.active').forEach(m => m.classList.remove('active'));
-            if (e.state && e.state.modal) document.getElementById(e.state.modal).classList.add('active');
-        });
         window.openMiniModal = function(id) { 
             vibrateApp(20); 
             const m = document.getElementById(id);
@@ -545,8 +550,14 @@
             const m = document.getElementById(id);
             if(m.classList.contains('active')) { m.classList.remove('active'); if(history.state && history.state.modal === id) history.back(); }
         };
+        
+        window.addEventListener('popstate', (e) => {
+            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.mini-modal-overlay.active').forEach(m => m.classList.remove('active'));
+            if (e.state && e.state.modal) document.getElementById(e.state.modal).classList.add('active');
+        });
 
-        // Dates for Aggregation
+        // Dates Setup (Accounting for Local Timezone properly)
         const now = new Date();
         const thisMStart = new Date(now.getFullYear(), now.getMonth(), 1);
         const thisMEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
@@ -555,15 +566,13 @@
 
         const toDateStr = (d) => { const off = d.getTimezoneOffset() * 60000; return new Date(d.getTime() - off).toISOString().split('T')[0]; };
 
-        // Set default dates for GST modal
         document.getElementById('repStart').value = toDateStr(thisMStart);
         document.getElementById('repEnd').value = toDateStr(thisMEnd);
 
-        // UI Labels
         document.getElementById('lblThisMonth').innerText = thisMStart.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
         document.getElementById('lblLastMonth').innerText = lastMStart.toLocaleDateString('en-IN', { month: 'short', year: 'numeric' });
 
-        // Authentication
+        // Authenticaton & Init
         const auth = getAuth(app);
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -573,36 +582,49 @@
             }
         });
 
-        // --- DASHBOARD AGGREGATION LOGIC (LOW READS) ---
-        async function fetchAggregateData(startDt, endDt, startStr, endStr) {
+        // --- DASHBOARD AGGREGATION LOGIC (WITH INDEX FALLBACK) ---
+        // Using robust fallback algorithm to prevent '0' errors if Firestore Indexes are missing.
+        async function getSafeAggregate(colName, where1, where2, sumField) {
+            const q = query(collection(db, colName), where1, where2);
             try {
-                // 1. Sales (date field is Timestamp)
-                const qSales = query(collection(db, "sales"), where("date", ">=", startDt), where("date", "<=", endDt));
-                const aggSales = await getAggregateFromServer(qSales, { total: sum('totals.grand') });
-                const salesTotal = aggSales.data().total || 0;
-
-                // 2. Purchases (date field is YYYY-MM-DD string)
-                const qPurchases = query(collection(db, "purchases"), where("date", ">=", startStr), where("date", "<=", endStr));
-                const aggPurchases = await getAggregateFromServer(qPurchases, { total: sum('grandTotal') });
-                const purchasesTotal = aggPurchases.data().total || 0;
-
-                // 3. Expenses (dateStr field is YYYY-MM-DD string)
-                const qExpenses = query(collection(db, "expanse"), where("dateStr", ">=", startStr), where("dateStr", "<=", endStr));
-                const aggExpenses = await getAggregateFromServer(qExpenses, { total: sum('amount') });
-                const expensesTotal = aggExpenses.data().total || 0;
-
-                const profit = salesTotal - purchasesTotal - expensesTotal;
-
-                return { salesTotal, purchasesTotal, expensesTotal, profit };
-            } catch(e) {
-                console.error("Aggregation Error", e);
-                // Return zeros on index failure to avoid UI crash
-                return { salesTotal: 0, purchasesTotal: 0, expensesTotal: 0, profit: 0 };
+                // Try low-read server aggregation first
+                const agg = await getAggregateFromServer(q, { total: sum(sumField) });
+                return agg.data().total || 0;
+            } catch (err) {
+                console.warn(`Server aggregation failed on '${colName}'. Missing Index? Triggering client-side fallback fetch.`, err);
+                try {
+                    // Client-side fallback to ensure calculations work flawlessly
+                    const snap = await getDocs(q);
+                    let localTotal = 0;
+                    snap.forEach(doc => {
+                        const data = doc.data();
+                        const keys = sumField.split('.');
+                        let val = data;
+                        keys.forEach(k => val = val?.[k]);
+                        localTotal += parseFloat(val) || 0;
+                    });
+                    return localTotal;
+                } catch(fallbackErr) {
+                    console.error("Fallback Failed", fallbackErr);
+                    return 0;
+                }
             }
         }
 
+        async function fetchAggregateData(startDt, endDt, startStr, endStr) {
+            // 1. Sales (date field is Timestamp)
+            const salesTotal = await getSafeAggregate("sales", where("date", ">=", startDt), where("date", "<=", endDt), "totals.grand");
+            // 2. Purchases (date field is YYYY-MM-DD string)
+            const purchasesTotal = await getSafeAggregate("purchases", where("date", ">=", startStr), where("date", "<=", endStr), "grandTotal");
+            // 3. Expenses (dateStr field is YYYY-MM-DD string)
+            const expensesTotal = await getSafeAggregate("expanse", where("dateStr", ">=", startStr), where("dateStr", "<=", endStr), "amount");
+
+            const profit = salesTotal - purchasesTotal - expensesTotal;
+            return { salesTotal, purchasesTotal, expensesTotal, profit };
+        }
+
         async function loadDashboardData() {
-            // Load This Month
+            // This Month
             const dThis = await fetchAggregateData(thisMStart, thisMEnd, toDateStr(thisMStart), toDateStr(thisMEnd));
             document.getElementById('valThisSales').innerText = `₹${formatINR(dThis.salesTotal)}`;
             document.getElementById('valThisPurchases').innerText = `₹${formatINR(dThis.purchasesTotal)}`;
@@ -612,7 +634,7 @@
             pThis.innerText = `₹${formatINR(dThis.profit)}`;
             pThis.className = 'fin-val ' + (dThis.profit >= 0 ? 'profit-positive' : 'profit-negative');
 
-            // Load Last Month
+            // Last Month
             const dLast = await fetchAggregateData(lastMStart, lastMEnd, toDateStr(lastMStart), toDateStr(lastMEnd));
             document.getElementById('valLastSales').innerText = `₹${formatINR(dLast.salesTotal)}`;
             document.getElementById('valLastPurchases').innerText = `₹${formatINR(dLast.purchasesTotal)}`;
@@ -623,19 +645,40 @@
             pLast.className = 'fin-val ' + (dLast.profit >= 0 ? 'profit-positive' : 'profit-negative');
         }
 
-        // --- SINGLE BILL DOWNLOAD LOGIC ---
+        // --- PDF EXPORT ENGINE VIA HTML2PDF ---
+        function executePdfDownload(elementId, filename) {
+            return new Promise((resolve) => {
+                const element = document.getElementById(elementId);
+                // Configuration for crisp, high-quality PDF 
+                const opt = {
+                    margin:       0.3,
+                    filename:     `${filename}.pdf`,
+                    image:        { type: 'jpeg', quality: 1 },
+                    html2canvas:  { scale: 2, useCORS: true, letterRendering: true },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' },
+                    pagebreak:    { mode: ['css', 'legacy'] }
+                };
+                
+                // Directly trigger download without print prompt
+                html2pdf().set(opt).from(element).save().then(() => {
+                    resolve(true);
+                });
+            });
+        }
+
+        // SINGLE BILL PDF
         window.downloadSingleBill = async function() {
             const billNo = document.getElementById('sbInvoiceNo').value.trim();
             if(!billNo) { showToast("Enter Invoice Number", "error"); return; }
             
             const btn = document.getElementById('btnDownloadSingleBill');
-            btn.disabled = true; btn.innerHTML = "Fetching...";
+            btn.disabled = true; btn.innerHTML = "Generating PDF...";
             
             try {
                 const q = query(collection(db, "sales"), where("invoiceNo", "==", billNo));
                 const snap = await getDocs(q);
                 
-                if(snap.empty) { showToast("Bill not found", "error"); btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined">download</span> Download PDF'; return; }
+                if(snap.empty) { showToast("Bill not found", "error"); return; }
                 
                 const sale = snap.docs[0].data();
                 
@@ -648,11 +691,6 @@
                 let dObj = sale.date && sale.date.toDate ? sale.date.toDate() : new Date();
                 const dateFormatted = `${dObj.getDate().toString().padStart(2, '0')}-${(dObj.getMonth()+1).toString().padStart(2, '0')}-${dObj.getFullYear()}`;
                 document.getElementById('prDate').innerText = dateFormatted;
-                
-                const qrTextData = `LITHIK BEVERAGE\nInv No: ${sale.invoiceNo}\nDate: ${dateFormatted}\nBilled To: ${sale.customer.name}\nTotal Amount: Rs. ${sale.totals.grand.toFixed(2)}`;
-                const qrCodeImg = document.getElementById('prQrCode');
-                qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrTextData)}`;
-                qrCodeImg.style.display = 'block';
                 
                 const tbody = document.getElementById('prTableBody');
                 tbody.innerHTML = '';
@@ -672,7 +710,11 @@
                     }
                     const num = (index + 1).toString().padStart(2, '0');
                     const desc = `<strong style="font-size:13px; display:block; color:#0f172a; padding-bottom: 3px;">${item.name}</strong><span style="font-size:11px; color:#475569;">GST: ${item.gstPercent}% | Base: ₹${item.baseTotal.toFixed(2)}</span>`;
-                    tbody.innerHTML += `<tr style="height: 25mm; max-height: 25mm;"><td>${num}.</td><td>${desc}</td><td class="text-center">-</td><td class="text-center">${item.qty.toString().padStart(2, '0')}</td><td class="text-right">₹${item.price.toFixed(2)}</td><td class="text-right" style="font-weight:900; color:#0f172a;">₹${item.finalTotal.toFixed(2)}</td></tr>`;
+                    
+                    // Handle natural page breaks on 5th items
+                    let cls = ((index + 1) % 5 === 0 && index !== printItems.length - 1) ? 'class="page-break"' : '';
+                    
+                    tbody.innerHTML += `<tr ${cls} style="height: 25mm; max-height: 25mm;"><td>${num}.</td><td>${desc}</td><td class="text-center">-</td><td class="text-center">${item.qty.toString().padStart(2, '0')}</td><td class="text-right">₹${item.price.toFixed(2)}</td><td class="text-right" style="font-weight:900; color:#0f172a;">₹${item.finalTotal.toFixed(2)}</td></tr>`;
                 });
                 
                 document.getElementById('prBaseTotal').innerText = `₹${sale.totals.base.toFixed(2)}`;
@@ -682,18 +724,15 @@
                 document.getElementById('prTransportTotal').innerText = `+₹${sale.totals.transport.toFixed(2)}`;
                 document.getElementById('prGrandTotal').innerText = `₹${sale.totals.grand.toFixed(2)}`;
                 
-                closeMiniModal('miniModalSingleBill');
+                // Trigger Direct Download!
+                await executePdfDownload('printArea', `Invoice_${sale.invoiceNo}`);
                 
-                // Print command (triggering body class for specific view)
-                setTimeout(() => { 
-                    document.body.classList.add('print-bill');
-                    window.print(); 
-                    document.body.classList.remove('print-bill');
-                }, 300);
+                showToast("PDF Downloaded!", "success");
+                closeMiniModal('miniModalSingleBill');
                 
             } catch(e) {
                 console.error(e);
-                showToast("Failed to fetch bill", "error");
+                showToast("Failed to fetch/download bill", "error");
             } finally {
                 btn.disabled = false; btn.innerHTML = '<span class="material-symbols-outlined">download</span> Download PDF';
             }
@@ -713,6 +752,11 @@
             const eDate = document.getElementById('repEnd').value;
             
             if(!sDate || !eDate) { showToast("Date range required.", "error"); return; }
+            
+            const btnPdf = document.getElementById('btnExportPDF');
+            if(format === 'PDF') {
+                btnPdf.disabled = true; btnPdf.innerHTML = "Processing...";
+            }
             
             try {
                 let dataArray = [];
@@ -769,7 +813,6 @@
                     showToast("Excel generated!", "success");
                 } 
                 else if (format === 'JSON') {
-                    // Structure for JSON
                     let jsonObj = dataArray.map(row => {
                         let obj = {};
                         headers.forEach((h, i) => obj[h] = row[i]);
@@ -782,7 +825,6 @@
                 else if (format === 'PDF') {
                     document.getElementById('rptTitle').innerText = title;
                     
-                    // Build Table Head
                     let thead = '<tr>';
                     headers.forEach((h, i) => {
                         let cls = (i > 3 && type==='Sales') || (i > 2 && type==='Purchases') ? 'class="num"' : '';
@@ -791,7 +833,6 @@
                     thead += '</tr>';
                     document.getElementById('rptTableHead').innerHTML = thead;
 
-                    // Build Table Body
                     let tbody = '';
                     let gTotal = 0;
                     dataArray.forEach(row => {
@@ -801,25 +842,24 @@
                             tbody += `<td ${cls}>${col}</td>`;
                         });
                         tbody += '</tr>';
-                        // Keep track of final grand total column
                         gTotal += parseFloat(row[row.length - 1] || 0);
                     });
                     
-                    // Total Row
                     tbody += `<tr class="total-row"><td colspan="${headers.length - 1}" class="num">TOTAL:</td><td class="num">${gTotal.toFixed(2)}</td></tr>`;
                     document.getElementById('rptTableBody').innerHTML = tbody;
 
-                    // Trigger Print
-                    setTimeout(() => { 
-                        document.body.classList.add('print-report');
-                        window.print(); 
-                        document.body.classList.remove('print-report');
-                    }, 300);
+                    // Trigger PDF download directly!
+                    await executePdfDownload('reportPrintArea', `${type}_Report`);
+                    showToast("PDF Downloaded!", "success");
                 }
 
             } catch (err) {
                 console.error(err);
                 showToast("Failed to generate report.", "error");
+            } finally {
+                if(format === 'PDF') {
+                    btnPdf.disabled = false; btnPdf.innerHTML = '<span class="material-symbols-outlined">picture_as_pdf</span> Download as PDF';
+                }
             }
         };
 
