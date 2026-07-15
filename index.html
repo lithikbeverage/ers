@@ -59,7 +59,6 @@
         header, .material-symbols-outlined, .nav-item { -webkit-user-select: none; user-select: none; }
         .material-symbols-outlined { display: inline-flex; align-items: center; justify-content: center; }
 
-        /* Robust PWA Mobile Shell Fix - Prevents bottom nav from disappearing */
         #app-shell { display: flex; height: 100%; width: 100%; position: absolute; inset: 0; flex-direction: column; overflow: hidden; background-color: var(--bg-body); z-index: 1; }
         
         header { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-surface); padding: 12px 20px; border-bottom: 1px solid var(--border-color); z-index: 10; flex-shrink: 0; }
@@ -105,19 +104,19 @@
         .profit-negative { color: var(--danger-color) !important; }
         .metric-neutral { color: var(--accent-color) !important; }
 
-        /* Skeleton Loading Animation */
         .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; color: transparent !important; display: inline-block; width: 60px; height: 20px; }
         @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         
-        /* Fixed Install Banner */
-        #install-banner { position: fixed; bottom: 90px; left: 50%; transform: translate(-50%, 150%); visibility: hidden; opacity: 0; pointer-events: none; width: 90%; max-width: 360px; background-color: var(--bg-surface); border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; z-index: 9999; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s, visibility 0.4s; }
-        #install-banner.show { transform: translate(-50%, 0); visibility: visible; opacity: 1; pointer-events: auto; }
-        .install-info { display: flex; flex-direction: column; gap: 4px; }
-        .install-info strong { font-size: 0.95rem; color: var(--text-main); }
-        .install-info span { font-size: 0.8rem; color: var(--text-muted); }
-        .install-actions { display: flex; gap: 10px; align-items: center; }
-        .btn-install { background-color: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-sm); }
-        .btn-close { background: none; border: none; color: var(--text-muted); padding: 8px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        /* INDEX ERROR POPUP STYLES */
+        #index-alert-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; width: calc(100% - 40px); max-width: 400px; pointer-events: none; }
+        .index-alert { background-color: var(--bg-surface); border-left: 4px solid var(--danger-color); box-shadow: var(--shadow-lg); border-radius: 8px; padding: 16px; pointer-events: auto; animation: slideIn 0.3s ease-out forwards; display: flex; flex-direction: column; gap: 10px; }
+        .index-alert-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: var(--danger-color); font-size: 1rem; }
+        .index-alert-body { font-size: 0.85rem; color: var(--text-main); line-height: 1.4; }
+        .index-alert-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px; }
+        .btn-index-close { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
+        .btn-index-open { background: var(--danger-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-block; }
+        
+        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
 
         @media (min-width: 768px) {
             #app-shell { flex-direction: column; }
@@ -125,9 +124,6 @@
             nav.bottom-nav { display: none; }
             nav.sidebar { display: flex; }
             .dashboard-grid { grid-template-columns: 1fr 1fr; }
-            
-            #install-banner { bottom: 24px; left: auto; right: 24px; transform: translate(150%, 0); }
-            #install-banner.show { transform: translate(0, 0); }
         }
     </style>
 </head>
@@ -142,6 +138,8 @@
             });
         }
     </script>
+
+    <div id="index-alert-container"></div>
 
     <div id="app-shell">
         <header>
@@ -232,31 +230,12 @@
         </div>
     </div>
 
-    <div id="install-banner">
-        <div class="install-info">
-            <strong>Install App</strong>
-            <span>Add to home screen for fast offline access</span>
-        </div>
-        <div class="install-actions">
-            <button class="btn-install" id="btn-install-app">Install</button>
-            <button class="btn-close" id="btn-close-banner">✕</button>
-        </div>
-    </div>
-
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW registration failed:', err));
-            });
-        }
-    </script>
-
     <script type="module">
         import { app, db } from './config.js';
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         
-        // CRITICAL UPDATE: Imported `getDocs` to power the intelligent fallback logic.
-        import { collection, query, where, getDocs, getAggregateFromServer, sum, count } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        // Removed getDocs. Only importing required aggregation functions to prevent accidental massive reads.
+        import { collection, query, where, getAggregateFromServer, sum, count } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         // Navigation Generation
         const navItems = [
@@ -283,7 +262,7 @@
             mobileNav.innerHTML += html;
         });
 
-        // 1. Auth & Initial Load
+        // Auth
         const auth = getAuth(app);
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -299,8 +278,6 @@
         });
 
         const formatINR = (val) => Number(val || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-        // Fail-safe Date Formatter Helper
         const formatYMD = (d) => {
             const yr = d.getFullYear();
             const mo = String(d.getMonth() + 1).padStart(2, '0');
@@ -308,14 +285,37 @@
             return `${yr}-${mo}-${da}`;
         };
 
-        // CRITICAL FIX: Robust Server Aggregation with Automatic Client Fallback
+        // --- NEW: UI Popup Generator for Missing Indexes ---
+        function showIndexPopup(url, colName) {
+            const container = document.getElementById('index-alert-container');
+            const alertId = 'alert-' + Date.now() + Math.floor(Math.random() * 100);
+            
+            const html = `
+                <div class="index-alert" id="${alertId}">
+                    <div class="index-alert-header">
+                        <span style="display:flex; align-items:center; gap:6px;">
+                            <span class="material-symbols-outlined">warning</span> Missing Index
+                        </span>
+                    </div>
+                    <div class="index-alert-body">
+                        Firestore requires a composite index to calculate totals for the <b>${colName}</b> collection. Please click below to generate it.
+                    </div>
+                    <div class="index-alert-actions">
+                        <button class="btn-index-close" onclick="document.getElementById('${alertId}').remove()">Dismiss</button>
+                        <a href="${url}" target="_blank" class="btn-index-open">Open Link</a>
+                    </div>
+                </div>
+            `;
+            container.insertAdjacentHTML('beforeend', html);
+        }
+
+        // --- UPDATED: Secure Server Aggregation (No getDocs Fallback) ---
         async function getSafeAggregate(colName, conditions, aggregationsConf) {
             let q = collection(db, colName);
             if (conditions && conditions.length > 0) {
                 q = query(q, ...conditions);
             }
             
-            // 1. Assemble specific Server-Side functions required by Firestore
             const serverAggs = {};
             for (const [key, conf] of Object.entries(aggregationsConf)) {
                 if (conf.type === 'sum') serverAggs[key] = sum(conf.field);
@@ -326,47 +326,30 @@
                 const snap = await getAggregateFromServer(q, serverAggs);
                 return snap.data();
             } catch(e) {
-                console.warn(`Server aggregation failed for ${colName} (Likely due to missing Firestore Composite Indexes). Utilizing client-side fallback computations.`);
+                console.error(`Aggregation error for ${colName}:`, e);
                 
-                // 2. Initialize fallback zeros structure
-                const fallback = {};
-                for (const key of Object.keys(aggregationsConf)) {
-                    fallback[key] = 0;
+                // Extract the Firebase URL from the error message using Regex
+                if (e.message) {
+                    const urlMatch = e.message.match(/(https:\/\/console\.firebase\.google\.com[^\s]+)/);
+                    if (urlMatch && urlMatch[1]) {
+                        showIndexPopup(urlMatch[1], colName);
+                    }
                 }
-
-                // 3. Trigger Client-Side Fallback fetching and mapping logic
-                try {
-                    const snap = await getDocs(q);
-                    snap.forEach(doc => {
-                        const data = doc.data();
-                        for (const [key, conf] of Object.entries(aggregationsConf)) {
-                            if (conf.type === 'count') {
-                                fallback[key] += 1;
-                            } else if (conf.type === 'sum') {
-                                const keys = conf.field.split('.');
-                                let val = data;
-                                keys.forEach(k => val = val?.[k]);
-                                fallback[key] += (parseFloat(val) || 0);
-                            }
-                        }
-                    });
-                } catch (clientErr) {
-                    console.error(`Client fallback also completely failed for ${colName}`, clientErr);
-                }
-                return fallback;
+                
+                // Return zeros so the UI renders gracefully instead of completely breaking
+                const fallbackZeros = {};
+                for (const key of Object.keys(aggregationsConf)) fallbackZeros[key] = 0;
+                return fallbackZeros;
             }
         }
 
-        // 2. Dashboard Rendering logic mapping perfectly to the new configuration setup
         async function fetchDashboardData() {
             const now = new Date();
             
-            // --- TODAY CALCULATION ---
             const todayStartObj = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const todayEndObj = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
             const todayStr = formatYMD(todayStartObj);
 
-            // --- WEEK CALCULATION ---
             const dayOfWeek = now.getDay() || 7;
             const weekStartObj = new Date(todayStartObj);
             weekStartObj.setDate(todayStartObj.getDate() - dayOfWeek + 1);
@@ -377,7 +360,6 @@
             const weekStartStr = formatYMD(weekStartObj);
             const weekEndStr = formatYMD(weekEndObj);
 
-            // Update Labels
             document.getElementById('lblTodayDate').innerText = todayStartObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
             document.getElementById('lblWeekDate').innerText = `${weekStartObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${weekEndObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`;
 
@@ -402,7 +384,6 @@
                 { qty: { type: 'count' } }
             );
 
-            // Apply Today DOM
             document.getElementById('valTodayRev').innerText = `₹${formatINR(tSales.totalRev)}`;
             document.getElementById('valTodayExp').innerText = `₹${formatINR(tExp.totalExp)}`;
             document.getElementById('valTodayProd').innerText = (tProd.totalQty || 0).toLocaleString('en-IN');
@@ -431,7 +412,6 @@
                 { totalExp: { type: 'sum', field: 'amount' } }
             );
 
-            // Apply Week DOM
             document.getElementById('valWeekRev').innerText = `₹${formatINR(wSales.totalRev)}`;
             document.getElementById('valWeekExp').innerText = `₹${formatINR(wExp.totalExp)}`;
             document.getElementById('valWeekProd').innerText = (wProd.totalQty || 0).toLocaleString('en-IN');
@@ -443,52 +423,12 @@
             netWeekEl.className = 'fin-val ' + (pWeek >= 0 ? 'profit-positive' : 'profit-negative');
         }
 
-        // Haptic Feedback Utility
+        // Haptics
         function hapticVibrate(pattern) {
             if ('vibrate' in navigator) navigator.vibrate(pattern);
         }
-
         document.querySelectorAll('.nav-item').forEach(el => {
             el.addEventListener('click', () => hapticVibrate(40));
-        });
-
-        // PWA Installation Logic
-        let deferredPrompt;
-        const installBanner = document.getElementById('install-banner');
-        const btnInstall = document.getElementById('btn-install-app');
-        const btnClose = document.getElementById('btn-close-banner');
-
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-
-        if (!isStandalone) {
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                setTimeout(() => {
-                    installBanner.classList.add('show');
-                    hapticVibrate([30, 50, 30]);
-                }, 2000);
-            });
-        }
-
-        window.addEventListener('appinstalled', () => {
-            installBanner.classList.remove('show');
-            deferredPrompt = null;
-        });
-
-        btnInstall.addEventListener('click', async () => {
-            hapticVibrate(50);
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                deferredPrompt = null;
-                installBanner.classList.remove('show');
-            }
-        });
-
-        btnClose.addEventListener('click', () => {
-            hapticVibrate(30);
-            installBanner.classList.remove('show');
         });
     </script>
 </body>
