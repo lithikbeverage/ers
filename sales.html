@@ -115,11 +115,12 @@
 
         /* Sales List Cards */
         .sales-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-        .sale-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px; }
+        .sale-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; display: flex; flex-direction: column; gap: 16px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .sale-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); }
         
         .sc-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .sc-inv { font-weight: 800; font-size: 1.15rem; color: var(--primary-color); margin-bottom: 4px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;}
-        .sc-inv:active { opacity: 0.7; }
+        .sc-inv { font-weight: 800; font-size: 1.15rem; color: var(--primary-color); margin-bottom: 4px; display: inline-flex; align-items: center; gap: 4px; cursor: pointer;}
+        .sc-inv:hover { text-decoration: underline; }
         .sc-customer { font-size: 0.95rem; color: var(--text-main); font-weight: 600; display: flex; align-items: center; gap: 6px; margin-bottom: 4px;}
         .sc-items { font-size: 0.8rem; color: var(--text-muted); }
         
@@ -135,12 +136,42 @@
         .sc-actions { display: flex; gap: 10px; }
         .btn-card-action { background: var(--input-bg); border: 1px solid var(--border-color); width: 38px; height: 38px; border-radius: 10px; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; }
         .btn-card-action:active { transform: scale(0.9); }
+        .btn-edit-sale { color: var(--warning-color); background: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.2); }
         .btn-print { color: var(--primary-color); background: rgba(30, 64, 175, 0.1); border-color: rgba(30, 64, 175, 0.2); }
         .btn-delete { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); }
 
         /* Skeletons */
         .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Modals (Full screen for edit/returns) */
+        .modal { position: fixed; top: 0; right: -100%; width: 100%; height: 100%; background-color: var(--bg-body); z-index: 2000; transition: right 0.3s cubic-bezier(0.2, 0.8, 0.2, 1); overflow-y: auto; padding-bottom: 80px; }
+        .modal.active { right: 0; }
+        .modal-header { display: flex; align-items: center; gap: 15px; padding: 18px 20px; background: var(--bg-surface); position: sticky; top: 0; z-index: 10; border-bottom: 1px solid var(--border-color); justify-content: space-between;}
+        .close-modal { background: none; border: none; color: var(--text-main); cursor: pointer; display: flex; padding: 8px; border-radius: 50%; margin-left: -8px; }
+        .modal-header h2 { margin: 0; font-size: 1.25em; font-weight: 700; }
+
+        /* Edit/Return Sale Styles */
+        .return-item-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 12px; box-shadow: var(--shadow-sm); }
+        .return-item-info { flex: 1; }
+        .return-item-name { font-weight: 700; color: var(--text-main); font-size: 0.95rem; margin-bottom: 4px; }
+        .return-item-meta { font-size: 0.8rem; color: var(--text-muted); }
+        .return-input-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+        .return-input-group label { font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        .return-input-group input { width: 70px; text-align: center; padding: 8px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 700; font-family: 'Inter'; outline: none; transition: all 0.2s; }
+        .return-input-group input:focus { border-color: var(--primary-color); }
+        .return-input-group input:disabled { opacity: 0.5; }
+
+        /* Timeline / History UI */
+        .history-container { margin-top: 30px; }
+        .history-title { font-size: 1rem; font-weight: 700; color: var(--text-main); margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+        .history-item { position: relative; padding-left: 24px; padding-bottom: 20px; border-left: 2px solid var(--border-color); margin-left: 10px; }
+        .history-item:last-child { border-left-color: transparent; }
+        .history-dot { position: absolute; left: -7px; top: 0; width: 12px; height: 12px; border-radius: 50%; background: var(--primary-color); border: 2px solid var(--bg-body); }
+        .history-time { font-size: 0.75rem; font-weight: 700; color: var(--text-muted); margin-bottom: 4px; }
+        .history-user { font-size: 0.85rem; font-weight: 600; color: var(--text-main); margin-bottom: 4px; }
+        .history-details { font-size: 0.85rem; color: var(--text-muted); background: var(--input-bg); padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); line-height: 1.4;}
+        .history-amount { display: inline-block; font-size: 0.8rem; font-weight: 800; padding: 2px 6px; border-radius: 4px; background: rgba(245, 158, 11, 0.1); color: var(--warning-color); margin-top: 6px;}
 
         /* Mini Popup Modals */
         .mini-modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(15, 23, 42, 0.6); z-index: 4000; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; backdrop-filter: blur(4px); }
@@ -188,7 +219,7 @@
         #printArea { display: none; }
 
         @media print {
-            #app-shell, .toast-msg { display: none !important; }
+            #app-shell, .toast-msg, .modal, .mini-modal-overlay { display: none !important; }
             @page { size: A4 portrait; margin: 0mm; }
             body * { visibility: hidden; }
             body { background: white; color: black; margin: 0; padding: 0; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -306,6 +337,36 @@
         <nav class="bottom-nav" id="mobile-nav"></nav>
     </div>
 
+    <!-- Edit/Return Sale Full Modal with Mobile Back Support -->
+    <div class="modal" id="modalReturnSale">
+        <div class="modal-header">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <button class="close-modal" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button>
+                <h2 id="modalReturnTitle">Return Products</h2>
+            </div>
+        </div>
+        <div class="form-group" style="padding: 20px; max-width: 800px; margin: 0 auto;">
+            <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4;">Enter the quantity of items being returned. The stock will be automatically added back to inventory, and the invoice totals will be recalculated.</p>
+            
+            <div id="returnItemsContainer">
+                <!-- Dynamically populated -->
+            </div>
+
+            <button type="button" class="btn-primary" id="btnProcessReturn" style="margin-top: 24px;" onclick="executeReturn()">
+                <span class="material-symbols-outlined">assignment_return</span> Process Return & Update Stock
+            </button>
+
+            <!-- Edit History Timeline -->
+            <div class="history-container" id="historyContainer" style="display: none;">
+                <div class="history-title"><span class="material-symbols-outlined" style="font-size: 20px;">history</span> Edit & Return History</div>
+                <div id="historyTimeline">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mini Modal Summary -->
     <div class="mini-modal-overlay" id="miniModalSummary">
         <div class="mini-modal-content" style="max-width: 350px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
@@ -335,6 +396,7 @@
         </div>
     </div>
 
+    <!-- Mini Modal Delete -->
     <div class="mini-modal-overlay" id="miniModalDelete">
         <div class="mini-modal-content">
             <div style="text-align: center;">
@@ -352,6 +414,7 @@
         </div>
     </div>
 
+    <!-- Print Area -->
     <div id="printArea">
         <div class="print-top-band">
             <div class="print-header-left">
@@ -496,8 +559,26 @@
         };
 
         const formatINR = (val) => Number(val).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        const formatIndDate = (isoString) => {
+            if(!isoString) return "N/A";
+            const d = new Date(isoString);
+            return d.toLocaleString('en-IN', {
+                day: '2-digit', month: 'short', year: 'numeric',
+                hour: '2-digit', minute: '2-digit', hour12: true
+            });
+        };
 
-        // Modals - Properly utilizing History API to support Mobile Back button
+        // Standard Modal Management (Push State API)
+        window.openModal = function(id) { 
+            vibrateApp(20); 
+            const modal = document.getElementById(id);
+            if (!modal.classList.contains('active')) {
+                modal.classList.add('active');
+                history.pushState({ modal: id }, "", "");
+            }
+        };
+
+        // Mini Modal Management
         window.openMiniModal = function(id) { 
             vibrateApp(20); 
             const modal = document.getElementById(id);
@@ -511,15 +592,14 @@
             const modal = document.getElementById(id);
             if (modal.classList.contains('active')) {
                 modal.classList.remove('active');
-                // Pop the state if it was created by us so future back-navigations align correctly
                 if (history.state && history.state.modal === id) {
                     history.back();
                 }
             }
         };
 
-        // When the hardware back button is pressed, the browser natively pops the state
         window.addEventListener('popstate', (e) => {
+            document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active'));
             document.querySelectorAll('.mini-modal-overlay.active').forEach(m => m.classList.remove('active'));
         });
 
@@ -530,6 +610,7 @@
         let isFetching = false;
         let hasMore = true;
         let currentSearch = '';
+        let currentReturnSaleId = null;
         
         // Smart Date Filter Initialization (Local Timezone Fix & Auto UI styling on Reload)
         const todayObj = new Date();
@@ -709,7 +790,15 @@
             }, 300); 
         });
 
-        // --- RENDER CARDS (Fully detailed) ---
+        // --- RENDER CARDS (Fully detailed & clickable) ---
+        window.handleCardClick = function(event, id) {
+            // Prevent opening edit modal if they click actions directly
+            if(event.target.closest('.btn-card-action') || event.target.closest('.sc-inv')) {
+                return;
+            }
+            openReturnModal(id);
+        };
+
         function generateCardHTML(item) {
             let dStr = "N/A";
             let timeStr = ""; 
@@ -732,7 +821,6 @@
             if(item.paymentMode === "Online") payClass = "pay-online";
             if(item.paymentMode === "Credit") payClass = "pay-credit";
 
-            // Generate detailed product list for card body
             let productsHTML = '';
             if (item.items && item.items.length > 0) {
                 productsHTML = '<div style="margin-top: 14px; border-top: 1px dashed var(--border-color); padding-top: 12px; display: flex; flex-direction: column; gap: 8px;">';
@@ -749,7 +837,7 @@
             }
 
             return `
-                <div class="sale-card">
+                <div class="sale-card" onclick="handleCardClick(event, '${item.id}')">
                     <div class="sc-header">
                         <div class="sc-inv" onclick="vibrateApp(10); printSale('${item.id}')">${item.invoiceNo}</div>
                         <div style="display:flex; flex-direction:column; align-items:flex-end;">
@@ -772,6 +860,9 @@
                     <div class="sc-footer">
                         <div class="sc-total">₹${formatINR(grand)}</div>
                         <div class="sc-actions">
+                            <button class="btn-card-action btn-edit-sale" onclick="vibrateApp(20); openReturnModal('${item.id}')" title="Return / Edit Sale">
+                                <span class="material-symbols-outlined" style="font-size: 20px;">edit_note</span>
+                            </button>
                             <button class="btn-card-action btn-print" onclick="vibrateApp(20); printSale('${item.id}')" title="Print Invoice">
                                 <span class="material-symbols-outlined" style="font-size: 20px;">print</span>
                             </button>
@@ -786,6 +877,186 @@
 
         function renderSales(items) { document.getElementById('salesGrid').innerHTML = items.length === 0 && currentSearch !== '' ? '<div style="text-align:center; color:var(--text-muted); padding:40px;">No matches found in loaded data.</div>' : items.map(generateCardHTML).join(''); }
         function renderSalesAppend(items) { document.getElementById('salesGrid').insertAdjacentHTML('beforeend', items.map(generateCardHTML).join('')); }
+
+        // --- RETURN / EDIT ENGINE ---
+        window.openReturnModal = function(id) {
+            const sale = salesCache.find(s => s.id === id);
+            if (!sale) return;
+            currentReturnSaleId = id;
+
+            document.getElementById('modalReturnTitle').innerText = `${sale.invoiceNo} Return`;
+
+            // Render Items
+            let itemsHtml = '';
+            sale.items.forEach((item, idx) => {
+                itemsHtml += `
+                    <div class="return-item-row">
+                        <div class="return-item-info">
+                            <div class="return-item-name">${item.name}</div>
+                            <div class="return-item-meta">Original Sold: <strong>${item.qty} Qty</strong> • Rate: ₹${item.price}</div>
+                        </div>
+                        <div class="return-input-group">
+                            <label>Return</label>
+                            <input type="number" id="ret_qty_${idx}" min="0" max="${item.qty}" value="0" ${item.qty === 0 ? 'disabled' : ''}>
+                        </div>
+                    </div>
+                `;
+            });
+            document.getElementById('returnItemsContainer').innerHTML = itemsHtml;
+
+            // Render History Timeline
+            const historyContainer = document.getElementById('historyContainer');
+            const historyTimeline = document.getElementById('historyTimeline');
+            if (sale.editHistory && sale.editHistory.length > 0) {
+                let histHtml = '';
+                // Render from newest to oldest
+                [...sale.editHistory].reverse().forEach(h => {
+                    const timeFormatted = formatIndDate(h.timestamp);
+                    const before = h.beforeGrand || 0;
+                    const after = h.afterGrand || 0;
+                    histHtml += `
+                        <div class="history-item">
+                            <div class="history-dot"></div>
+                            <div class="history-time">${timeFormatted}</div>
+                            <div class="history-user"><span class="material-symbols-outlined" style="font-size: 14px; vertical-align: middle;">account_circle</span> ${h.user}</div>
+                            <div class="history-details">${h.details}</div>
+                            <div class="history-amount">₹${formatINR(before)} ➔ ₹${formatINR(after)}</div>
+                        </div>
+                    `;
+                });
+                historyTimeline.innerHTML = histHtml;
+                historyContainer.style.display = 'block';
+            } else {
+                historyContainer.style.display = 'none';
+            }
+
+            openModal('modalReturnSale');
+        };
+
+        window.executeReturn = async function() {
+            vibrateApp(30);
+            if (!currentReturnSaleId) return;
+            const sale = salesCache.find(s => s.id === currentReturnSaleId);
+            if (!sale) return;
+
+            let historyDetails = [];
+            let stockUpdates = [];
+            let newItems = [];
+            
+            let baseSum = 0;
+            let cgstSum = 0;
+            let sgstSum = 0;
+            let grandSum = 0;
+            let hasReturns = false;
+            let validQuantities = true;
+
+            sale.items.forEach((item, idx) => {
+                const retInput = document.getElementById(`ret_qty_${idx}`);
+                const retQty = parseInt(retInput.value) || 0;
+
+                if (retQty < 0 || retQty > item.qty) {
+                    validQuantities = false;
+                }
+
+                if (retQty > 0) {
+                    hasReturns = true;
+                    historyDetails.push(`${retQty}x ${item.name}`);
+                    stockUpdates.push({ invId: item.invId, qty: retQty });
+                }
+                
+                const newQty = item.qty - retQty;
+                const newFinalTotal = newQty * item.price;
+                const newBaseTotal = newFinalTotal / (1 + (item.gstPercent / 100));
+                const taxAmount = newFinalTotal - newBaseTotal;
+                
+                newItems.push({
+                    ...item,
+                    qty: newQty,
+                    finalTotal: newFinalTotal,
+                    baseTotal: newBaseTotal
+                });
+
+                baseSum += newBaseTotal;
+                cgstSum += (taxAmount / 2);
+                sgstSum += (taxAmount / 2);
+                grandSum += newFinalTotal;
+            });
+
+            if (!validQuantities) { showToast("Return quantity cannot exceed original quantity.", "error"); return; }
+            if (!hasReturns) { showToast("Enter return quantities to process.", "error"); return; }
+
+            const btn = document.getElementById('btnProcessReturn');
+            btn.disabled = true; 
+            btn.innerHTML = "Processing...";
+
+            // Apply Document Level Adjustments
+            const docDiscount = sale.totals.discount || 0;
+            const docTransport = sale.totals.transport || 0;
+            grandSum = grandSum - docDiscount + docTransport;
+            // Prevent negative grand total logic safety
+            if (grandSum < 0) grandSum = 0;
+
+            const historyEntry = {
+                timestamp: new Date().toISOString(),
+                user: (currentUser && currentUser.displayName) ? currentUser.displayName : "Staff Member",
+                details: "Returned: " + historyDetails.join(", "),
+                beforeGrand: sale.totals.grand,
+                afterGrand: grandSum
+            };
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const saleRef = doc(db, "sales", currentReturnSaleId);
+                    const saleSnap = await transaction.get(saleRef);
+                    if (!saleSnap.exists()) throw "Sale record not found!";
+
+                    // 1. Process Stock Returns to Inventory
+                    stockUpdates.forEach(update => {
+                        if (update.invId) {
+                            const invRef = doc(db, "inventory", update.invId);
+                            transaction.update(invRef, { qty: increment(update.qty), lastUpdated: new Date().toISOString() });
+                        }
+                    });
+
+                    // 2. Prepare History Array
+                    const existingData = saleSnap.data();
+                    const currentHistory = existingData.editHistory || [];
+                    currentHistory.push(historyEntry);
+
+                    // 3. Update Sale Document
+                    transaction.update(saleRef, {
+                        items: newItems,
+                        totals: {
+                            base: baseSum,
+                            cgst: cgstSum,
+                            sgst: sgstSum,
+                            discount: docDiscount,
+                            transport: docTransport,
+                            grand: grandSum
+                        },
+                        editHistory: currentHistory,
+                        lastUpdated: new Date().toISOString()
+                    });
+                });
+
+                showToast("Return processed successfully!", "success");
+                
+                // Navigate back to clear modal state
+                history.back();
+
+                // Refresh data
+                currentSearch = '';
+                document.getElementById('searchInput').value = '';
+                loadSales();
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to process return.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span class="material-symbols-outlined">assignment_return</span> Process Return & Update Stock`;
+            }
+        };
 
         // --- DAILY SUMMARY MATH ---
         window.openSummaryModal = function() {
@@ -866,8 +1137,12 @@
                     return;
                 }
                 const num = (index + 1).toString().padStart(2, '0');
+                
+                // Show standard description, but append a notice if returned completely
+                let returnNotice = item.qty === 0 ? ` <span style="color:var(--danger-color); font-weight:800; font-size:10px;">(RETURNED)</span>` : '';
+                
                 const desc = `
-                    <strong style="font-size:13px; display:block; color:#0f172a; padding-bottom: 3px;">${item.name}</strong>
+                    <strong style="font-size:13px; display:block; color:#0f172a; padding-bottom: 3px;">${item.name}${returnNotice}</strong>
                     <span style="font-size:11px; color:#475569;">GST: ${item.gstPercent}% | Base: ₹${item.baseTotal.toFixed(2)}</span>
                 `;
                 tbody.innerHTML += `
@@ -916,7 +1191,8 @@
                     
                     // 1. Loop through sold items and return them to Inventory
                     sale.items.forEach(item => {
-                        if(item.invId) {
+                        // Ensure we only return the current active quantity (excluding already returned items)
+                        if(item.invId && item.qty > 0) {
                             const invRef = doc(db, "inventory", item.invId);
                             transaction.update(invRef, { qty: increment(item.qty), lastUpdated: new Date().toISOString() });
                         }
