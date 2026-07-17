@@ -176,13 +176,11 @@
         .btn-add-row:active { background: var(--input-bg); }
 
         /* Auto Calculator Table specific for Production */
-        .calc-row { display: grid; align-items: center; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); }
-        .calc-row input { padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-main); font-size: 0.9rem; width: 100%; outline: none; text-align: center;}
+        .calc-row { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; padding: 12px 16px; border-bottom: 1px solid var(--border-color); align-items: center; font-size: 0.9rem; }
+        .calc-row input { padding: 8px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-surface); color: var(--text-main); font-size: 0.9rem; width: 100%; outline: none; text-align: center;}
         .calc-row input:focus { border-color: var(--danger-color); }
-        .calc-total-col { font-weight: 800; color: var(--danger-color); }
-
-        .mobile-label-calc { display: none; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; text-align: center; }
-        .mobile-full-width { display: block; font-weight: 700; color: var(--primary-color); }
+        .calc-total-col { font-weight: 800; color: var(--danger-color); text-align: right; }
+        .mobile-label { display: none; }
 
         .btn-primary { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--primary-color); color: white; font-size: 1.1em; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
         .btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
@@ -210,8 +208,6 @@
             nav.bottom-nav { display: none; }
             nav.sidebar { display: flex; }
             .item-row { grid-template-columns: 3fr 1fr auto; }
-            .calc-row { grid-template-columns: 2fr 1fr 1fr 1fr; gap: 10px; padding: 12px 16px; }
-            .calc-total-col { text-align: right; }
         }
         @media (max-width: 767px) {
             /* Mobile tweaks for header date filter */
@@ -219,14 +215,15 @@
             .mobile-filter-icon { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); transition: all 0.2s; }
             .mobile-filter-icon.active-filter { background: rgba(30, 64, 175, 0.05); color: var(--primary-color); border-color: var(--primary-color); }
             
-            /* Mobile calc row full rewrite for perfect table */
+            /* Enhanced Mobile calc row (Table fix) */
             #calcHeaderDesktop { display: none; }
-            .calc-row { grid-template-columns: 1fr 1fr 1fr; gap: 12px; padding: 16px; align-items: end; }
-            .mobile-full-width { grid-column: span 3; font-size: 1.05rem; border-bottom: 1px dashed var(--border-color); padding-bottom: 8px; margin-bottom: 4px; }
-            .mobile-label-calc { display: block; }
-            .calc-row .field-wrap { display: flex; flex-direction: column; align-items: center; }
-            .calc-row input { width: 100%; max-width: 80px; }
-            .calc-total-col { text-align: center; }
+            .mobile-label { display: block; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;}
+            .calc-row { grid-template-columns: 1fr 1fr; gap: 12px; padding: 16px; border: 1px solid var(--border-color); border-radius: 12px; margin-bottom: 12px; background: var(--input-bg); align-items: start;}
+            .calc-row > div:nth-child(1) { grid-column: span 2; font-size: 1.1rem; color: var(--primary-color); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; font-weight: 800;}
+            .calc-row > div:nth-child(2) { grid-column: 1; }
+            .calc-row > div:nth-child(3) { grid-column: 2; }
+            .calc-row > div:nth-child(4) { grid-column: span 2; border-top: 1px dashed var(--border-color); padding-top: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 1.1em;}
+            .calc-row .calc-total-col { text-align: right; font-size: 1.2em;}
         }
     </style>
 </head>
@@ -364,7 +361,7 @@
             </div>
 
             <label style="display: block; margin-bottom: 8px; margin-top: 24px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase;">Raw Materials to Deduct</label>
-            <div class="items-section">
+            <div class="items-section" style="background: transparent; border: none; box-shadow: none;">
                 <div class="items-header" id="calcHeaderDesktop">
                     <div style="flex: 2;">Raw Material</div>
                     <div style="flex: 1; text-align: center;">Required</div>
@@ -373,7 +370,7 @@
                 </div>
                 
                 <div id="calcContainer">
-                    <div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">
+                    <div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.9rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">
                         Select a product and enter quantity to auto-calculate required raw materials.
                     </div>
                 </div>
@@ -427,11 +424,7 @@
             <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Define exactly which raw materials make up <strong>one unit</strong> of your finished inventory goods.</p>
             
             <div id="recipeGrid">
-                <!-- Loaded Dynamically -->
-            </div>
-            <div id="scrollLoaderRecipes" style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; justify-content: center; gap: 10px;">
-                <span class="skeleton" style="width:16px; height:16px; border-radius:50%;"></span> Loading recipes...
-            </div>
+                </div>
         </div>
     </div>
 
@@ -495,7 +488,7 @@
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
         import { collection, doc, getDoc, setDoc, getDocs, query, orderBy, limit, startAfter, where, writeBatch, serverTimestamp, increment, runTransaction, updateDoc, deleteDoc, arrayUnion, arrayRemove } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Navigation Setup
+        // Navigation Setup (Updated to match full structure)
         const navItems = [
             { name: 'Dashboard', path: 'index.html', icon: '<path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>' },
             { name: 'Billing', path: 'bill.html', icon: '<path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>' },
@@ -572,25 +565,22 @@
 
         // Global Variables
         let currentUser = null;
-        let masterRawGoods = []; // Used for calculations & reversals
+        let masterRawGoods = [];
         let productionCache = [];
         let machineList = [];
-        
-        // Main Feed Pagination
         let lastVisibleDoc = null;
         let isFetching = false;
         let hasMore = true;
         let currentSearch = '';
         let filterDate = '';
+        let recipeItemsCounter = 0;
+        let currentEditingRecipeId = null;
 
-        // Dropdown Pagination
-        let ddCursors = {}; 
+        // Optimized Pagination Trackers for Inventory Dropdowns
+        let ddCursors = {};
         let lastRecipeDoc = null;
         let hasMoreRecipes = true;
         let isLoadingRecipes = false;
-
-        let recipeItemsCounter = 0;
-        let currentEditingRecipeId = null;
 
         // Date Filter
         window.applyDateFilter = function(val) {
@@ -634,15 +624,14 @@
         });
 
         async function fetchMasterRawGoods() {
-            // Raw materials fetched entirely since it's a small master list and essential for damage heuristics
             try {
                 const q = query(collection(db, "raw_goods_master"), orderBy("name"));
                 const snap = await getDocs(q);
                 masterRawGoods = [];
                 snap.forEach(doc => masterRawGoods.push({ id: doc.id, ...doc.data() }));
-            } catch (err) { console.error("Error fetching raw goods:", err); }
+            } catch (err) {  } // Silenced as requested
         }
-        
+
         async function fetchMachines() {
             try {
                 const docSnap = await getDoc(doc(db, "settings", "machines"));
@@ -653,18 +642,18 @@
                     machineList = [];
                 }
                 populateMachineDropdown();
-            } catch (err) { console.error("Error fetching machines:", err); }
+            } catch (err) { } 
         }
 
         // ==========================================
-        // 0. PAGINATED DROPDOWNS LOGIC (FIREBASE READ OPTIMIZATION)
+        // PAGINATED DROPDOWNS LOGIC (FIREBASE READ OPTIMIZATION)
         // ==========================================
         window.handleDropdownChange = function(selectElement, type) {
             if (selectElement.value === "LOAD_MORE") {
                 selectElement.selectedIndex = 0;
                 loadDropdownData(selectElement.id, type, true);
-            } else if (selectElement.id === 'pdProduct') {
-                handleProductSelection();
+            } else {
+                if (selectElement.id === 'pdProduct') handleProductSelection();
             }
         };
 
@@ -719,8 +708,7 @@
                     ddCursors[selectId] = null;
                 }
             } catch (e) {
-                console.error("Error loading dropdown options:", e);
-                showToast("Failed to fetch inventory options", "error");
+               // Silenced as requested
             }
         }
 
@@ -740,7 +728,7 @@
                 return;
             }
             
-            container.innerHTML = machineList.map((m) => `
+            container.innerHTML = machineList.map((m, index) => `
                 <div class="item-row" style="grid-template-columns: 1fr auto;">
                     <div style="font-weight: 600; color: var(--text-main);">${m}</div>
                     <button class="btn-remove-row" onclick="vibrateApp(20); deleteMachine('${m}')">
@@ -764,9 +752,7 @@
             if(machineList.includes(name)) { showToast("Machine already exists", "error"); return; }
             
             try {
-                await updateDoc(doc(db, "settings", "machines"), {
-                    list: arrayUnion(name)
-                });
+                await updateDoc(doc(db, "settings", "machines"), { list: arrayUnion(name) });
                 machineList.push(name);
                 input.value = '';
                 renderMachinesList();
@@ -777,9 +763,7 @@
 
         window.deleteMachine = async function(name) {
             try {
-                await updateDoc(doc(db, "settings", "machines"), {
-                    list: arrayRemove(name)
-                });
+                await updateDoc(doc(db, "settings", "machines"), { list: arrayRemove(name) });
                 machineList = machineList.filter(m => m !== name);
                 renderMachinesList();
                 populateMachineDropdown();
@@ -799,19 +783,15 @@
         async function loadRecipes(isAppend = false) {
             if (isLoadingRecipes) return;
             if (isAppend && !hasMoreRecipes) return;
-
             isLoadingRecipes = true;
+
             const grid = document.getElementById('recipeGrid');
-            const loader = document.getElementById('scrollLoaderRecipes');
-            
             if (!isAppend) {
                 grid.innerHTML = '<div style="text-align:center; padding: 20px;"><span class="skeleton" style="display:inline-block; width:20px; height:20px; border-radius:50%;"></span></div>';
                 lastRecipeDoc = null;
                 hasMoreRecipes = true;
-            } else {
-                loader.style.display = 'flex';
             }
-            
+
             try {
                 let qConstraints = [where("hasRecipe", "==", true), orderBy("name")];
                 if (isAppend && lastRecipeDoc) qConstraints.push(startAfter(lastRecipeDoc));
@@ -820,11 +800,9 @@
                 const q = query(collection(db, "inventory"), ...qConstraints);
                 const snap = await getDocs(q);
                 
-                loader.style.display = 'none';
-
                 if (snap.empty) {
                     if (!isAppend) {
-                        grid.innerHTML = '<div style="text-align:center; padding: 30px; color:var(--text-muted); background:var(--bg-surface); border-radius:12px; border:1px dashed var(--border-color);">No recipes defined yet.<br>Click "Add Recipe" to configure one.</div>';
+                        grid.innerHTML = '<div style="text-align:center; padding: 30px; color:var(--text-muted); background:var(--bg-surface); border-radius:12px; border:1px dashed var(--border-color);">No recipes defined yet.<br>Click "Add Recipe" to map finished goods to raw materials.</div>';
                     }
                     hasMoreRecipes = false;
                     isLoadingRecipes = false;
@@ -836,9 +814,8 @@
 
                 let html = '';
                 snap.forEach(docSnap => {
-                    const r = { id: docSnap.id, ...docSnap.data() };
-                    
-                    const materialsStr = r.recipe.map(item => `
+                    const rData = docSnap.data();
+                    const materialsStr = (rData.recipe || []).map(item => `
                         <div class="recipe-item">
                             <span>${item.name}</span>
                             <div>${item.qty} ${item.uom || ''}</div>
@@ -846,12 +823,12 @@
                     `).join('');
                     
                     html += `
-                        <div class="recipe-card" onclick="openRecipeBuilder('${r.id}')" style="cursor:pointer; transition:transform 0.2s;">
+                        <div class="recipe-card" onclick="openRecipeBuilder('${docSnap.id}')" style="cursor:pointer; transition:transform 0.2s;">
                             <div class="recipe-header">
-                                <div class="recipe-title">${r.name}</div>
+                                <div class="recipe-title">${rData.name}</div>
                                 <div class="recipe-badge">Configured</div>
                             </div>
-                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Required per Unit:</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Uses (Raw Materials):</div>
                             ${materialsStr}
                         </div>
                     `;
@@ -860,16 +837,10 @@
                 if (!isAppend) grid.innerHTML = html;
                 else grid.innerHTML += html;
                 
-            } catch(e) {
-                console.error(e);
-                loader.style.display = 'none';
-                if (!isAppend) grid.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">Error loading recipes.</div>';
-            } finally {
-                isLoadingRecipes = false;
-            }
+            } catch(e) { } // Silenced
+            finally { isLoadingRecipes = false; }
         }
 
-        // Infinite scroll for Recipe Master
         document.getElementById('recipeMasterScrollArea').addEventListener('scroll', function() {
             if ((this.scrollTop + this.clientHeight) >= (this.scrollHeight - 40)) {
                 if (!isLoadingRecipes && hasMoreRecipes) loadRecipes(true);
@@ -880,9 +851,11 @@
             vibrateApp(20);
             document.getElementById('recipeItemsContainer').innerHTML = '';
             
+            // Initiate highly optimized paginated dropdowns for all inventory
             await loadDropdownData('rbInventorySelect', 'all', false);
-            const selectInv = document.getElementById('rbInventorySelect');
             
+            const selectInv = document.getElementById('rbInventorySelect');
+
             if (editInvId) {
                 currentEditingRecipeId = editInvId;
                 document.getElementById('recipeBuilderTitle').innerText = "Edit Recipe";
@@ -903,7 +876,7 @@
                             product.recipe.forEach(ri => addRecipeItemRow(ri.rawGoodId, ri.qty));
                         }
                     }
-                } catch(e) { console.error(e); }
+                } catch(e) { }
             } else {
                 currentEditingRecipeId = null;
                 document.getElementById('recipeBuilderTitle').innerText = "Create Recipe";
@@ -941,7 +914,7 @@
         document.getElementById('btnSaveRecipe').addEventListener('click', async () => {
             vibrateApp(30);
             const invId = document.getElementById('rbInventorySelect').value;
-            if (!invId || invId === "LOAD_MORE") { showToast("Please select a valid finished product.", "error"); return; }
+            if (!invId || invId === "LOAD_MORE") { showToast("Please select a finished product.", "error"); return; }
             
             const items = [];
             let valid = true;
@@ -985,10 +958,12 @@
         // 3. DAILY PRODUCTION LOGGING
         // ==========================================
         window.openProductionModal = async function(editId = null) {
-            document.getElementById('calcContainer').innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">Select a product and enter quantity to auto-calculate required raw materials.</div>';
+            document.getElementById('calcContainer').innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.9rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">Select a product and enter quantity to auto-calculate required raw materials.</div>';
             
-            await loadDropdownData('pdProduct', 'recipes', false);
             const selectProd = document.getElementById('pdProduct');
+            
+            // Initiate highly optimized paginated dropdowns for recipes
+            await loadDropdownData('pdProduct', 'recipes', false);
 
             if (editId) {
                 const data = productionCache.find(p => p.id === editId);
@@ -1007,16 +982,16 @@
                 document.getElementById('pdTiming').value = data.timing || '';
                 document.getElementById('pdRemarks').value = data.remarks || '';
                 
-                // Force append if missing in first page
+                // Fetch document if missing from initial 25 limits
                 if(!selectProd.querySelector(`option[value="${data.inventoryId}"]`)) {
                     try {
                         const docSnap = await getDoc(doc(db, "inventory", data.inventoryId));
                         if(docSnap.exists()) {
-                            const pData = docSnap.data();
+                            const p = docSnap.data();
                             let opt = document.createElement('option');
                             opt.value = docSnap.id;
-                            opt.text = pData.name;
-                            if(pData.recipe) opt.setAttribute('data-recipe', JSON.stringify(pData.recipe));
+                            opt.text = p.name;
+                            if(p.recipe) opt.setAttribute('data-recipe', JSON.stringify(p.recipe));
                             selectProd.appendChild(opt);
                         }
                     } catch(e) {}
@@ -1060,19 +1035,15 @@
             const container = document.getElementById('calcContainer');
             
             if (!invId || invId === "LOAD_MORE") return;
-
-            const selectedOpt = selectProd.options[selectProd.selectedIndex];
-            const recipeDataStr = selectedOpt.getAttribute('data-recipe');
             
-            if (!recipeDataStr) {
-                container.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--danger-color); font-size: 0.9rem;">No valid recipe found for this product.</div>';
-                return;
-            }
-
-            const recipe = JSON.parse(recipeDataStr);
+            const selectedOpt = selectProd.options[selectProd.selectedIndex];
+            const recipeStr = selectedOpt.getAttribute('data-recipe');
+            if (!recipeStr) return;
+            
+            const recipe = JSON.parse(recipeStr);
 
             if (qtyProd <= 0) {
-                container.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.9rem;">Enter a valid quantity > 0 to see calculations.</div>';
+                container.innerHTML = '<div style="padding: 30px; text-align: center; color: var(--text-muted); font-size: 0.9rem; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px;">Enter a valid quantity > 0 to see calculations.</div>';
                 return;
             }
 
@@ -1088,20 +1059,17 @@
 
                 html += `
                     <div class="calc-row" data-rawid="${r.rawGoodId}" data-name="${r.name}" data-baseqty="${r.qty}">
-                        <div class="mobile-full-width">${r.name}</div>
-                        
-                        <div class="field-wrap">
-                            <span class="mobile-label-calc">Required</span>
-                            <div style="font-weight:600; color:var(--text-main);" class="val-req">${reqQty}</div>
+                        <div>${r.name}</div>
+                        <div>
+                            <label class="mobile-label">Required</label>
+                            <div style="text-align:center; font-weight:600; color:var(--text-main); margin-top:8px;" class="val-req">${reqQty}</div>
                         </div>
-                        
-                        <div class="field-wrap">
-                            <span class="mobile-label-calc">Wastage (+/-)</span>
+                        <div>
+                            <label class="mobile-label">Wastage (+/Broken)</label>
                             <input type="number" class="val-waste" min="0" value="${savedWastage}" placeholder="0" oninput="updateRowTotal(this, ${reqQty})">
                         </div>
-                        
-                        <div class="field-wrap">
-                            <span class="mobile-label-calc">Total Deduct</span>
+                        <div>
+                            <label class="mobile-label">Total Deduct</label>
                             <div class="calc-total-col val-total">${reqQty + savedWastage}</div>
                         </div>
                     </div>
@@ -1123,10 +1091,8 @@
             const editId = document.getElementById('editProdId').value;
             const batchNo = document.getElementById('pdBatchNo').value.trim();
             const dateStr = document.getElementById('pdDate').value;
-            
             const selectProd = document.getElementById('pdProduct');
             const invId = selectProd.value;
-            
             const qtyProduced = parseInt(document.getElementById('pdQty').value);
             
             const machine = document.getElementById('pdMachine').value;
@@ -1164,9 +1130,9 @@
             const btn = document.getElementById('btnSaveProduction');
             btn.disabled = true; btn.innerHTML = "Processing Factory Logistics...";
 
-            // Determine identifiers for specific stock deduction logic heuristically
-            const preformItem = masterRawGoods.find(g => g.name.toLowerCase().includes('preform'));
-            const bottleItem = masterRawGoods.find(g => g.name.toLowerCase().includes('bottle') && !g.name.toLowerCase().includes('cap'));
+            // Determine identifiers directly from rawUsed mapped arrays
+            const preformItem = rawUsed.find(g => g.name.toLowerCase().includes('preform'));
+            const bottleItem = rawUsed.find(g => g.name.toLowerCase().includes('bottle') && !g.name.toLowerCase().includes('cap'));
 
             try {
                 await runTransaction(db, async (transaction) => {
@@ -1191,10 +1157,6 @@
                         searchTokens: generateSearchTokens(batchNo, productName),
                         lastUpdated: new Date().toISOString()
                     };
-                    
-                    // Track explicitly for flawless undo later
-                    if (preformItem) payload.preformItemId = preformItem.id;
-                    if (bottleItem) payload.bottleItemId = bottleItem.id;
 
                     if (isUpdate) {
                         const oldData = productionCache.find(p => p.id === editId);
@@ -1202,30 +1164,36 @@
 
                         transaction.update(invRef, { qty: increment(-oldData.qtyProduced) });
                         transaction.update(invRef, { qty: increment(qtyProduced), lastUpdated: new Date().toISOString() });
-
+                        
+                        // 1. Revert Old Raw Materials 
                         oldData.rawUsed.forEach(oldRaw => {
                             const rawRef = doc(db, "raw_goods_master", oldRaw.rawGoodId);
                             transaction.update(rawRef, { currentStock: increment(oldRaw.totalDeducted) });
                         });
                         
-                        // Revert explicitly saved damage links
-                        if (oldData.preformDamage > 0 && oldData.preformItemId) {
-                            transaction.update(doc(db, "raw_goods_master", oldData.preformItemId), { currentStock: increment(oldData.preformDamage) });
+                        // Revert Specific Extra damages based on historical records if it exists
+                        const oldPreformItem = oldData.rawUsed.find(g => g.name.toLowerCase().includes('preform'));
+                        const oldBottleItem = oldData.rawUsed.find(g => g.name.toLowerCase().includes('bottle') && !g.name.toLowerCase().includes('cap'));
+                        
+                        if (oldData.preformDamage > 0 && oldPreformItem) {
+                            transaction.update(doc(db, "raw_goods_master", oldPreformItem.rawGoodId), { currentStock: increment(oldData.preformDamage) });
                         }
-                        if (oldData.bottleDamage > 0 && oldData.bottleItemId) {
-                            transaction.update(doc(db, "raw_goods_master", oldData.bottleItemId), { currentStock: increment(oldData.bottleDamage) });
+                        if (oldData.bottleDamage > 0 && oldBottleItem) {
+                            transaction.update(doc(db, "raw_goods_master", oldBottleItem.rawGoodId), { currentStock: increment(oldData.bottleDamage) });
                         }
 
-                        // Apply new
+                        // 2. Deduct New Raw Materials
                         rawUsed.forEach(newRaw => {
                             const rawRef = doc(db, "raw_goods_master", newRaw.rawGoodId);
                             transaction.update(rawRef, { currentStock: increment(-newRaw.totalDeducted), lastUpdated: new Date().toISOString() });
                         });
+                        
+                        // Deduct new specific Extra damages
                         if (preformItem && preformDamage > 0) {
-                            transaction.update(doc(db, "raw_goods_master", preformItem.id), { currentStock: increment(-preformDamage) });
+                            transaction.update(doc(db, "raw_goods_master", preformItem.rawGoodId), { currentStock: increment(-preformDamage) });
                         }
                         if (bottleItem && bottleDamage > 0) {
-                            transaction.update(doc(db, "raw_goods_master", bottleItem.id), { currentStock: increment(-bottleDamage) });
+                            transaction.update(doc(db, "raw_goods_master", bottleItem.rawGoodId), { currentStock: increment(-bottleDamage) });
                         }
 
                     } else {
@@ -1240,12 +1208,11 @@
                             transaction.update(rawRef, { currentStock: increment(-newRaw.totalDeducted), lastUpdated: new Date().toISOString() });
                         });
                         
-                        // Deduct Extra specific damages
                         if (preformItem && preformDamage > 0) {
-                            transaction.update(doc(db, "raw_goods_master", preformItem.id), { currentStock: increment(-preformDamage), lastUpdated: new Date().toISOString() });
+                            transaction.update(doc(db, "raw_goods_master", preformItem.rawGoodId), { currentStock: increment(-preformDamage), lastUpdated: new Date().toISOString() });
                         }
                         if (bottleItem && bottleDamage > 0) {
-                            transaction.update(doc(db, "raw_goods_master", bottleItem.id), { currentStock: increment(-bottleDamage), lastUpdated: new Date().toISOString() });
+                            transaction.update(doc(db, "raw_goods_master", bottleItem.rawGoodId), { currentStock: increment(-bottleDamage), lastUpdated: new Date().toISOString() });
                         }
                     }
                 });
@@ -1276,25 +1243,30 @@
 
             const btn = document.getElementById('btnConfirmDeleteProduction');
             btn.disabled = true; btn.innerText = "Reversing...";
+            
+            const preformItem = existingData.rawUsed.find(g => g.name.toLowerCase().includes('preform'));
+            const bottleItem = existingData.rawUsed.find(g => g.name.toLowerCase().includes('bottle') && !g.name.toLowerCase().includes('cap'));
 
             try {
                 await runTransaction(db, async (transaction) => {
                     const prodRef = doc(db, "production", id);
                     const invRef = doc(db, "inventory", existingData.inventoryId);
                     
+                    // Revert Finished Goods (subtract what was produced)
                     transaction.update(invRef, { qty: increment(-existingData.qtyProduced), lastUpdated: new Date().toISOString() });
 
+                    // Revert all generic Raw Materials mapping incuding sleeves, labels etc (add back what was deducted via recipe wastage & req)
                     existingData.rawUsed.forEach(oldRaw => {
                         const rawRef = doc(db, "raw_goods_master", oldRaw.rawGoodId);
                         transaction.update(rawRef, { currentStock: increment(oldRaw.totalDeducted), lastUpdated: new Date().toISOString() });
                     });
                     
-                    // Revert explicitly saved damage links flawlessly
-                    if (existingData.preformDamage > 0 && existingData.preformItemId) {
-                        transaction.update(doc(db, "raw_goods_master", existingData.preformItemId), { currentStock: increment(existingData.preformDamage) });
+                    // Revert specific damages 
+                    if (existingData.preformDamage > 0 && preformItem) {
+                        transaction.update(doc(db, "raw_goods_master", preformItem.rawGoodId), { currentStock: increment(existingData.preformDamage) });
                     }
-                    if (existingData.bottleDamage > 0 && existingData.bottleItemId) {
-                        transaction.update(doc(db, "raw_goods_master", existingData.bottleItemId), { currentStock: increment(existingData.bottleDamage) });
+                    if (existingData.bottleDamage > 0 && bottleItem) {
+                        transaction.update(doc(db, "raw_goods_master", bottleItem.rawGoodId), { currentStock: increment(existingData.bottleDamage) });
                     }
 
                     transaction.delete(prodRef);
