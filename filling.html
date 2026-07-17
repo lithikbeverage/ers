@@ -559,7 +559,10 @@
                 }
             } catch (e) {
                 console.error("Error loading dropdown options:", e);
-                showToast("Failed to fetch inventory options", "error");
+                showToast("Failed to fetch inventory options. Check if a composite index is missing.", "error");
+                if (e.message && e.message.includes('index')) {
+                    console.error("⚠️ Create the required index here: https://console.firebase.google.com/project/_/database/firestore/indexes");
+                }
             }
         }
 
@@ -632,9 +635,16 @@
                 else grid.innerHTML += html;
                 
             } catch(e) {
-                console.error(e);
+                console.error("Error loading recipes:", e);
                 loader.style.display = 'none';
-                if (!isAppend) grid.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">Error loading recipes.</div>';
+                if (!isAppend) {
+                    grid.innerHTML = `
+                        <div style="text-align:center; padding:20px; color:var(--danger-color); font-size:0.9rem;">
+                            Error loading recipes. A composite index is likely required.<br>
+                            <a href="https://console.firebase.google.com/project/_/database/firestore/indexes" target="_blank" style="color:var(--primary-color); text-decoration:underline; font-weight:600; display:block; margin-top:10px;">Open Firebase Index Page</a>
+                        </div>
+                    `;
+                }
             } finally {
                 isLoadingRecipes = false;
             }
