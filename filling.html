@@ -160,6 +160,28 @@
         .toast-msg.success { background: var(--success-color); }
         .toast-msg.show { display: flex; opacity: 1; transform: translate(-50%, 0); }
 
+        /* New additions for Date Filter and Loader */
+        .header-date-picker {
+            padding: 8px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            height: 38px;
+        }
+        .header-date-picker:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .header-date-picker.active-filter { background: rgba(30, 64, 175, 0.05); color: var(--primary-color); border-color: var(--primary-color); font-weight: 600; }
+        .clear-date-btn { display: none; background: rgba(239, 68, 68, 0.1); border: none; color: var(--danger-color); cursor: pointer; height: 38px; width: 38px; border-radius: 10px; align-items: center; justify-content: center; transition: all 0.2s; position: relative; z-index: 10; }
+        .clear-date-btn.active { display: flex; }
+        .mobile-filter-icon { display: none; }
+
+        #scrollLoader { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; justify-content: center; gap: 10px; }
+
         @media (min-width: 768px) {
             #app-shell { flex-direction: column; }
             .layout-container { flex-direction: row; }
@@ -176,6 +198,11 @@
             .item-row > :nth-child(3) { grid-column: 2; } /* Reject */
             .item-row > :nth-child(4) { grid-column: 1; } /* Cost */
             .item-row > :nth-child(5) { grid-column: 2; justify-self: end; align-self: end; } /* Remove btn */
+
+            /* Mobile tweaks for header date filter */
+            .header-date-picker { position: absolute; left: 0; top: 0; width: 38px; height: 38px; opacity: 0; z-index: 5; padding: 0; margin: 0; }
+            .mobile-filter-icon { display: flex; align-items: center; justify-content: center; width: 38px; height: 38px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); transition: all 0.2s; }
+            .mobile-filter-icon.active-filter { background: rgba(30, 64, 175, 0.05); color: var(--primary-color); border-color: var(--primary-color); }
         }
     </style>
 </head>
@@ -190,6 +217,15 @@
                 <h1>FILLING OPERATIONS</h1>
             </div>
             <div class="header-right">
+                <div class="date-filter-container" style="display: flex; align-items: center; gap: 6px; position: relative;">
+                    <div class="mobile-filter-icon" id="mobileFilterIcon">
+                        <span class="material-symbols-outlined" style="font-size: 22px;">filter_alt</span>
+                    </div>
+                    <input type="date" id="masterDateFilter" class="header-date-picker" title="Filter by Date" onchange="vibrateApp(10); applyDateFilter(this.value)">
+                    <button id="clearDateBtn" class="clear-date-btn" onclick="vibrateApp(10); clearDateFilter()" title="Clear Filter">
+                        <span class="material-symbols-outlined" style="font-size: 20px;">close</span>
+                    </button>
+                </div>
                 <span class="material-symbols-outlined" style="font-size: 26px; color: var(--primary-color); cursor: pointer; padding: 6px; background: rgba(30, 64, 175, 0.1); border-radius: 10px;" onclick="vibrateApp(20); openRecipeMaster()" title="Filling Recipe Master">precision_manufacturing</span>
             </div>
         </header>
@@ -211,6 +247,11 @@
 
                     <div class="filling-grid" id="fillingGrid">
                         <!-- Loaded dynamically -->
+                    </div>
+
+                    <!-- Scroll Loader added -->
+                    <div id="scrollLoader">
+                        <span class="skeleton" style="width:16px; height:16px; border-radius:50%;"></span> Loading records...
                     </div>
                 </div>
             </div>
@@ -406,10 +447,34 @@
         let isLoadingLogs = false;
         let hasMoreLogs = true;
         let currentSearchQuery = '';
+        let filterDate = ''; // Added global variable for date filter
         let searchDebounceTimeout = null;
         let inventoryProducts = [];
         let itemsCounter = 0;
         let fillingLogsCache = [];
+
+        // Date Filter Logic Added
+        window.applyDateFilter = function(val) {
+            filterDate = val;
+            const input = document.getElementById('masterDateFilter');
+            const clearBtn = document.getElementById('clearDateBtn');
+            const mobileIcon = document.getElementById('mobileFilterIcon');
+            
+            if (val) {
+                input.classList.add('active-filter');
+                if(mobileIcon) mobileIcon.classList.add('active-filter');
+                clearBtn.classList.add('active');
+            } else {
+                input.classList.remove('active-filter');
+                if(mobileIcon) mobileIcon.classList.remove('active-filter');
+                clearBtn.classList.remove('active');
+            }
+            loadFillingLogs(false);
+        };
+        window.clearDateFilter = function() {
+            document.getElementById('masterDateFilter').value = '';
+            applyDateFilter('');
+        };
 
         // Initialization
         const auth = getAuth(app);
@@ -766,32 +831,59 @@
 
             isLoadingLogs = true;
             const grid = document.getElementById('fillingGrid');
+            const scrollLoader = document.getElementById('scrollLoader');
             
             if (!isAppend) {
-                grid.innerHTML = '<div class="loading-indicator"><span class="material-symbols-outlined">sync</span> Loading logs...</div>';
+                // Skeleton UI implementation
+                let skeletonHtml = `
+                    <div class="filling-card" style="padding: 20px; min-height: 160px; display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--border-color);">
+                        <div class="skeleton" style="width: 50%; height: 24px; border-radius: 4px;"></div>
+                        <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                        <div class="skeleton" style="width: 30%; height: 20px; border-radius: 4px; margin-top: auto;"></div>
+                    </div>
+                    <div class="filling-card" style="padding: 20px; min-height: 160px; display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--border-color);">
+                        <div class="skeleton" style="width: 50%; height: 24px; border-radius: 4px;"></div>
+                        <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                        <div class="skeleton" style="width: 30%; height: 20px; border-radius: 4px; margin-top: auto;"></div>
+                    </div>
+                    <div class="filling-card" style="padding: 20px; min-height: 160px; display: flex; flex-direction: column; gap: 12px; border: 1px solid var(--border-color);">
+                        <div class="skeleton" style="width: 50%; height: 24px; border-radius: 4px;"></div>
+                        <div class="skeleton" style="width: 100%; height: 40px; border-radius: 8px;"></div>
+                        <div class="skeleton" style="width: 30%; height: 20px; border-radius: 4px; margin-top: auto;"></div>
+                    </div>
+                `;
+                grid.innerHTML = skeletonHtml;
                 lastVisibleDoc = null;
                 hasMoreLogs = true;
                 fillingLogsCache = [];
             } else {
                 removeLoadingIndicator();
-                grid.innerHTML += '<div id="paginationLoading" class="loading-indicator"><span class="material-symbols-outlined">sync</span> Loading more logs...</div>';
+                scrollLoader.style.display = 'flex'; // Trigger standard bottom loader
             }
             
             try {
-                let q;
-                if (currentSearchQuery) {
-                    if (isAppend && lastVisibleDoc) {
-                        q = query(collection(db, "filling_logs"), orderBy("company"), where("company", ">=", currentSearchQuery), where("company", "<=", currentSearchQuery + "\uf8ff"), startAfter(lastVisibleDoc), limit(PAGE_LIMIT));
-                    } else {
-                        q = query(collection(db, "filling_logs"), orderBy("company"), where("company", ">=", currentSearchQuery), where("company", "<=", currentSearchQuery + "\uf8ff"), limit(PAGE_LIMIT));
-                    }
-                } else {
-                    if (isAppend && lastVisibleDoc) {
-                        q = query(collection(db, "filling_logs"), orderBy("date", "desc"), startAfter(lastVisibleDoc), limit(PAGE_LIMIT));
-                    } else {
-                        q = query(collection(db, "filling_logs"), orderBy("date", "desc"), limit(PAGE_LIMIT));
-                    }
+                let qRef = collection(db, "filling_logs");
+                let constraints = [];
+                
+                // Add Date Filter Logic
+                if (filterDate) {
+                    constraints.push(where("date", "==", filterDate));
                 }
+
+                if (currentSearchQuery) {
+                    constraints.push(orderBy("company"));
+                    constraints.push(where("company", ">=", currentSearchQuery));
+                    constraints.push(where("company", "<=", currentSearchQuery + "\uf8ff"));
+                } else {
+                    constraints.push(orderBy("date", "desc"));
+                }
+                
+                if (isAppend && lastVisibleDoc) {
+                    constraints.push(startAfter(lastVisibleDoc));
+                }
+                constraints.push(limit(PAGE_LIMIT));
+
+                let q = query(qRef, ...constraints);
 
                 const snap = await getDocs(q);
                 removeLoadingIndicator();
@@ -868,8 +960,11 @@
         }
 
         function removeLoadingIndicator() {
+            // Keep any original logic, additionally hide the new #scrollLoader
             const activeIndicator = document.getElementById('paginationLoading');
             if (activeIndicator) activeIndicator.remove();
+            const scrollLoader = document.getElementById('scrollLoader');
+            if (scrollLoader) scrollLoader.style.display = 'none';
         }
 
         function setupPaginationAndSearch() {
