@@ -880,13 +880,9 @@
                         }
 
                         // Highly accurate integer math implementation preventing floating-point chaos
-                        const nominalBottles = qty * ratio;
-                        const totalEmptyDeducted = Math.max(nominalBottles, reject); // deducts at least the rejects if cases=0
-                        const successfulBottles = Math.max(0, nominalBottles - reject);
-                        const finishedAddedCases = successfulBottles / ratio;
-                        
-                        const exactFinishedAdded = parseFloat(finishedAddedCases.toFixed(4));
-                        const exactEmptyDeducted = parseFloat(totalEmptyDeducted.toFixed(4));
+                        const nominalBottles = Math.round(qty * ratio);
+                        const exactEmptyDeducted = nominalBottles; 
+                        const exactFinishedAdded = Math.max(0, nominalBottles - reject);
 
                         items.push({ 
                             finishedId: prodId, 
@@ -933,11 +929,11 @@
                         const finishedRef = doc(db, "inventory", item.finishedId);
                         const emptyRef = doc(db, "inventory", item.emptyId);
                         
-                        if (item.exactFinishedAdded !== 0) {
+                        if (item.exactFinishedAdded > 0) {
                             transaction.update(finishedRef, { qty: increment(item.exactFinishedAdded), lastUpdated: new Date().toISOString() });
                         }
                         
-                        if (item.exactEmptyDeducted !== 0) {
+                        if (item.exactEmptyDeducted > 0) {
                             transaction.update(emptyRef, { qty: increment(-item.exactEmptyDeducted), lastUpdated: new Date().toISOString() });
                         }
                     });
@@ -995,16 +991,16 @@
                         let finishedToRemove = item.exactFinishedAdded;
                         let emptyToRestore = item.exactEmptyDeducted;
 
-                        // Smart fallback for old logs (V1) to completely fix the fractional corruption (300.08333 -> 300)
+                        // Smart fallback for old logs (V1) to completely fix the fractional corruption
                         if (finishedToRemove === undefined) {
-                            finishedToRemove = item.qtyCases; // Reverts the exact "wrongly 2 added"
-                            emptyToRestore = (item.qtyCases * item.ratio) + (item.rejected || 0); // Reverts the exact original empty deduction
+                            finishedToRemove = item.qtyCases; // Reverts the exact "wrongly added cases"
+                            emptyToRestore = (item.qtyCases * item.ratio) + (item.rejected || 0); // Reverts exact empty deduction
                         }
                         
-                        if (finishedToRemove !== 0) {
+                        if (finishedToRemove > 0) {
                             transaction.update(finishedRef, { qty: increment(-finishedToRemove), lastUpdated: new Date().toISOString() });
                         }
-                        if (emptyToRestore !== 0) {
+                        if (emptyToRestore > 0) {
                             transaction.update(emptyRef, { qty: increment(emptyToRestore), lastUpdated: new Date().toISOString() });
                         }
                     });
@@ -1136,8 +1132,9 @@
                     let itemsHtml = '';
                     if (data.items) {
                         data.items.forEach(i => {
-                            // Properly display exact finished added cases in UI log history
-                            const displayCases = i.exactFinishedAdded !== undefined ? i.exactFinishedAdded : i.qtyCases;
+                            // Properly display exact integer units added in UI log history
+                            const displayUnits = i.exactFinishedAdded !== undefined ? i.exactFinishedAdded : i.qtyCases;
+                            const unitLabel = i.exactFinishedAdded !== undefined ? 'Units' : 'Cases';
                             
                             itemsHtml += `
                                 <div class="fc-row">
@@ -1146,7 +1143,7 @@
                                         ${i.rejected > 0 ? `<div class="fc-reject">${i.rejected} Empty Bottles Rejected</div>` : ''}
                                     </div>
                                     <div style="text-align: right;">
-                                        ${displayCases > 0 ? `<div class="fc-val">+${displayCases} Cases</div>` : `<div class="fc-val" style="color:var(--text-muted);">0 Cases</div>`}
+                                        ${displayUnits > 0 ? `<div class="fc-val">+${displayUnits} ${unitLabel}</div>` : `<div class="fc-val" style="color:var(--text-muted);">0 ${unitLabel}</div>`}
                                         <div style="font-size: 0.8rem; color: var(--text-muted);">₹${(i.cost || 0).toLocaleString('en-IN')}</div>
                                     </div>
                                 </div>
