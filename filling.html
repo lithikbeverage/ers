@@ -80,7 +80,9 @@
         .search-container input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
         .search-icon { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 20px; pointer-events: none; }
 
+        .action-buttons-group { display: flex; gap: 8px; }
         .btn-fab { background: var(--primary-color); color: white; border: none; width: 48px; height: 48px; border-radius: 12px; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: var(--shadow-md); transition: all 0.2s; flex-shrink: 0; }
+        .btn-fab.secondary { background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border-color); }
         .btn-fab:active { transform: scale(0.95); }
 
         .filling-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
@@ -96,6 +98,9 @@
         .fc-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; margin-top: 12px; }
         .fc-cost { font-size: 1.25rem; font-weight: 800; color: var(--danger-color); }
         .fc-dc { font-size: 0.8rem; font-weight: 700; padding: 4px 10px; border-radius: 6px; background: var(--input-bg); color: var(--primary-color); border: 1px solid var(--border-color); }
+        
+        .btn-delete-log { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; border-radius: 6px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .btn-delete-log:hover { color: var(--danger-color); background: rgba(239, 68, 68, 0.1); }
 
         .loading-indicator { grid-column: 1 / -1; text-align: center; padding: 20px; color: var(--text-muted); font-weight: 500; font-size: 0.9rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
 
@@ -108,14 +113,29 @@
         .form-group { padding: 20px; max-width: 800px; margin: 0 auto; }
         .input-wrapper { margin-bottom: 20px; }
         .input-wrapper label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .input-wrapper input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 1rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s ease; }
-        .input-wrapper input:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .input-wrapper input, .input-wrapper select { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-size: 1rem; font-family: 'Inter', sans-serif; outline: none; transition: all 0.2s ease; appearance: none; }
+        .input-wrapper input:focus, .input-wrapper select:focus { border-color: var(--primary-color); box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
         .row-inputs { display: flex; gap: 16px; }
         .row-inputs > div { flex: 1; }
 
         .btn-primary { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--primary-color); color: white; font-size: 1.1em; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
         .btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+        .recipe-list-item { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
+        .recipe-details h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 4px; }
+        .recipe-details p { font-size: 0.8rem; color: var(--text-muted); font-weight: 500; }
+
+        .mini-popup-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 99999; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+        .mini-popup-overlay.active { opacity: 1; pointer-events: auto; }
+        .mini-popup { background: var(--bg-surface); border: 1px solid var(--border-color); padding: 24px; border-radius: 16px; max-width: 340px; width: 90%; box-shadow: var(--shadow-lg); text-align: center; transform: scale(0.9); transition: transform 0.2s ease; }
+        .mini-popup-overlay.active .mini-popup { transform: scale(1); }
+        .mp-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+        .mp-desc { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 20px; line-height: 1.4; }
+        .mp-actions { display: flex; gap: 12px; }
+        .mp-btn { flex: 1; padding: 12px; border-radius: 10px; font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; }
+        .mp-btn-cancel { background: var(--input-bg); color: var(--text-main); }
+        .mp-btn-confirm { background: var(--danger-color); color: white; }
 
         .toast-msg { position: fixed; top: 20px; left: 50%; transform: translate(-50%, -20px); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; display: none; font-weight: 600; font-size: 0.95em; align-items: center; gap: 10px; opacity: 0; transition: all 0.3s; box-shadow: var(--shadow-lg); }
         .toast-msg.error { background: var(--danger-color); }
@@ -135,6 +155,18 @@
     <div class="toast-msg error" id="errorToast"><span class="material-symbols-outlined">error</span><span id="errorToastText">Error</span></div>
     <div class="toast-msg success" id="successToast"><span class="material-symbols-outlined">check_circle</span><span id="successToastText">Success</span></div>
 
+    <!-- Mini Delete Confirmation Popup Overlay -->
+    <div class="mini-popup-overlay" id="deleteConfirmOverlay">
+        <div class="mini-popup">
+            <div class="mp-title">Delete Log entry?</div>
+            <div class="mp-desc">This action will securely reverse stock deductions and add adjustments back to your inventory items automatically.</div>
+            <div class="mp-actions">
+                <button class="mp-btn mp-btn-cancel" onclick="closeDeleteConfirmPopup()">Cancel</button>
+                <button class="mp-btn mp-btn-confirm" id="btnConfirmDeleteLog">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <div id="app-shell">
         <header>
             <div class="header-left">
@@ -153,9 +185,14 @@
                             <span class="material-symbols-outlined search-icon">search</span>
                             <input type="text" id="searchLogs" placeholder="Search by filling company...">
                         </div>
-                        <button class="btn-fab" onclick="openFillingModal()" title="Log New Filling">
-                            <span class="material-symbols-outlined">local_shipping</span>
-                        </button>
+                        <div class="action-buttons-group">
+                            <button class="btn-fab secondary" onclick="openRecipeMasterModal()" title="Recipe Master Setup">
+                                <span class="material-symbols-outlined">receipt_long</span>
+                            </button>
+                            <button class="btn-fab" onclick="openFillingModal()" title="Log New Filling">
+                                <span class="material-symbols-outlined">local_shipping</span>
+                            </button>
+                        </div>
                     </div>
 
                     <div class="filling-grid" id="fillingGrid">
@@ -166,6 +203,47 @@
         </div>
 
         <nav class="bottom-nav" id="mobile-nav"></nav>
+    </div>
+
+    <!-- Recipe Master Modal -->
+    <div class="modal" id="modalRecipes">
+        <div class="modal-header">
+            <button class="close-modal" onclick="history.back()"><span class="material-symbols-outlined">arrow_back</span></button>
+            <h2>Filling Recipe Master</h2>
+        </div>
+        <div class="form-group">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                <h3 style="margin-bottom: 16px; font-size: 1.05rem; font-weight: 700; color: var(--primary-color);">Create New Mapping</h3>
+                
+                <div class="input-wrapper">
+                    <label>Finished Filled Product *</label>
+                    <select id="recFinishedGood">
+                        <option value="">Select Inventory Finished Good...</option>
+                    </select>
+                </div>
+
+                <div class="input-wrapper">
+                    <label>Empty Bottle Item *</label>
+                    <select id="recEmptyBottle">
+                        <option value="">Select Inventory Empty Bottle...</option>
+                    </select>
+                </div>
+
+                <div class="input-wrapper">
+                    <label>Conversion Ratio (Bottles per Case) *</label>
+                    <input type="number" id="recRatio" placeholder="e.g. 24" min="1">
+                </div>
+
+                <button type="button" class="btn-primary" id="btnSaveRecipe" style="padding: 12px;">
+                    <span class="material-symbols-outlined">add_circle</span> Add Recipe Link
+                </button>
+            </div>
+
+            <h3 style="margin-bottom: 14px; font-size: 1rem; font-weight: 700;">Configured Recipes Mappings</h3>
+            <div id="recipeMasterList">
+                <!-- Recipes loaded here -->
+            </div>
+        </div>
     </div>
 
     <!-- Log Filling Modal -->
@@ -194,21 +272,19 @@
             </div>
 
             <div style="background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 20px;">
-                <label style="margin-bottom: 12px; color: var(--primary-color);">Filled Cases Received</label>
-                <div class="row-inputs">
-                    <div class="input-wrapper" style="margin-bottom: 8px;">
-                        <label>300ML (Cases)</label>
-                        <input type="number" id="f300" placeholder="0" min="0">
-                    </div>
-                    <div class="input-wrapper" style="margin-bottom: 8px;">
-                        <label>500ML (Cases)</label>
-                        <input type="number" id="f500" placeholder="0" min="0">
-                    </div>
+                <label style="margin-bottom: 12px; display: block; font-weight: 600; color: var(--primary-color);">Select Recipe Operations</label>
+                
+                <div class="input-wrapper">
+                    <label>Product Recipe Link *</label>
+                    <select id="fRecipeSelect">
+                        <option value="">Choose a recipe configuration...</option>
+                    </select>
                 </div>
+
                 <div class="row-inputs">
                     <div class="input-wrapper" style="margin-bottom: 0;">
-                        <label>1L (Cases)</label>
-                        <input type="number" id="f1L" placeholder="0" min="0">
+                        <label>Filled Cases Received *</label>
+                        <input type="number" id="fCases" placeholder="0" min="1">
                     </div>
                     <div class="input-wrapper" style="margin-bottom: 0;">
                         <label>Rejected Bottles</label>
@@ -231,25 +307,38 @@
     <script type="module">
         import { app, db } from './config.js';
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        import { collection, doc, getDocs, query, orderBy, setDoc, serverTimestamp, limit, startAfter, where } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+        import { collection, doc, getDocs, getDoc, query, orderBy, setDoc, serverTimestamp, limit, startAfter, where, runTransaction, deleteDoc } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
-        // Navigation Setup
+        // Navigation Setup (Matches your existing app perfectly)
         const navItems = [
-            { name: 'Dashboard', path: 'index.html' },
-            { name: 'Billing', path: 'bill.html' },
-            { name: 'Production', path: 'production.html' },
-            { name: 'Filling', path: 'filling.html' },
-            { name: 'Inventory', path: 'inventory.html' },
-            { name: 'Purchase', path: 'purchase.html' }
+            { name: 'Dashboard', path: 'index.html', icon: '<path d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8V11h-8v10zm0-18v6h8V3h-8z"/>' },
+            { name: 'Billing', path: 'bill.html', icon: '<path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/>' },
+            { name: 'Production', path: 'production.html', icon: '<path d="M19.36 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.36 8.04A5.994 5.994 0 000 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.64-4.96zM10 17l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>' },
+            { name: 'Filling', path: 'filling.html', icon: '<path d="M12 2c-5.33 0-8 2.67-8 4v12c0 1.33 2.67 4 8 4s8-2.67 8-4V6c0-1.33-2.67-4-8-4zm0 2c4.42 0 6 1.5 6 2s-1.58 2-6 2-6-1.5-6-2 1.58-2 6-2z"/>' },
+            { name: 'Inventory', path: 'inventory.html', icon: '<path d="M20 2H4c-1.1 0-2 .9-2 2v3.01c0 .72.43 1.34 1 1.69V20c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8.7c.57-.35 1-.97 1-1.69V4c0-1.1-.9-2-2-2zm-5 12H9v-2h6v2zm5-7H4V4h16v3z"/>' },
+            { name: 'Purchase', path: 'purchase.html', icon: '<path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/>' },
+            { name: 'Sales', path: 'sales.html', icon: '<path d="M16 6l2.29 2.29-4.88 4.88-4-4L2 16.59 3.41 18l6-6 4 4 6.3-6.29L22 12V6z"/>' },
+            { name: 'Parties', path: 'parties.html', icon: '<path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>' },
+            { name: 'Expenses', path: 'expenses.html', icon: '<path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>' },
+            { name: 'Accounts', path: 'accounts.html', icon: '<path d="M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z"/>' },
+            { name: 'Labour', path: 'attendance.html', icon: '<path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>' }
         ];
 
-        function renderNav() {
-            const path = window.location.pathname.split('/').pop() || 'filling.html';
-            const html = navItems.map(n => `<a href="${n.path}" class="nav-item ${path === n.path ? 'active' : ''}"><span>${n.name}</span></a>`).join('');
-            document.getElementById('desktop-nav').innerHTML = html;
-            document.getElementById('mobile-nav').innerHTML = html;
-        }
-        renderNav();
+        const desktopNav = document.getElementById('desktop-nav');
+        const mobileNav = document.getElementById('mobile-nav');
+        const currentPath = window.location.pathname.split('/').pop() || 'filling.html';
+
+        navItems.forEach(item => {
+            const isActive = currentPath === item.path ? 'active' : '';
+            const html = `
+                <a href="${item.path}" class="nav-item ${isActive}">
+                    <svg class="nav-icon" viewBox="0 0 24 24">${item.icon}</svg>
+                    <span>${item.name}</span>
+                </a>
+            `;
+            desktopNav.innerHTML += html;
+            mobileNav.innerHTML += html;
+        });
 
         window.vibrateApp = function(pattern) { if (navigator.vibrate) navigator.vibrate(pattern); };
         window.showToast = function(msg, type = "success") {
@@ -262,9 +351,14 @@
         };
 
         window.openModal = function(id) { document.getElementById(id).classList.add('active'); history.pushState({modal: id}, '', `#${id}`); };
-        window.addEventListener('popstate', (e) => { document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active')); });
+        window.addEventListener('popstate', (e) => { document.querySelectorAll('.modal.active').forEach(m => m.classList.remove('active')); closeDeleteConfirmPopup(); });
 
-        // Pagination and State
+        // Global state storage configurations
+        let recipeCache = [];
+        let inventoryCache = [];
+        let logPendingDeletion = null;
+
+        // Pagination and Filtering State State Variables
         const PAGE_LIMIT = 10;
         let lastVisibleDoc = null;
         let isLoadingLogs = false;
@@ -277,17 +371,141 @@
             if (user) { 
                 document.getElementById('fDate').valueAsDate = new Date();
                 setupPaginationAndSearch();
+                await initializeDynamicData();
                 loadFillingLogs(false); 
             }
             else window.location.replace('login.html');
         });
 
+        async function initializeDynamicData() {
+            try {
+                // Read master options directly from inventory collection
+                const invSnap = await getDocs(collection(db, "inventory"));
+                inventoryCache = [];
+                invSnap.forEach(d => {
+                    inventoryCache.push({ id: d.id, ...d.data() });
+                });
+
+                // Populate recipe configuration select panels
+                const selectFG = document.getElementById('recFinishedGood');
+                const selectEB = document.getElementById('recEmptyBottle');
+                
+                selectFG.innerHTML = '<option value="">Select Inventory Finished Good...</option>';
+                selectEB.innerHTML = '<option value="">Select Inventory Empty Bottle...</option>';
+                
+                inventoryCache.forEach(item => {
+                    const optText = `${item.name} (Stock: ${item.stock || 0})`;
+                    selectFG.innerHTML += `<option value="${item.id}">${optText}</option>`;
+                    selectEB.innerHTML += `<option value="${item.id}">${optText}</option>`;
+                });
+
+                // Load operational recipes mapping configurations
+                await syncRecipes();
+            } catch(e) {
+                console.error("Initialization failure", e);
+                showToast("Failed to sync inventory assets data link", "error");
+            }
+        }
+
+        async function syncRecipes() {
+            const recipeSnap = await getDocs(collection(db, "filling_recipes"));
+            recipeCache = [];
+            recipeSnap.forEach(d => {
+                recipeCache.push({ id: d.id, ...d.data() });
+            });
+
+            // Update UI Dropdown Selector for log filling window
+            const selectLogRecipe = document.getElementById('fRecipeSelect');
+            selectLogRecipe.innerHTML = '<option value="">Choose a recipe configuration...</option>';
+            
+            recipeCache.forEach(rec => {
+                selectLogRecipe.innerHTML += `<option value="${rec.id}">${rec.finishedGoodName} (Uses: ${rec.emptyBottleName} x${rec.ratio})</option>`;
+            });
+
+            // Render management lists details panel
+            renderRecipesList();
+        }
+
+        function renderRecipesList() {
+            const container = document.getElementById('recipeMasterList');
+            if (recipeCache.length === 0) {
+                container.innerHTML = '<p style="font-size: 0.9rem; color: var(--text-muted); text-align: center; padding: 12px;">No operational conversions configured yet.</p>';
+                return;
+            }
+            container.innerHTML = recipeCache.map(rec => `
+                <div class="recipe-list-item">
+                    <div class="recipe-details">
+                        <h4>${rec.finishedGoodName}</h4>
+                        <p>Deducts: ${rec.emptyBottleName} (${rec.ratio} per case)</p>
+                    </div>
+                    <button class="btn-delete-log" onclick="window.deleteRecipeLink('${rec.id}')">
+                        <span class="material-symbols-outlined" style="color: var(--danger-color);">delete</span>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        window.openRecipeMasterModal = function() {
+            document.getElementById('recRatio').value = '';
+            document.getElementById('recFinishedGood').value = '';
+            document.getElementById('recEmptyBottle').value = '';
+            openModal('modalRecipes');
+        };
+
+        document.getElementById('btnSaveRecipe').addEventListener('click', async () => {
+            const fgId = document.getElementById('recFinishedGood').value;
+            const ebId = document.getElementById('recEmptyBottle').value;
+            const ratioVal = parseInt(document.getElementById('recRatio').value) || 0;
+
+            if (!fgId || !ebId || ratioVal <= 0) {
+                showToast("Please verify recipe inputs fields.", "error");
+                return;
+            }
+
+            const fgItem = inventoryCache.find(i => i.id === fgId);
+            const ebItem = inventoryCache.find(i => i.id === ebId);
+
+            const btn = document.getElementById('btnSaveRecipe');
+            btn.disabled = true;
+
+            try {
+                const newRecRef = doc(collection(db, "filling_recipes"));
+                await setDoc(newRecRef, {
+                    finishedGoodId: fgId,
+                    finishedGoodName: fgItem.name,
+                    emptyBottleId: ebId,
+                    emptyBottleName: ebItem.name,
+                    ratio: ratioVal,
+                    createdAt: serverTimestamp()
+                });
+
+                showToast("Recipe mapping established!");
+                await initializeDynamicData();
+            } catch(e) {
+                console.error(e);
+                showToast("Failed to save dynamic conversion rule", "error");
+            } finally {
+                btn.disabled = false;
+            }
+        });
+
+        window.deleteRecipeLink = async function(id) {
+            vibrateApp(20);
+            if (!confirm("Are you sure you want to delete this recipe mapping configuration?")) return;
+            try {
+                await deleteDoc(doc(db, "filling_recipes", id));
+                showToast("Mapping dropped.");
+                await syncRecipes();
+            } catch(e) {
+                showToast("Error removing item tracking parameters", "error");
+            }
+        };
+
         window.openFillingModal = function() {
             document.getElementById('fDcNo').value = '';
             document.getElementById('fCompany').value = '';
-            document.getElementById('f300').value = '';
-            document.getElementById('f500').value = '';
-            document.getElementById('f1L').value = '';
+            document.getElementById('fRecipeSelect').value = '';
+            document.getElementById('fCases').value = '';
             document.getElementById('fReject').value = '';
             document.getElementById('fCost').value = '';
             openModal('modalFilling');
@@ -298,45 +516,133 @@
             const dateStr = document.getElementById('fDate').value;
             const company = document.getElementById('fCompany').value.trim();
             const dcNo = document.getElementById('fDcNo').value.trim();
-            const c300 = parseInt(document.getElementById('f300').value) || 0;
-            const c500 = parseInt(document.getElementById('f500').value) || 0;
-            const c1L = parseInt(document.getElementById('f1L').value) || 0;
+            const recId = document.getElementById('fRecipeSelect').value;
+            const casesVal = parseInt(document.getElementById('fCases').value) || 0;
             const reject = parseInt(document.getElementById('fReject').value) || 0;
             const cost = parseFloat(document.getElementById('fCost').value) || 0;
 
-            if(!dateStr || !company || !dcNo || cost <= 0) { showToast("Date, Company, DC No, and Cost are required.", "error"); return; }
-            if(c300 === 0 && c500 === 0 && c1L === 0) { showToast("Enter at least one case quantity.", "error"); return; }
+            if(!dateStr || !company || !dcNo || cost <= 0 || !recId || casesVal <= 0) { 
+                showToast("All fields highlighted with asterisks are mandatory.", "error"); 
+                return; 
+            }
+
+            const recipe = recipeCache.find(r => r.id === recId);
+            if (!recipe) { showToast("Selected recipe reference validation error.", "error"); return; }
+
+            const totalEmptyBottlesUsed = (casesVal * recipe.ratio) + reject;
 
             const btn = document.getElementById('btnSaveFilling');
-            btn.disabled = true; btn.innerHTML = "Saving...";
+            btn.disabled = true; btn.innerHTML = "Processing Transaction...";
 
             try {
-                const payload = {
-                    date: dateStr,
-                    company,
-                    dcNo,
-                    qty300: c300,
-                    qty500: c500,
-                    qty1L: c1L,
-                    rejected: reject,
-                    cost,
-                    createdAt: serverTimestamp()
-                };
+                // Execute atomic Firestore transaction rules securely on server-side engine
+                await runTransaction(db, async (transaction) => {
+                    const fgDocRef = doc(db, "inventory", recipe.finishedGoodId);
+                    const ebDocRef = doc(db, "inventory", recipe.emptyBottleId);
 
-                const newRef = doc(collection(db, "filling_logs"));
-                await setDoc(newRef, payload);
+                    const fgSnap = await transaction.get(fgDocRef);
+                    const ebSnap = await transaction.get(ebDocRef);
 
-                showToast("Filling log saved!");
+                    if (!fgSnap.exists() || !ebSnap.exists()) {
+                        throw new Error("One or more physical catalog item targets do not exist in inventory databases records.");
+                    }
+
+                    const currentFgStock = fgSnap.data().stock || 0;
+                    const currentEbStock = ebSnap.data().stock || 0;
+
+                    // Update local inventory metrics securely
+                    transaction.update(fgDocRef, { stock: currentFgStock + casesVal });
+                    transaction.update(ebDocRef, { stock: currentEbStock - totalEmptyBottlesUsed });
+
+                    // Generate log records payload mapping structure
+                    const newLogRef = doc(collection(db, "filling_logs"));
+                    transaction.set(newLogRef, {
+                        date: dateStr,
+                        company,
+                        dcNo,
+                        recipeId: recId,
+                        finishedGoodId: recipe.finishedGoodId,
+                        finishedGoodName: recipe.finishedGoodName,
+                        emptyBottleId: recipe.emptyBottleId,
+                        emptyBottleName: recipe.emptyBottleName,
+                        ratio: recipe.ratio,
+                        casesReceived: casesVal,
+                        rejected: reject,
+                        totalEmptyBottlesUsed: totalEmptyBottlesUsed,
+                        cost,
+                        createdAt: serverTimestamp()
+                    });
+                });
+
+                showToast("Transaction committed & logged!");
                 history.back();
+                await initializeDynamicData();
                 loadFillingLogs(false); 
             } catch(e) {
                 console.error(e);
-                showToast("Failed to save log", "error");
+                showToast(e.message || "Atomic operational validation checkpoint crashed.", "error");
             } finally {
                 btn.disabled = false; btn.innerHTML = `<span class="material-symbols-outlined">task_alt</span> Save Log`;
             }
         });
 
+        // Trigger dynamic mini popup confirmation parameters securely
+        window.promptDeleteLog = function(logId) {
+            vibrateApp([40, 20]);
+            logPendingDeletion = logId;
+            document.getElementById('deleteConfirmOverlay').classList.add('active');
+        };
+
+        window.closeDeleteConfirmPopup = function() {
+            logPendingDeletion = null;
+            document.getElementById('deleteConfirmOverlay').classList.remove('active');
+        };
+
+        document.getElementById('btnConfirmDeleteLog').addEventListener('click', async () => {
+            if (!logPendingDeletion) return;
+            const logId = logPendingDeletion;
+            closeDeleteConfirmPopup();
+            
+            showToast("Processing dynamic rollback data...", "info");
+
+            try {
+                await runTransaction(db, async (transaction) => {
+                    const logDocRef = doc(db, "filling_logs", logId);
+                    const logSnap = await transaction.get(logDocRef);
+
+                    if (!logSnap.exists()) {
+                        throw new Error("Target record details log configuration missing.");
+                    }
+
+                    const logData = logSnap.data();
+                    const fgDocRef = doc(db, "inventory", logData.finishedGoodId);
+                    const ebDocRef = doc(db, "inventory", logData.emptyBottleId);
+
+                    const fgSnap = await transaction.get(fgDocRef);
+                    const ebSnap = await transaction.get(ebDocRef);
+
+                    // Revert calculations metrics values atomically inside security context rules
+                    if (fgSnap.exists()) {
+                        transaction.update(fgDocRef, { stock: (fgSnap.data().stock || 0) - logData.casesReceived });
+                    }
+                    if (ebSnap.exists()) {
+                        transaction.update(ebDocRef, { stock: (ebSnap.data().stock || 0) + logData.totalEmptyBottlesUsed });
+                    }
+
+                    // Delete history node link
+                    transaction.delete(logDocRef);
+                });
+
+                showToast("Stock rolled back & entry wiped!");
+                await initializeDynamicData();
+                loadFillingLogs(false);
+            } catch (err) {
+                console.error("Deletion transaction error execution details: ", err);
+                showToast("System synchronization rollback failed entirely.", "error");
+            }
+        });
+
+        // Optimized & Paginated Firebase Log Loading Engine
         async function loadFillingLogs(isAppend = false) {
             if (isLoadingLogs) return;
             if (isAppend && !hasMoreLogs) return;
@@ -356,38 +662,64 @@
             try {
                 let q;
                 if (currentSearchQuery) {
-                    q = query(
-                        collection(db, "filling_logs"), 
-                        orderBy("company"), 
-                        where("company", ">=", currentSearchQuery), 
-                        where("company", "<=", currentSearchQuery + "\uf8ff"),
-                        isAppend && lastVisibleDoc ? startAfter(lastVisibleDoc) : limit(PAGE_LIMIT)
-                    );
+                    // Optimized Prefix Range Filtering Query for Firestore
+                    if (isAppend && lastVisibleDoc) {
+                        q = query(
+                            collection(db, "filling_logs"), 
+                            orderBy("company"), 
+                            where("company", ">=", currentSearchQuery), 
+                            where("company", "<=", currentSearchQuery + "\uf8ff"),
+                            startAfter(lastVisibleDoc),
+                            limit(PAGE_LIMIT)
+                        );
+                    } else {
+                        q = query(
+                            collection(db, "filling_logs"), 
+                            orderBy("company"), 
+                            where("company", ">=", currentSearchQuery), 
+                            where("company", "<=", currentSearchQuery + "\uf8ff"),
+                            limit(PAGE_LIMIT)
+                        );
+                    }
                 } else {
-                    q = query(
-                        collection(db, "filling_logs"), 
-                        orderBy("createdAt", "desc"), 
-                        isAppend && lastVisibleDoc ? startAfter(lastVisibleDoc) : limit(PAGE_LIMIT)
-                    );
+                    // Standard Chronological Query
+                    if (isAppend && lastVisibleDoc) {
+                        q = query(
+                            collection(db, "filling_logs"), 
+                            orderBy("date", "desc"), 
+                            startAfter(lastVisibleDoc),
+                            limit(PAGE_LIMIT)
+                        );
+                    } else {
+                        q = query(
+                            collection(db, "filling_logs"), 
+                            orderBy("date", "desc"), 
+                            limit(PAGE_LIMIT)
+                        );
+                    }
                 }
 
                 const snap = await getDocs(q);
                 removeLoadingIndicator();
                 
                 if (snap.empty) {
-                    if (!isAppend) grid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:500;">No matching filling logs found.</div>';
+                    if (!isAppend) {
+                        grid.innerHTML = '<div style="text-align:center; padding:40px; color:var(--text-muted); font-weight:500;">No matching filling logs found.</div>';
+                    }
                     hasMoreLogs = false;
                     isLoadingLogs = false;
                     return;
                 }
 
                 lastVisibleDoc = snap.docs[snap.docs.length - 1];
-                if (snap.docs.length < PAGE_LIMIT) hasMoreLogs = false;
+                if (snap.docs.length < PAGE_LIMIT) {
+                    hasMoreLogs = false;
+                }
 
                 let html = '';
                 snap.forEach(doc => {
                     const d = doc.data();
-                    const dFormatted = new Date(d.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric'});
+                    const dFormatted = new Date(d.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric'});
                     
                     html += `
                         <div class="filling-card">
@@ -396,26 +728,38 @@
                                 <div class="fc-date">${dFormatted}</div>
                             </div>
                             <div style="margin-bottom: 12px;">
-                                ${d.qty300 > 0 ? `<div class="fc-row"><span class="fc-label">300ML Cases</span><span class="fc-val">${d.qty300}</span></div>` : ''}
-                                ${d.qty500 > 0 ? `<div class="fc-row"><span class="fc-label">500ML Cases</span><span class="fc-val">${d.qty500}</span></div>` : ''}
-                                ${d.qty1L > 0 ? `<div class="fc-row"><span class="fc-label">1L Cases</span><span class="fc-val">${d.qty1L}</span></div>` : ''}
-                                ${d.rejected > 0 ? `<div class="fc-row" style="color:var(--danger-color);"><span class="fc-label" style="color:var(--danger-color);">Rejected Bottles</span><span class="fc-val">${d.rejected}</span></div>` : ''}
+                                <div class="fc-row"><span class="fc-label">Finished Product</span><span class="fc-val">${d.finishedGoodName || 'Dynamic Output'}</span></div>
+                                <div class="fc-row"><span class="fc-label">Cases Loaded</span><span class="fc-val" style="color: var(--success-color); font-weight:800;">+${d.casesReceived || 0} Cases</span></div>
+                                <div class="fc-row"><span class="fc-label">Empty Asset Used</span><span class="fc-val">${d.emptyBottleName || 'Packaging Material'}</span></div>
+                                <div class="fc-row"><span class="fc-label">Total Bottles Consumed</span><span class="fc-val" style="color: var(--danger-color); font-weight:700;">-${d.totalEmptyBottlesUsed || 0} Units</span></div>
+                                ${d.rejected > 0 ? `<div class="fc-row" style="color:var(--danger-color);"><span class="fc-label" style="color:var(--danger-color);">Rejected In Process</span><span class="fc-val">${d.rejected} Pcs</span></div>` : ''}
                             </div>
                             <div class="fc-footer">
                                 <div class="fc-dc">DC NO: ${d.dcNo}</div>
-                                <div class="fc-cost">₹${d.cost.toLocaleString('en-IN')}</div>
+                                <div style="display: flex; align-items: center; gap: 12px;">
+                                    <div class="fc-cost">₹${d.cost.toLocaleString('en-IN')}</div>
+                                    <button class="btn-delete-log" onclick="window.promptDeleteLog('${doc.id}')" title="Delete & Revert Stock">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     `;
                 });
 
-                if (!isAppend) grid.innerHTML = html;
-                else grid.innerHTML += html;
+                if (!isAppend) {
+                    grid.innerHTML = html;
+                } else {
+                    grid.innerHTML += html;
+                }
             } catch(e) {
                 console.error(e);
                 removeLoadingIndicator();
-                if (!isAppend) grid.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">Failed to load logs.</div>';
-                else showToast("Error loading more logs", "error");
+                if (!isAppend) {
+                    grid.innerHTML = '<div style="text-align:center; padding:20px; color:var(--danger-color);">Failed to load logs.</div>';
+                } else {
+                    showToast("Error loading more logs", "error");
+                }
             } finally {
                 isLoadingLogs = false;
             }
@@ -426,21 +770,28 @@
             if (activeIndicator) activeIndicator.remove();
         }
 
+        // Setup Observers for Endless Scrolling & Search Input Buffering
         function setupPaginationAndSearch() {
             const scrollArea = document.getElementById('mainScrollArea');
+            
+            // Infinite Scroll Listener
             scrollArea.addEventListener('scroll', () => {
                 if ((scrollArea.scrollTop + scrollArea.clientHeight) >= (scrollArea.scrollHeight - 60)) {
-                    if (!isLoadingLogs && hasMoreLogs) loadFillingLogs(true);
+                    if (!isLoadingLogs && hasMoreLogs) {
+                        loadFillingLogs(true);
+                    }
                 }
             });
 
+            // Search Bar Input Element with Performance Optimization (Debounce)
             const searchInput = document.getElementById('searchLogs');
             searchInput.addEventListener('input', (e) => {
                 clearTimeout(searchDebounceTimeout);
+                
                 searchDebounceTimeout = setTimeout(() => {
                     currentSearchQuery = e.target.value.trim();
                     loadFillingLogs(false); 
-                }, 300); 
+                }, 300); // 300ms window prevents excessive database reads during rapid typing
             });
         }
     </script>
