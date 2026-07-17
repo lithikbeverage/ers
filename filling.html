@@ -392,6 +392,24 @@
         </div>
     </div>
 
+    <!-- Mini Popup - Delete Recipe Confirmation -->
+    <div class="mini-modal-overlay" id="miniModalDeleteRecipe">
+        <div class="mini-modal-content">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(239, 68, 68, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--danger-color);">delete</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Delete Recipe?</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5;">This will remove the filling configuration mapping for this finished good. It will NOT delete the actual inventory item.</p>
+                <input type="hidden" id="deleteRecipeTargetId">
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeMiniModal('miniModalDeleteRecipe')" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                    <button type="button" id="btnConfirmDeleteRecipe" class="btn-primary" onclick="executeDeleteRecipe()" style="flex: 1; background: var(--danger-color); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); border: none; padding: 12px;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Mini Popup - Missing Firestore Index Diagnostic UI Linker -->
     <div class="mini-modal-overlay" id="miniModalIndexError">
         <div class="mini-modal-content" style="max-width: 460px; width: 92%;">
@@ -650,8 +668,13 @@
                     html += `
                         <div class="recipe-card" onclick="openRecipeBuilder('${docSnap.id}')" style="cursor:pointer; transition:transform 0.2s;">
                             <div class="recipe-header">
+                                <div style="display: flex; align-items: center; gap: 10px;">
                                 <div class="recipe-title">${rData.name}</div>
                                 <div class="recipe-badge">Configured</div>
+                                </div>
+                                <button type="button" onclick="event.stopPropagation(); confirmDeleteRecipe('${docSnap.id}')" title="Delete Recipe" style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger-color); border-radius: 8px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s;">
+                                    <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
+                                </button>
                             </div>
                             <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Uses (Empty Bottles):</div>
                             <div class="recipe-item">
@@ -983,6 +1006,40 @@
                 showToast("Failed to reverse filling log.", "error");
             } finally {
                 btn.disabled = false; btn.innerText = "Reverse";
+            }
+        };
+
+        window.confirmDeleteRecipe = function(id) {
+            document.getElementById('deleteRecipeTargetId').value = id;
+            openMiniModal('miniModalDeleteRecipe');
+        };
+
+        window.executeDeleteRecipe = async function() {
+            vibrateApp(30);
+            const id = document.getElementById('deleteRecipeTargetId').value;
+            if(!id) return;
+            
+            const btn = document.getElementById('btnConfirmDeleteRecipe');
+            btn.disabled = true; btn.innerText = "Deleting...";
+
+            try {
+                const docRef = doc(db, "inventory", id);
+                await updateDoc(docRef, { 
+                    hasFillingRecipe: false,
+                    fillingRecipe: null,
+                    lastUpdated: new Date().toISOString()
+                });
+
+                showToast("Recipe deleted successfully!", "success");
+                closeMiniModal('miniModalDeleteRecipe');
+                
+                loadRecipes(false);
+
+            } catch (err) {
+                console.error(err);
+                showToast("Failed to delete recipe.", "error");
+            } finally {
+                btn.disabled = false; btn.innerText = "Delete";
             }
         };
 
