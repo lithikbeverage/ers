@@ -5,16 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>404 - Page Not Found</title>
     <style>
-        /* Custom CSS Variables for Theme Consistency */
         :root {
             --bg-color: #0f172a;
             --text-primary: #f8fafc;
             --text-secondary: #94a3b8;
-            --accent-color: #3b82f6;
-            --accent-hover: #2563eb;
-            --glass-bg: rgba(30, 41, 59, 0.7);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --nav-height: 70px;
         }
 
         * {
@@ -27,166 +21,68 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-primary);
-            display: flex;
-            flex-direction: column;
             min-height: 100vh;
-            overflow-x: hidden;
-        }
-
-        /* Glassmorphism Navigation */
-        nav {
-            height: var(--nav-height);
-            background: var(--glass-bg);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 5%;
-            position: fixed;
-            top: 0;
-            width: 100%;
-            z-index: 1000;
-        }
-
-        .nav-logo {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--text-primary);
-            text-decoration: none;
-            letter-spacing: 0.5px;
-        }
-
-        .nav-links {
-            display: flex;
-            gap: 2rem;
-            list-style: none;
-        }
-
-        .nav-links a {
-            color: var(--text-secondary);
-            text-decoration: none;
-            font-size: 1rem;
-            transition: color 0.3s ease;
-        }
-
-        .nav-links a:hover {
-            color: var(--text-primary);
-        }
-
-        /* Main 404 Content Container */
-        main {
-            flex: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
             text-align: center;
-            padding: 0 20px;
-            margin-top: var(--nav-height);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
         }
 
         .error-code {
-            font-size: 8rem;
-            font-weight: 800;
+            font-size: 10rem;
+            font-weight: 900;
             background: linear-gradient(135deg, #3b82f6, #8b5cf6);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             line-height: 1;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .error-title {
-            font-size: 2rem;
-            font-weight: 600;
+            font-size: 2.5rem;
             margin-bottom: 1rem;
-            color: var(--text-primary);
         }
 
         .error-description {
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             color: var(--text-secondary);
-            max-width: 500px;
-            margin-bottom: 2.5rem;
             line-height: 1.6;
         }
 
-        .btn-return {
-            background-color: var(--accent-color);
-            color: #ffffff;
-            text-decoration: none;
-            padding: 0.8rem 2rem;
-            border-radius: 6px;
-            font-size: 1rem;
-            font-weight: 500;
-            transition: background-color 0.3s ease, transform 0.2s ease;
-            border: none;
-            cursor: pointer;
-        }
-
-        .btn-return:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-2px);
-        }
-
-        /* Fixed Footer */
         footer {
-            background: var(--glass-bg);
-            border-top: 1px solid var(--glass-border);
-            text-align: center;
-            padding: 1rem;
+            position: absolute;
+            bottom: 20px;
             color: var(--text-secondary);
             font-size: 0.9rem;
-            position: relative;
-            bottom: 0;
-            width: 100%;
         }
 
-        /* Responsive Design */
         @media (max-width: 768px) {
-            .nav-links {
-                display: none; /* Hide standard links on mobile for simplicity, or implement a hamburger menu */
-            }
-            .error-code {
-                font-size: 6rem;
-            }
-            .error-title {
-                font-size: 1.5rem;
-            }
+            .error-code { font-size: 6rem; }
+            .error-title { font-size: 1.8rem; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Professional Glassmorphism Navigation -->
-    <nav>
-        <a href="/" class="nav-logo">System Dashboard</a>
-        <ul class="nav-links">
-            <li><a href="/">Home</a></li>
-            <li><a href="/billing">Billing</a></li>
-            <li><a href="/inventory">Inventory</a></li>
-            <li><a href="/customers">Customers</a></li>
-        </ul>
-    </nav>
-
-    <!-- Centered 404 Content -->
-    <main>
+    <div class="container">
         <div class="error-code">404</div>
         <h1 class="error-title">Page Not Found</h1>
         <p class="error-description">
-            The page you are looking for might have been removed, had its name changed, or is temporarily unavailable. Please check the URL or return to the main dashboard.
+            The page you are looking for does not exist or has been moved.
         </p>
-        <a href="/" class="btn-return">Return to Dashboard</a>
-    </main>
+    </div>
 
-    <!-- Standard Fixed Footer -->
     <footer>
-        &copy; <span id="year"></span> Application System. All rights reserved.
+        &copy; <span id="year"></span> Application System.
     </footer>
 
     <script>
-        // Dynamically set the current year in the footer
         document.getElementById('year').textContent = new Date().getFullYear();
     </script>
 
