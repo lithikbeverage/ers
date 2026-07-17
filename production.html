@@ -467,6 +467,25 @@
         </div>
     </div>
 
+    <!-- Firebase Index Missing Modal -->
+    <div class="mini-modal-overlay" id="miniModalFirebaseIndex">
+        <div class="mini-modal-content">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(245, 158, 11, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--warning-color);">database</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Database Index Required</h3>
+                <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.5;">Firebase requires a composite index for this query to run fast. Click below to create it automatically (takes ~1-2 mins).</p>
+                <div style="display: flex; gap: 12px;">
+                    <button type="button" onclick="closeMiniModal('miniModalFirebaseIndex')" style="flex: 1; padding: 12px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Cancel</button>
+                    <a id="firebaseIndexLink" href="#" target="_blank" onclick="closeMiniModal('miniModalFirebaseIndex')" style="flex: 1; text-decoration: none;">
+                        <button type="button" class="btn-primary" style="width: 100%; padding: 12px; margin: 0;">Create Index</button>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="mini-modal-overlay" id="miniModalDeleteProduction">
         <div class="mini-modal-content">
             <div style="text-align: center;">
@@ -549,6 +568,23 @@
         window.openMiniModal = function(id) { vibrateApp(20); document.getElementById(id).classList.add('active'); };
         window.closeMiniModal = function(id) { document.getElementById(id).classList.remove('active'); };
 
+        // Firebase Error Handler for Missing Indexes
+        window.handleFirebaseError = function(error, fallbackId) {
+            console.error("Firebase Error: ", error);
+            const errMsg = (error.message || error.toString());
+            const match = errMsg.match(/(https:\/\/console\.firebase\.google\.com[^\s]+)/);
+            if (match && match[0]) {
+                document.getElementById('firebaseIndexLink').href = match[0];
+                openMiniModal('miniModalFirebaseIndex');
+            } else {
+                showToast("Database Error. Check console.", "error");
+            }
+            if (fallbackId) {
+                const el = document.getElementById(fallbackId);
+                if (el) el.innerHTML = '<div style="text-align:center; padding: 20px; color: var(--danger-color);">Error loading data. Requires Database Index.</div>';
+            }
+        };
+
         function generateSearchTokens(str1, str2) {
             const combined = `${str1 || ''} ${str2 || ''}`.toLowerCase().replace(/[.\/\\~*\[\]]/g, ' ');
             const words = combined.split(/[\s\-_]+/).filter(w => w.trim().length > 0);
@@ -629,7 +665,7 @@
                 const snap = await getDocs(q);
                 masterRawGoods = [];
                 snap.forEach(doc => masterRawGoods.push({ id: doc.id, ...doc.data() }));
-            } catch (err) {  } // Silenced as requested
+            } catch (err) { console.error(err); } 
         }
 
         async function fetchMachines() {
@@ -642,7 +678,7 @@
                     machineList = [];
                 }
                 populateMachineDropdown();
-            } catch (err) { } 
+            } catch (err) { console.error(err); } 
         }
 
         // ==========================================
@@ -708,7 +744,8 @@
                     ddCursors[selectId] = null;
                 }
             } catch (e) {
-               // Silenced as requested
+                handleFirebaseError(e);
+                sel.innerHTML = '<option value="" disabled selected>Error loading items</option>';
             }
         }
 
@@ -837,7 +874,9 @@
                 if (!isAppend) grid.innerHTML = html;
                 else grid.innerHTML += html;
                 
-            } catch(e) { } // Silenced
+            } catch(e) { 
+                handleFirebaseError(e, 'recipeGrid');
+            } 
             finally { isLoadingRecipes = false; }
         }
 
@@ -876,7 +915,7 @@
                             product.recipe.forEach(ri => addRecipeItemRow(ri.rawGoodId, ri.qty));
                         }
                     }
-                } catch(e) { }
+                } catch(e) { console.error(e); }
             } else {
                 currentEditingRecipeId = null;
                 document.getElementById('recipeBuilderTitle').innerText = "Create Recipe";
@@ -1367,10 +1406,10 @@
                 document.getElementById('scrollLoader').style.display = 'none';
 
             } catch (err) {
-                console.error(err);
-                showToast("Error loading records.", "error");
+                handleFirebaseError(err, !isLoadMore ? 'productionGrid' : null);
             } finally {
                 isFetching = false;
+                document.getElementById('scrollLoader').style.display = 'none';
             }
         }
 
