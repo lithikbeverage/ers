@@ -922,10 +922,11 @@
                         const finishedRef = doc(db, "inventory", item.finishedId);
                         const emptyRef = doc(db, "inventory", item.emptyId);
                         
-                        const emptyToDeduct = (item.qtyCases * item.ratio) + item.rejected;
+                        const emptyToDeduct = (item.qtyCases * item.ratio);
+                        const finishedToAdd = item.qtyCases - (item.rejected / item.ratio);
                         
-                        if (item.qtyCases > 0) {
-                            transaction.update(finishedRef, { qty: increment(item.qtyCases), lastUpdated: new Date().toISOString() });
+                        if (finishedToAdd !== 0) {
+                            transaction.update(finishedRef, { qty: increment(finishedToAdd), lastUpdated: new Date().toISOString() });
                         }
                         
                         if (emptyToDeduct > 0) {
@@ -983,10 +984,11 @@
                         const finishedRef = doc(db, "inventory", item.finishedId);
                         const emptyRef = doc(db, "inventory", item.emptyId);
                         
-                        const emptyToRestore = (item.qtyCases * item.ratio) + item.rejected;
+                        const emptyToRestore = (item.qtyCases * item.ratio);
+                        const finishedToRemove = item.qtyCases - (item.rejected / item.ratio);
                         
-                        if (item.qtyCases > 0) {
-                            transaction.update(finishedRef, { qty: increment(-item.qtyCases), lastUpdated: new Date().toISOString() });
+                        if (finishedToRemove !== 0) {
+                            transaction.update(finishedRef, { qty: increment(-finishedToRemove), lastUpdated: new Date().toISOString() });
                         }
                         if (emptyToRestore > 0) {
                             transaction.update(emptyRef, { qty: increment(emptyToRestore), lastUpdated: new Date().toISOString() });
