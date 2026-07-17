@@ -293,7 +293,7 @@
             <div class="items-section">
                 <div class="items-header">
                     <div style="flex: 2;">Finished Product (Recipe)</div>
-                    <div style="flex: 1; text-align: center;">Quantity</div>
+                    <div style="flex: 1; text-align: center;">Empty Units Used</div> <!-- Changed column title here -->
                     <div style="flex: 1; text-align: center;">Reject (Pieces)</div>
                     <div style="flex: 1; text-align: center;">Cost (₹)</div>
                     <div style="width: 42px;"></div>
@@ -365,16 +365,17 @@
                     </select>
                 </div>
 
-                <div class="input-wrapper" style="margin-bottom: 20px;">
-                    <label>1 Unit of Finished Good requires how many units of Empty Material? (Usually 1 if both are cases or both are pieces) *</label>
-                    <input type="number" id="rbQtyRatio" placeholder="e.g. 1" min="0.01" step="0.01">
-                </div>
-
-                <!-- Human Friendly Conversational Toggle -->
+                <!-- Moved Conversational Toggle Up -->
                 <label style="display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">How is the Empty Material counted in Inventory?</label>
                 <div class="toggle-group">
                     <div class="toggle-btn active" id="toggleSingles" onclick="vibrateApp(10); setInventoryMode('singles')">Counted as Single Pieces</div>
                     <div class="toggle-btn" id="togglePacks" onclick="vibrateApp(10); setInventoryMode('packs')">Counted as Packs/Boxes</div>
+                </div>
+
+                <!-- Kept Ratio field but visually hidden to keep backend schema intact -->
+                <div class="input-wrapper" id="ratioContainer" style="display: none; margin-bottom: 20px;">
+                    <label>1 Unit of Finished Good requires how many units of Empty Material? (Usually 1 if both are cases or both are pieces) *</label>
+                    <input type="number" id="rbQtyRatio" placeholder="e.g. 1" min="0.01" step="0.01" value="1">
                 </div>
 
                 <div class="input-wrapper" id="packSizeContainer" style="display: none; margin-bottom: 0;">
@@ -576,6 +577,12 @@
             document.getElementById('toggleSingles').classList.toggle('active', mode === 'singles');
             document.getElementById('togglePacks').classList.toggle('active', mode === 'packs');
             document.getElementById('packSizeContainer').style.display = mode === 'packs' ? 'block' : 'none';
+            
+            // Behind the scenes logic enforcement: Ratio is always 1.
+            document.getElementById('rbQtyRatio').value = 1;
+            if(mode === 'singles') {
+                document.getElementById('rbPackSize').value = 1;
+            }
         };
 
         // Initialization
@@ -634,7 +641,8 @@
                     if (type === 'recipes' && p.fillingRecipe) {
                         opt.setAttribute('data-empty-id', p.fillingRecipe.emptyBottleId);
                         opt.setAttribute('data-empty-name', p.fillingRecipe.emptyBottleName);
-                        opt.setAttribute('data-ratio', p.fillingRecipe.qtyPerUnit);
+                        // Using hardcoded ratio 1 for new logic, but allowing fallback for extremely old recipes
+                        opt.setAttribute('data-ratio', p.fillingRecipe.qtyPerUnit || 1);
                         opt.setAttribute('data-bottles-per-empty', p.fillingRecipe.bottlesPerEmpty || 1); 
                     }
                     sel.appendChild(opt);
@@ -722,7 +730,7 @@
                             <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Uses (Empty Materials):</div>
                             <div class="recipe-item">
                                 <span>${rData.fillingRecipe.emptyBottleName}</span>
-                                <div>Ratio: ${rData.fillingRecipe.qtyPerUnit}</div>
+                                <div>Counted as: ${rData.fillingRecipe.bottlesPerEmpty > 1 ? `Pack of ${rData.fillingRecipe.bottlesPerEmpty}` : 'Single Piece'}</div>
                             </div>
                         </div>
                     `;
@@ -775,7 +783,6 @@
                                 emptySel.insertAdjacentHTML('beforeend', `<option value="${product.fillingRecipe.emptyBottleId}">${product.fillingRecipe.emptyBottleName}</option>`);
                             }
                             emptySel.value = product.fillingRecipe.emptyBottleId;
-                            document.getElementById('rbQtyRatio').value = product.fillingRecipe.qtyPerUnit;
                             
                             // Initialize Toggle State based on existing data
                             const bpe = product.fillingRecipe.bottlesPerEmpty || 1;
@@ -793,7 +800,6 @@
             } else {
                 document.getElementById('recipeBuilderTitle').innerText = "Create Recipe";
                 selFinished.disabled = false;
-                document.getElementById('rbQtyRatio').value = "";
                 setInventoryMode('singles');
                 document.getElementById('rbPackSize').value = "";
             }
@@ -808,7 +814,9 @@
             
             const finishedId = finishedSel.value;
             const emptyId = emptySel.value;
-            const qtyRatio = parseFloat(document.getElementById('rbQtyRatio').value);
+            
+            // Forced to 1 behind the scenes
+            const qtyRatio = 1; 
             
             // Calculate Hidden Math Parameter based on Toggle Choice
             let bottlesPerEmpty = 1;
@@ -820,7 +828,7 @@
                 }
             }
 
-            if (!finishedId || !emptyId || finishedId === "LOAD_MORE" || emptyId === "LOAD_MORE" || isNaN(qtyRatio) || qtyRatio <= 0) {
+            if (!finishedId || !emptyId || finishedId === "LOAD_MORE" || emptyId === "LOAD_MORE") {
                 showToast("Please fill all fields correctly.", "error"); return;
             }
             if (finishedId === emptyId) {
@@ -883,8 +891,8 @@
                         </select>
                     </div>
                     <div class="field-wrap">
-                        <label class="mobile-label">Quantity</label>
-                        <input type="number" placeholder="Qty" min="0" step="0.01" class="f-qty">
+                        <label class="mobile-label">Empty Units Used</label>
+                        <input type="number" placeholder="Input Qty" min="0" step="0.01" class="f-qty">
                     </div>
                     <div class="field-wrap">
                         <label class="mobile-label">Reject (Pieces)</label>
@@ -913,6 +921,7 @@
 
             const items = [];
             let validItems = true;
+            let rejectMathError = false;
             let totalCost = 0;
 
             document.querySelectorAll('.item-row').forEach(row => {
@@ -920,35 +929,51 @@
                 const selectedOpt = selectEl.options[selectEl.selectedIndex];
                 
                 const prodId = selectEl.value;
-                const qty = parseFloat(row.querySelector('.f-qty').value) || 0;
+                const inputEmptyQty = parseFloat(row.querySelector('.f-qty').value) || 0; // Empty Units Consumed
                 const reject = parseInt(row.querySelector('.f-reject').value) || 0;
                 const cost = parseFloat(row.querySelector('.f-cost').value) || 0;
                 
-                const hasData = (prodId && prodId !== "LOAD_MORE") || qty > 0 || reject > 0 || cost > 0;
+                const hasData = (prodId && prodId !== "LOAD_MORE") || inputEmptyQty > 0 || reject > 0 || cost > 0;
                 
                 if (hasData) {
-                    if (prodId && prodId !== "LOAD_MORE" && (qty >= 0 && reject >= 0 && cost >= 0) && (qty > 0 || reject > 0)) {
+                    if (prodId && prodId !== "LOAD_MORE" && (inputEmptyQty >= 0 && reject >= 0 && cost >= 0) && (inputEmptyQty > 0 || reject > 0)) {
                         
                         const emptyId = selectedOpt.getAttribute('data-empty-id');
                         const emptyName = selectedOpt.getAttribute('data-empty-name');
-                        const ratio = parseFloat(selectedOpt.getAttribute('data-ratio'));
+                        
+                        // Enforce Ratio 1 for new logic, but fallback for older ones if applicable
+                        const parsedRatio = parseFloat(selectedOpt.getAttribute('data-ratio'));
+                        const ratio = isNaN(parsedRatio) ? 1 : parsedRatio; 
+                        
                         // Extracting our background parameter
                         const bottlesPerEmpty = parseFloat(selectedOpt.getAttribute('data-bottles-per-empty')) || 1;
                         
-                        if (!emptyId || isNaN(ratio)) {
+                        if (!emptyId) {
                             validItems = false;
                             return;
                         }
 
                         // THE BULLETPROOF MATHEMATICAL FIX:
-                        const exactFinishedAdded = qty; 
                         
-                        // Exact calculation for deduct: (Qty * Ratio) + (Rejects / PackSize)
+                        // Exact calculation for deduct: Input Qty (Total empty used)
+                        let exactEmptyDeducted = inputEmptyQty;
+
+                        // Rejects are in pieces. Convert to the unit of the empty material.
                         const rejectInEmptyUnits = reject / bottlesPerEmpty;
-                        let exactEmptyDeducted = (qty * ratio) + rejectInEmptyUnits;
+                        
+                        // Exact calculation for added: Input Qty - Converted Rejects
+                        let exactFinishedAdded = inputEmptyQty - rejectInEmptyUnits;
+
+                        // Guard against mathematically impossible reject amounts
+                        if (exactFinishedAdded < 0) {
+                            rejectMathError = true;
+                            validItems = false;
+                            return; 
+                        }
 
                         // Clean floating point errors (e.g. 2.50000004 -> 2.5)
                         exactEmptyDeducted = Math.round(exactEmptyDeducted * 10000) / 10000;
+                        exactFinishedAdded = Math.round(exactFinishedAdded * 10000) / 10000;
 
                         items.push({ 
                             finishedId: prodId, 
@@ -957,7 +982,7 @@
                             emptyName: emptyName,
                             ratio: ratio,
                             bottlesPerEmpty: bottlesPerEmpty, // Saves into history for flawless undo
-                            qtyCases: qty, // legacy parameter for older logs
+                            qtyCases: exactEmptyDeducted, // legacy mapping parameter
                             rejected: reject, 
                             cost: cost,
                             exactFinishedAdded: exactFinishedAdded,
@@ -970,6 +995,7 @@
                 }
             });
 
+            if(rejectMathError) { showToast("Rejects cannot exceed the total input quantity converted to pieces.", "error"); return; }
             if(!validItems) { showToast("Please complete all item rows correctly without negative values.", "error"); return; }
             if(items.length === 0) { showToast("Add at least one valid item to save.", "error"); return; }
 
