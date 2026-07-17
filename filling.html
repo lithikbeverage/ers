@@ -366,19 +366,19 @@
                 </div>
 
                 <div class="input-wrapper" style="margin-bottom: 20px;">
-                    <label>1 Unit of Finished Good requires how many empty pieces? *</label>
-                    <input type="number" id="rbQtyRatio" placeholder="e.g. 24" min="1">
+                    <label>1 Unit of Finished Good requires how many units of Empty Material? (Usually 1 if both are cases or both are pieces) *</label>
+                    <input type="number" id="rbQtyRatio" placeholder="e.g. 1" min="0.01" step="0.01">
                 </div>
 
-                <!-- NEW: Human Friendly Conversational Toggle -->
-                <label style="display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">How is this Empty Material counted in Inventory?</label>
+                <!-- Human Friendly Conversational Toggle -->
+                <label style="display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">How is the Empty Material counted in Inventory?</label>
                 <div class="toggle-group">
                     <div class="toggle-btn active" id="toggleSingles" onclick="vibrateApp(10); setInventoryMode('singles')">Counted as Single Pieces</div>
                     <div class="toggle-btn" id="togglePacks" onclick="vibrateApp(10); setInventoryMode('packs')">Counted as Packs/Boxes</div>
                 </div>
 
                 <div class="input-wrapper" id="packSizeContainer" style="display: none; margin-bottom: 0;">
-                    <label>How many pieces are inside 1 Pack/Box? *</label>
+                    <label>How many individual pieces are inside 1 Pack/Box of Empty Material? (Used to calculate rejects) *</label>
                     <input type="number" id="rbPackSize" placeholder="e.g. 24" min="1">
                 </div>
             </div>
@@ -598,22 +598,6 @@
             }
         };
 
-        // Dynamic Label Updater for Pieces vs Cases
-        window.updateRowLabels = function(selectEl) {
-            const row = selectEl.closest('.item-row');
-            if(!row) return;
-            const opt = selectEl.options[selectEl.selectedIndex];
-            const qtyInput = row.querySelector('.f-qty');
-            const mobLabel = row.querySelectorAll('.mobile-label')[1]; 
-            
-            if(opt && opt.value && opt.value !== "LOAD_MORE") {
-                const ratio = parseFloat(opt.getAttribute('data-ratio')) || 1;
-                const unitStr = ratio > 1 ? "Cases" : "Pieces";
-                if(qtyInput) qtyInput.placeholder = `Qty (${unitStr})`;
-                if(mobLabel) mobLabel.innerText = `Qty (${unitStr})`;
-            }
-        };
-
         async function loadDropdownData(selectId, type, isAppend = false) {
             const sel = document.getElementById(selectId);
             if (!sel) return;
@@ -738,7 +722,7 @@
                             <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Uses (Empty Materials):</div>
                             <div class="recipe-item">
                                 <span>${rData.fillingRecipe.emptyBottleName}</span>
-                                <div>${rData.fillingRecipe.qtyPerUnit} Pieces per Finished Unit</div>
+                                <div>Ratio: ${rData.fillingRecipe.qtyPerUnit}</div>
                             </div>
                         </div>
                     `;
@@ -894,13 +878,13 @@
                 <div class="item-row" id="${id}">
                     <div class="field-wrap">
                         <label class="mobile-label">Finished Good</label>
-                        <select id="${selectId}" class="f-product" onchange="handleDropdownChange(this, 'recipes'); updateRowLabels(this);">
+                        <select id="${selectId}" class="f-product" onchange="handleDropdownChange(this, 'recipes')">
                             <option value="" disabled selected>Select from Inventory...</option>
                         </select>
                     </div>
                     <div class="field-wrap">
                         <label class="mobile-label">Quantity</label>
-                        <input type="number" placeholder="Qty" min="0" class="f-qty">
+                        <input type="number" placeholder="Qty" min="0" step="0.01" class="f-qty">
                     </div>
                     <div class="field-wrap">
                         <label class="mobile-label">Reject (Pieces)</label>
@@ -936,7 +920,7 @@
                 const selectedOpt = selectEl.options[selectEl.selectedIndex];
                 
                 const prodId = selectEl.value;
-                const qty = parseInt(row.querySelector('.f-qty').value) || 0;
+                const qty = parseFloat(row.querySelector('.f-qty').value) || 0;
                 const reject = parseInt(row.querySelector('.f-reject').value) || 0;
                 const cost = parseFloat(row.querySelector('.f-cost').value) || 0;
                 
@@ -956,21 +940,15 @@
                             return;
                         }
 
-                        // THE MATHEMATICAL FIX:
-                        // 1. You add EXACTLY the Finished Good amount entered.
+                        // THE BULLETPROOF MATHEMATICAL FIX:
                         const exactFinishedAdded = qty; 
                         
-                        // 2. Exact raw units consumed = (Finished Qty * Ratio) + Wasted Raw Units.
-                        const totalPiecesUsed = (qty * ratio) + reject;
-                        let exactEmptyDeducted = totalPiecesUsed;
+                        // Exact calculation for deduct: (Qty * Ratio) + (Rejects / PackSize)
+                        const rejectInEmptyUnits = reject / bottlesPerEmpty;
+                        let exactEmptyDeducted = (qty * ratio) + rejectInEmptyUnits;
 
-                        if (bottlesPerEmpty > 1) {
-                            exactEmptyDeducted = totalPiecesUsed / bottlesPerEmpty;
-                            // Round to 4 decimal places to prevent floating point weirdness
-                            exactEmptyDeducted = Math.round(exactEmptyDeducted * 10000) / 10000;
-                        } else {
-                            exactEmptyDeducted = Math.round(totalPiecesUsed);
-                        }
+                        // Clean floating point errors (e.g. 2.50000004 -> 2.5)
+                        exactEmptyDeducted = Math.round(exactEmptyDeducted * 10000) / 10000;
 
                         items.push({ 
                             finishedId: prodId, 
@@ -978,8 +956,8 @@
                             emptyId: emptyId,
                             emptyName: emptyName,
                             ratio: ratio,
-                            bottlesPerEmpty: bottlesPerEmpty, // Saves into history
-                            qtyCases: qty, 
+                            bottlesPerEmpty: bottlesPerEmpty, // Saves into history for flawless undo
+                            qtyCases: qty, // legacy parameter for older logs
                             rejected: reject, 
                             cost: cost,
                             exactFinishedAdded: exactFinishedAdded,
@@ -1077,7 +1055,7 @@
                         let finishedToRemove = item.exactFinishedAdded;
                         let emptyToRestore = item.exactEmptyDeducted;
 
-                        // Backward compatibility fallback
+                        // Backward compatibility fallback for extremely old logs
                         if (finishedToRemove === undefined) {
                             finishedToRemove = item.qtyCases; 
                             emptyToRestore = (item.qtyCases * item.ratio) + (item.rejected || 0);
@@ -1231,14 +1209,6 @@
                         data.items.forEach(i => {
                             const displayUnits = i.exactFinishedAdded !== undefined ? i.exactFinishedAdded : i.qtyCases;
                             
-                            // Dynamically determine the label for the feed based on the ratio
-                            let unitLabel = 'Units';
-                            if (i.ratio !== undefined) {
-                                unitLabel = parseFloat(i.ratio) > 1 ? 'Cases' : 'Pieces';
-                            } else if (i.exactFinishedAdded === undefined) {
-                                unitLabel = 'Cases'; // Legacy fallback
-                            }
-                            
                             itemsHtml += `
                                 <div class="fc-row">
                                     <div style="flex:1;">
@@ -1246,7 +1216,7 @@
                                         ${i.rejected > 0 ? `<div class="fc-reject">${i.rejected} Pieces Rejected</div>` : ''}
                                     </div>
                                     <div style="text-align: right;">
-                                        ${displayUnits > 0 ? `<div class="fc-val">+${displayUnits} ${unitLabel}</div>` : `<div class="fc-val" style="color:var(--text-muted);">0 ${unitLabel}</div>`}
+                                        ${displayUnits > 0 ? `<div class="fc-val">+${displayUnits} Units</div>` : `<div class="fc-val" style="color:var(--text-muted);">0 Units</div>`}
                                         <div style="font-size: 0.8rem; color: var(--text-muted);">₹${(i.cost || 0).toLocaleString('en-IN')}</div>
                                     </div>
                                 </div>
