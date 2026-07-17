@@ -59,6 +59,7 @@
         header, .material-symbols-outlined, .nav-item { -webkit-user-select: none; user-select: none; }
         .material-symbols-outlined { display: inline-flex; align-items: center; justify-content: center; }
 
+        /* Robust PWA Mobile Shell Fix - Prevents bottom nav from disappearing */
         #app-shell { display: flex; height: 100%; width: 100%; position: absolute; inset: 0; flex-direction: column; overflow: hidden; background-color: var(--bg-body); z-index: 1; }
         
         header { display: flex; align-items: center; justify-content: space-between; background-color: var(--bg-surface); padding: 12px 20px; border-bottom: 1px solid var(--border-color); z-index: 10; flex-shrink: 0; }
@@ -85,7 +86,7 @@
         .main-scroll-area { flex: 1; overflow-y: auto; padding: 20px; background-color: var(--bg-body); position: relative; }
         .container-inner { max-width: 900px; margin: 0 auto; width: 100%; padding-bottom: 30px; }
 
-        /* Dashboard UI */
+        /* Dashboard UI (Accounts.html derived styling) */
         .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
         
         .fin-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); position: relative; overflow: hidden; }
@@ -104,19 +105,18 @@
         .profit-negative { color: var(--danger-color) !important; }
         .metric-neutral { color: var(--accent-color) !important; }
 
+        /* Skeleton Loading Animation */
         .skeleton { background: linear-gradient(90deg, var(--skeleton-base) 25%, var(--skeleton-shine) 50%, var(--skeleton-base) 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; color: transparent !important; display: inline-block; width: 60px; height: 20px; }
-        @keyframes shimmer { 0% { background-position: -200% 0; } 100% { background-position: 200% 0; } }
         
-        /* INDEX ERROR POPUP STYLES */
-        #index-alert-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 12px; width: calc(100% - 40px); max-width: 400px; pointer-events: none; }
-        .index-alert { background-color: var(--bg-surface); border-left: 4px solid var(--danger-color); box-shadow: var(--shadow-lg); border-radius: 8px; padding: 16px; pointer-events: auto; animation: slideIn 0.3s ease-out forwards; display: flex; flex-direction: column; gap: 10px; }
-        .index-alert-header { display: flex; justify-content: space-between; align-items: center; font-weight: 700; color: var(--danger-color); font-size: 1rem; }
-        .index-alert-body { font-size: 0.85rem; color: var(--text-main); line-height: 1.4; }
-        .index-alert-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 5px; }
-        .btn-index-close { background: transparent; border: 1px solid var(--border-color); color: var(--text-muted); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; }
-        .btn-index-open { background: var(--danger-color); color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 0.85rem; font-weight: 600; text-decoration: none; display: inline-block; }
-        
-        @keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        /* Fixed Install Banner */
+        #install-banner { position: fixed; bottom: 90px; left: 50%; transform: translate(-50%, 150%); visibility: hidden; opacity: 0; pointer-events: none; width: 90%; max-width: 360px; background-color: var(--bg-surface); border: 1px solid var(--border-color); box-shadow: var(--shadow-lg); border-radius: 12px; padding: 16px; display: flex; align-items: center; justify-content: space-between; z-index: 9999; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.4s, visibility 0.4s; }
+        #install-banner.show { transform: translate(-50%, 0); visibility: visible; opacity: 1; pointer-events: auto; }
+        .install-info { display: flex; flex-direction: column; gap: 4px; }
+        .install-info strong { font-size: 0.95rem; color: var(--text-main); }
+        .install-info span { font-size: 0.8rem; color: var(--text-muted); }
+        .install-actions { display: flex; gap: 10px; align-items: center; }
+        .btn-install { background-color: var(--primary-color); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; box-shadow: var(--shadow-sm); }
+        .btn-close { background: none; border: none; color: var(--text-muted); padding: 8px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         @media (min-width: 768px) {
             #app-shell { flex-direction: column; }
@@ -124,6 +124,9 @@
             nav.bottom-nav { display: none; }
             nav.sidebar { display: flex; }
             .dashboard-grid { grid-template-columns: 1fr 1fr; }
+            
+            #install-banner { bottom: 24px; left: auto; right: 24px; transform: translate(150%, 0); }
+            #install-banner.show { transform: translate(0, 0); }
         }
     </style>
 </head>
@@ -138,8 +141,6 @@
             });
         }
     </script>
-
-    <div id="index-alert-container"></div>
 
     <div id="app-shell">
         <header>
@@ -230,11 +231,28 @@
         </div>
     </div>
 
+    <div id="install-banner">
+        <div class="install-info">
+            <strong>Install App</strong>
+            <span>Add to home screen for fast offline access</span>
+        </div>
+        <div class="install-actions">
+            <button class="btn-install" id="btn-install-app">Install</button>
+            <button class="btn-close" id="btn-close-banner">✕</button>
+        </div>
+    </div>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js');
+            });
+        }
+    </script>
+
     <script type="module">
         import { app, db } from './config.js';
         import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-auth.js";
-        
-        // Removed getDocs. Only importing required aggregation functions to prevent accidental massive reads.
         import { collection, query, where, getAggregateFromServer, sum, count } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
         // Navigation Generation
@@ -262,7 +280,7 @@
             mobileNav.innerHTML += html;
         });
 
-        // Auth
+        // 1. Auth & Initial Load
         const auth = getAuth(app);
         onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -271,6 +289,7 @@
                 if(picEl) picEl.src = picUrl;
                 localStorage.setItem('lithik_profile_pic', picUrl);
                 
+                // User authorized, fetch highly optimized data
                 fetchDashboardData();
             } else {
                 window.location.replace('login.html');
@@ -278,157 +297,131 @@
         });
 
         const formatINR = (val) => Number(val || 0).toLocaleString('en-IN', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-        const formatYMD = (d) => {
-            const yr = d.getFullYear();
-            const mo = String(d.getMonth() + 1).padStart(2, '0');
-            const da = String(d.getDate()).padStart(2, '0');
-            return `${yr}-${mo}-${da}`;
-        };
 
-        // --- NEW: UI Popup Generator for Missing Indexes ---
-        function showIndexPopup(url, colName) {
-            const container = document.getElementById('index-alert-container');
-            const alertId = 'alert-' + Date.now() + Math.floor(Math.random() * 100);
-            
-            const html = `
-                <div class="index-alert" id="${alertId}">
-                    <div class="index-alert-header">
-                        <span style="display:flex; align-items:center; gap:6px;">
-                            <span class="material-symbols-outlined">warning</span> Missing Index
-                        </span>
-                    </div>
-                    <div class="index-alert-body">
-                        Firestore requires a composite index to calculate totals for the <b>${colName}</b> collection. Please click below to generate it.
-                    </div>
-                    <div class="index-alert-actions">
-                        <button class="btn-index-close" onclick="document.getElementById('${alertId}').remove()">Dismiss</button>
-                        <a href="${url}" target="_blank" class="btn-index-open">Open Link</a>
-                    </div>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', html);
-        }
-
-        // --- UPDATED: Secure Server Aggregation (No getDocs Fallback) ---
-        async function getSafeAggregate(colName, conditions, aggregationsConf) {
+        // Generic wrapper to ensure safe Server Aggregation (1 Read Cost per Query)
+        async function getSafeAggregate(colName, conditions, aggregations) {
             let q = collection(db, colName);
-            if (conditions && conditions.length > 0) {
-                q = query(q, ...conditions);
-            }
-            
-            const serverAggs = {};
-            for (const [key, conf] of Object.entries(aggregationsConf)) {
-                if (conf.type === 'sum') serverAggs[key] = sum(conf.field);
-                else if (conf.type === 'count') serverAggs[key] = count();
-            }
-
+            conditions.forEach(c => { q = query(q, c); });
             try {
-                const snap = await getAggregateFromServer(q, serverAggs);
+                const snap = await getAggregateFromServer(q, aggregations);
                 return snap.data();
             } catch(e) {
-                console.error(`Aggregation error for ${colName}:`, e);
-                
-                // Extract the Firebase URL from the error message using Regex
-                if (e.message) {
-                    const urlMatch = e.message.match(/(https:\/\/console\.firebase\.google\.com[^\s]+)/);
-                    if (urlMatch && urlMatch[1]) {
-                        showIndexPopup(urlMatch[1], colName);
-                    }
-                }
-                
-                // Return zeros so the UI renders gracefully instead of completely breaking
-                const fallbackZeros = {};
-                for (const key of Object.keys(aggregationsConf)) fallbackZeros[key] = 0;
-                return fallbackZeros;
+                console.warn(`Aggregation failed for ${colName}. Check indexes.`, e);
+                // Return fallback zeros matching requested structure
+                const fallback = {};
+                Object.keys(aggregations).forEach(k => fallback[k] = 0);
+                return fallback;
             }
         }
 
+        // 2. Fetch Powerful Analytics without Document Readings loop
         async function fetchDashboardData() {
+            // Setup Accurate Local Dates
             const now = new Date();
+            const localOffset = now.getTimezoneOffset() * 60000;
+            const localNow = new Date(now.getTime() - localOffset);
             
+            // --- TODAY CALCULATION ---
             const todayStartObj = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             const todayEndObj = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
-            const todayStr = formatYMD(todayStartObj);
+            const todayStr = new Date(todayStartObj.getTime() - localOffset).toISOString().split('T')[0];
 
-            const dayOfWeek = now.getDay() || 7;
+            // --- WEEK CALCULATION ---
+            const dayOfWeek = now.getDay() || 7; // Convert Sun(0) to 7, Mon is 1.
             const weekStartObj = new Date(todayStartObj);
-            weekStartObj.setDate(todayStartObj.getDate() - dayOfWeek + 1);
+            weekStartObj.setDate(todayStartObj.getDate() - dayOfWeek + 1); // Start of week (Monday)
             const weekEndObj = new Date(weekStartObj);
             weekEndObj.setDate(weekStartObj.getDate() + 6);
             weekEndObj.setHours(23, 59, 59, 999);
             
-            const weekStartStr = formatYMD(weekStartObj);
-            const weekEndStr = formatYMD(weekEndObj);
+            const weekStartStr = new Date(weekStartObj.getTime() - localOffset).toISOString().split('T')[0];
+            const weekEndStr = new Date(weekEndObj.getTime() - localOffset).toISOString().split('T')[0];
 
+            // Update Labels
             document.getElementById('lblTodayDate').innerText = todayStartObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
             document.getElementById('lblWeekDate').innerText = `${weekStartObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} - ${weekEndObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}`;
 
             // ==== FETCH TODAY DATA ====
-            const tSales = await getSafeAggregate("sales", 
-                [where("date", ">=", todayStartObj), where("date", "<=", todayEndObj)], 
-                { qty: { type: 'count' }, totalRev: { type: 'sum', field: 'totals.grand' } }
-            );
-            
-            const tProd = await getSafeAggregate("production", 
-                [where("date", "==", todayStr)], 
-                { totalQty: { type: 'sum', field: 'qtyProduced' } }
-            );
-            
-            const tExp = await getSafeAggregate("expanse", 
-                [where("dateStr", "==", todayStr)], 
-                { totalExp: { type: 'sum', field: 'amount' } }
-            );
-            
-            const tLab = await getSafeAggregate("attendance", 
-                [where("date_string", "==", todayStr), where("status", "==", "present")], 
-                { qty: { type: 'count' } }
-            );
+            const tSales = await getSafeAggregate("sales", [where("date", ">=", todayStartObj), where("date", "<=", todayEndObj)], { qty: count(), totalRev: sum("totals.grand") });
+            const tProd = await getSafeAggregate("production", [where("date", "==", todayStr)], { totalQty: sum("qtyProduced") });
+            const tExp = await getSafeAggregate("expanse", [where("dateStr", "==", todayStr)], { totalExp: sum("amount") });
+            const tLab = await getSafeAggregate("attendance", [where("date_string", "==", todayStr), where("status", "==", "present")], { qty: count() });
 
+            // Apply Today DOM
             document.getElementById('valTodayRev').innerText = `₹${formatINR(tSales.totalRev)}`;
             document.getElementById('valTodayExp').innerText = `₹${formatINR(tExp.totalExp)}`;
             document.getElementById('valTodayProd').innerText = (tProd.totalQty || 0).toLocaleString('en-IN');
             document.getElementById('valTodayInv').innerText = (tSales.qty || 0).toLocaleString('en-IN');
             document.getElementById('valTodayLab').innerText = (tLab.qty || 0).toLocaleString('en-IN');
             
-            const pToday = (tSales.totalRev || 0) - (tExp.totalExp || 0);
+            const pToday = tSales.totalRev - tExp.totalExp;
             const netTodayEl = document.getElementById('valTodayNet');
             netTodayEl.innerText = `₹${formatINR(pToday)}`;
             netTodayEl.className = 'fin-val ' + (pToday >= 0 ? 'profit-positive' : 'profit-negative');
 
-
             // ==== FETCH WEEK DATA ====
-            const wSales = await getSafeAggregate("sales", 
-                [where("date", ">=", weekStartObj), where("date", "<=", weekEndObj)], 
-                { qty: { type: 'count' }, totalRev: { type: 'sum', field: 'totals.grand' } }
-            );
-            
-            const wProd = await getSafeAggregate("production", 
-                [where("date", ">=", weekStartStr), where("date", "<=", weekEndStr)], 
-                { totalQty: { type: 'sum', field: 'qtyProduced' } }
-            );
-            
-            const wExp = await getSafeAggregate("expanse", 
-                [where("dateStr", ">=", weekStartStr), where("dateStr", "<=", weekEndStr)], 
-                { totalExp: { type: 'sum', field: 'amount' } }
-            );
+            const wSales = await getSafeAggregate("sales", [where("date", ">=", weekStartObj), where("date", "<=", weekEndObj)], { qty: count(), totalRev: sum("totals.grand") });
+            const wProd = await getSafeAggregate("production", [where("date", ">=", weekStartStr), where("date", "<=", weekEndStr)], { totalQty: sum("qtyProduced") });
+            const wExp = await getSafeAggregate("expanse", [where("dateStr", ">=", weekStartStr), where("dateStr", "<=", weekEndStr)], { totalExp: sum("amount") });
 
+            // Apply Week DOM
             document.getElementById('valWeekRev').innerText = `₹${formatINR(wSales.totalRev)}`;
             document.getElementById('valWeekExp').innerText = `₹${formatINR(wExp.totalExp)}`;
             document.getElementById('valWeekProd').innerText = (wProd.totalQty || 0).toLocaleString('en-IN');
             document.getElementById('valWeekInv').innerText = (wSales.qty || 0).toLocaleString('en-IN');
             
-            const pWeek = (wSales.totalRev || 0) - (wExp.totalExp || 0);
+            const pWeek = wSales.totalRev - wExp.totalExp;
             const netWeekEl = document.getElementById('valWeekNet');
             netWeekEl.innerText = `₹${formatINR(pWeek)}`;
             netWeekEl.className = 'fin-val ' + (pWeek >= 0 ? 'profit-positive' : 'profit-negative');
         }
 
-        // Haptics
+        // Haptic Feedback Utility
         function hapticVibrate(pattern) {
             if ('vibrate' in navigator) navigator.vibrate(pattern);
         }
+
         document.querySelectorAll('.nav-item').forEach(el => {
             el.addEventListener('click', () => hapticVibrate(40));
+        });
+
+        // PWA Installation Logic
+        let deferredPrompt;
+        const installBanner = document.getElementById('install-banner');
+        const btnInstall = document.getElementById('btn-install-app');
+        const btnClose = document.getElementById('btn-close-banner');
+
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        if (!isStandalone) {
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                setTimeout(() => {
+                    installBanner.classList.add('show');
+                    hapticVibrate([30, 50, 30]);
+                }, 2000);
+            });
+        }
+
+        window.addEventListener('appinstalled', () => {
+            installBanner.classList.remove('show');
+            deferredPrompt = null;
+        });
+
+        btnInstall.addEventListener('click', async () => {
+            hapticVibrate(50);
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installBanner.classList.remove('show');
+            }
+        });
+
+        btnClose.addEventListener('click', () => {
+            hapticVibrate(30);
+            installBanner.classList.remove('show');
         });
     </script>
 </body>
