@@ -92,7 +92,7 @@
         .filling-card { background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; box-shadow: var(--shadow-sm); position: relative; display: flex; flex-direction: column;}
         .fc-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px;}
         .fc-company { font-weight: 800; font-size: 1.15rem; color: var(--text-main); display: flex; align-items: center; gap: 6px;}
-        .fc-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+        .fc-date { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; text-align: right; }
         
         .fc-items-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; flex: 1;}
         .fc-row { display: flex; justify-content: space-between; font-size: 0.9rem; align-items: center; background: var(--input-bg); padding: 8px 12px; border-radius: 8px;}
@@ -180,6 +180,11 @@
         .mobile-filter-icon { display: none; }
 
         #scrollLoader { text-align: center; padding: 20px; color: var(--text-muted); font-size: 0.9rem; font-weight: 600; display: none; align-items: center; justify-content: center; gap: 10px; }
+
+        /* Toggle Switch Styles */
+        .toggle-group { display: flex; background: var(--input-bg); border-radius: 12px; padding: 4px; border: 1px solid var(--border-color); margin-bottom: 16px; }
+        .toggle-btn { flex: 1; text-align: center; padding: 12px; font-size: 0.85rem; font-weight: 700; color: var(--text-muted); cursor: pointer; border-radius: 8px; transition: all 0.2s; user-select: none; border: 1px solid transparent; }
+        .toggle-btn.active { background: var(--bg-surface); color: var(--primary-color); box-shadow: var(--shadow-sm); border-color: rgba(59, 130, 246, 0.2); }
 
         @media (min-width: 768px) {
             #app-shell { flex-direction: column; }
@@ -321,7 +326,7 @@
             </button>
         </div>
         <div class="form-group" id="recipeMasterScrollArea" style="height: calc(100% - 70px); overflow-y: auto;">
-            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Map your Finished Filled Goods to the corresponding Empty Bottles from inventory.</p>
+            <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.95rem; line-height: 1.5;">Map your Finished Filled Goods to the corresponding Empty Materials from inventory.</p>
             
             <div id="recipeGrid">
                 <!-- Loaded dynamically -->
@@ -344,14 +349,14 @@
             <input type="hidden" id="editRecipeInvId">
             
             <div class="input-wrapper">
-                <label>Select Finished Good (e.g. 500ML Filled Case/Box) *</label>
+                <label>Select Finished Good (e.g. 500ML Filled Case) *</label>
                 <select id="rbFinishedGood" onchange="handleDropdownChange(this, 'all')">
                     <option value="" disabled selected>Select from Inventory...</option>
                 </select>
             </div>
 
             <div style="background: var(--bg-surface); padding: 16px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 24px;">
-                <label style="display: block; margin-bottom: 12px; color: var(--primary-color); font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Requires (Empty Bottles)</label>
+                <label style="display: block; margin-bottom: 12px; color: var(--primary-color); font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Requires (Empty Materials)</label>
                 
                 <div class="input-wrapper">
                     <label>Select Empty Material (e.g. 500ML Empty Bottle) *</label>
@@ -359,15 +364,22 @@
                         <option value="" disabled selected>Select from Inventory...</option>
                     </select>
                 </div>
-                <div class="input-wrapper" style="margin-bottom: 0;">
-                    <label>Empty Pieces needed per 1 Case/Unit of Finished Good *</label>
-                    <input type="number" id="rbQtyRatio" placeholder="e.g. 24 (Pieces inside 1 Case)" min="1">
+
+                <div class="input-wrapper" style="margin-bottom: 20px;">
+                    <label>1 Unit of Finished Good requires how many empty pieces? *</label>
+                    <input type="number" id="rbQtyRatio" placeholder="e.g. 24" min="1">
                 </div>
-                <!-- FIX ADDED HERE -->
-                <div class="input-wrapper" style="margin-bottom: 0; margin-top: 20px;">
-                    <label>Pieces per 1 Unit of Empty Material Stock *</label>
-                    <input type="number" id="rbBottlesPerEmpty" placeholder="e.g. 1 for singles, 24 for packs" min="1" value="1">
-                    <small style="color: var(--text-muted); font-size: 0.8rem; display: block; margin-top: 6px;">Required to accurately deduct stock when individual pieces are rejected. (Enter 1 if empty stock is in Singles, 24 if in Packs of 24)</small>
+
+                <!-- NEW: Human Friendly Conversational Toggle -->
+                <label style="display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.85em; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">How is this Empty Material counted in Inventory?</label>
+                <div class="toggle-group">
+                    <div class="toggle-btn active" id="toggleSingles" onclick="vibrateApp(10); setInventoryMode('singles')">Counted as Single Pieces</div>
+                    <div class="toggle-btn" id="togglePacks" onclick="vibrateApp(10); setInventoryMode('packs')">Counted as Packs/Boxes</div>
+                </div>
+
+                <div class="input-wrapper" id="packSizeContainer" style="display: none; margin-bottom: 0;">
+                    <label>How many pieces are inside 1 Pack/Box? *</label>
+                    <input type="number" id="rbPackSize" placeholder="e.g. 24" min="1">
                 </div>
             </div>
 
@@ -472,7 +484,7 @@
             setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.style.display = 'none', 300); }, 3000);
         };
 
-        // Advanced Error Tracker & Live URL Interceptor
+        // Advanced Error Tracker
         window.handleFirestoreError = function(e, customFallbackMsg) {
             console.error(customFallbackMsg, e);
             const errStr = e.toString() || e.message || "";
@@ -504,7 +516,6 @@
         let isLoadingLogs = false;
         let hasMoreLogs = true;
         let currentSearchQuery = '';
-        let filterDate = '';
         let searchDebounceTimeout = null;
         let itemsCounter = 0;
 
@@ -512,6 +523,28 @@
         let lastRecipeDoc = null;
         let hasMoreRecipes = true;
         let isLoadingRecipes = false;
+
+        // Auto Select Today's Date Filter (Local Timezone Fix)
+        const todayObj = new Date();
+        let filterDate = new Date(todayObj.getTime() - (todayObj.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+
+        // Ensure UI updates to show filter is active instantly
+        document.addEventListener('DOMContentLoaded', () => {
+            const masterDateInput = document.getElementById('masterDateFilter');
+            if(masterDateInput) {
+                masterDateInput.value = filterDate;
+                masterDateInput.classList.add('active-filter');
+            }
+            const clearBtn = document.getElementById('clearDateBtn');
+            if(clearBtn) clearBtn.classList.add('active');
+            
+            const mobIcon = document.getElementById('mobileFilterIcon');
+            if(mobIcon) mobIcon.classList.add('active-filter');
+            
+            // Set form default date
+            const fDateInput = document.getElementById('fDate');
+            if(fDateInput) fDateInput.valueAsDate = new Date();
+        });
 
         // Date Filter Logic
         window.applyDateFilter = function(val) {
@@ -536,11 +569,19 @@
             applyDateFilter('');
         };
 
+        // Conversational Toggle State Management
+        let currentInventoryMode = 'singles';
+        window.setInventoryMode = function(mode) {
+            currentInventoryMode = mode;
+            document.getElementById('toggleSingles').classList.toggle('active', mode === 'singles');
+            document.getElementById('togglePacks').classList.toggle('active', mode === 'packs');
+            document.getElementById('packSizeContainer').style.display = mode === 'packs' ? 'block' : 'none';
+        };
+
         // Initialization
         const auth = getAuth(app);
         onAuthStateChanged(auth, async (user) => {
             if (user) { 
-                document.getElementById('fDate').valueAsDate = new Date();
                 setupPaginationAndSearch();
                 loadFillingLogs(false); 
             }
@@ -594,7 +635,6 @@
                         opt.setAttribute('data-empty-id', p.fillingRecipe.emptyBottleId);
                         opt.setAttribute('data-empty-name', p.fillingRecipe.emptyBottleName);
                         opt.setAttribute('data-ratio', p.fillingRecipe.qtyPerUnit);
-                        // FIXED: Include the new parameter to calculate fractional deductions
                         opt.setAttribute('data-bottles-per-empty', p.fillingRecipe.bottlesPerEmpty || 1); 
                     }
                     sel.appendChild(opt);
@@ -679,10 +719,10 @@
                                     <span class="material-symbols-outlined" style="font-size: 18px;">delete</span>
                                 </button>
                             </div>
-                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Uses (Empty Pieces):</div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Uses (Empty Materials):</div>
                             <div class="recipe-item">
                                 <span>${rData.fillingRecipe.emptyBottleName}</span>
-                                <div>${rData.fillingRecipe.qtyPerUnit} Pieces per Case/Unit</div>
+                                <div>${rData.fillingRecipe.qtyPerUnit} Pieces per Finished Unit</div>
                             </div>
                         </div>
                     `;
@@ -737,11 +777,14 @@
                             emptySel.value = product.fillingRecipe.emptyBottleId;
                             document.getElementById('rbQtyRatio').value = product.fillingRecipe.qtyPerUnit;
                             
-                            // FIX ADDED HERE: Populate the new field
-                            if (product.fillingRecipe.bottlesPerEmpty) {
-                                document.getElementById('rbBottlesPerEmpty').value = product.fillingRecipe.bottlesPerEmpty;
+                            // Initialize Toggle State based on existing data
+                            const bpe = product.fillingRecipe.bottlesPerEmpty || 1;
+                            if (bpe > 1) {
+                                setInventoryMode('packs');
+                                document.getElementById('rbPackSize').value = bpe;
                             } else {
-                                document.getElementById('rbBottlesPerEmpty').value = "1";
+                                setInventoryMode('singles');
+                                document.getElementById('rbPackSize').value = "";
                             }
                         }
                     }
@@ -751,7 +794,8 @@
                 document.getElementById('recipeBuilderTitle').innerText = "Create Recipe";
                 selFinished.disabled = false;
                 document.getElementById('rbQtyRatio').value = "";
-                document.getElementById('rbBottlesPerEmpty').value = "1";
+                setInventoryMode('singles');
+                document.getElementById('rbPackSize').value = "";
             }
             
             openModal('modalRecipeBuilder');
@@ -765,10 +809,18 @@
             const finishedId = finishedSel.value;
             const emptyId = emptySel.value;
             const qtyRatio = parseFloat(document.getElementById('rbQtyRatio').value);
-            // FIX ADDED HERE: Extract the new field parameter
-            const bottlesPerEmpty = parseFloat(document.getElementById('rbBottlesPerEmpty').value) || 1;
+            
+            // Calculate Hidden Math Parameter based on Toggle Choice
+            let bottlesPerEmpty = 1;
+            if (currentInventoryMode === 'packs') {
+                bottlesPerEmpty = parseFloat(document.getElementById('rbPackSize').value);
+                if (isNaN(bottlesPerEmpty) || bottlesPerEmpty <= 1) {
+                    showToast("Please enter a valid pack size (greater than 1).", "error"); 
+                    return;
+                }
+            }
 
-            if (!finishedId || !emptyId || finishedId === "LOAD_MORE" || emptyId === "LOAD_MORE" || isNaN(qtyRatio) || qtyRatio <= 0 || isNaN(bottlesPerEmpty) || bottlesPerEmpty <= 0) {
+            if (!finishedId || !emptyId || finishedId === "LOAD_MORE" || emptyId === "LOAD_MORE" || isNaN(qtyRatio) || qtyRatio <= 0) {
                 showToast("Please fill all fields correctly.", "error"); return;
             }
             if (finishedId === emptyId) {
@@ -788,7 +840,7 @@
                         emptyBottleId: emptyId,
                         emptyBottleName: emptyOption.text,
                         qtyPerUnit: qtyRatio,
-                        bottlesPerEmpty: bottlesPerEmpty // Saved for math execution logic later
+                        bottlesPerEmpty: bottlesPerEmpty 
                     },
                     lastUpdated: new Date().toISOString()
                 });
@@ -880,7 +932,7 @@
                         const emptyId = selectedOpt.getAttribute('data-empty-id');
                         const emptyName = selectedOpt.getAttribute('data-empty-name');
                         const ratio = parseFloat(selectedOpt.getAttribute('data-ratio'));
-                        // Extracting our new parameter
+                        // Extracting our background parameter
                         const bottlesPerEmpty = parseFloat(selectedOpt.getAttribute('data-bottles-per-empty')) || 1;
                         
                         if (!emptyId || isNaN(ratio)) {
@@ -889,20 +941,19 @@
                         }
 
                         // THE MATHEMATICAL FIX:
-                        // 1. You add EXACTLY the Finished Good amount entered (Cases).
+                        // 1. You add EXACTLY the Finished Good amount entered.
                         const exactFinishedAdded = qty; 
                         
                         // 2. Exact raw units consumed = (Finished Qty * Ratio) + Wasted Raw Units.
                         let exactEmptyDeducted = 0;
 
                         if (bottlesPerEmpty === 1) {
-                            // Pure integer math for single piece items to prevent floating point drift entirely
+                            // Pure integer math for single piece items
                             exactEmptyDeducted = Math.round((qty * ratio) + reject);
                         } else {
                             // Decimal math for packs (e.g., 24 bottles per pack)
                             const rejectInEmptyUnits = reject / bottlesPerEmpty;
                             exactEmptyDeducted = (qty * ratio) + rejectInEmptyUnits;
-                            // Optionally round to 4 decimal places to prevent float drift natively in JS
                             exactEmptyDeducted = Math.round(exactEmptyDeducted * 10000) / 10000;
                         }
 
@@ -1011,7 +1062,7 @@
                         let finishedToRemove = item.exactFinishedAdded;
                         let emptyToRestore = item.exactEmptyDeducted;
 
-                        // Backward compatibility fallback for the old corrupted logs
+                        // Backward compatibility fallback
                         if (finishedToRemove === undefined) {
                             finishedToRemove = item.qtyCases; 
                             emptyToRestore = (item.qtyCases * item.ratio) + (item.rejected || 0);
@@ -1076,7 +1127,7 @@
         };
 
         // ==========================================
-        // 4. FEED RENDER & PAGINATION
+        // 4. FEED RENDER & PAGINATION (Sort by Newest)
         // ==========================================
         async function loadFillingLogs(isAppend = false) {
             if (isLoadingLogs) return;
@@ -1106,22 +1157,21 @@
                 let qRef = collection(db, "filling_logs");
                 let constraints = [];
                 
-                if (filterDate) {
+                // Smart Filter Logic: Ensure Exact Match + Recent Order
+                if (filterDate !== '') {
                     constraints.push(where("date", "==", filterDate));
-                }
-
-                if (currentSearchQuery) {
+                    // No Limit to fetch the entire day for client-side sorting
+                } else if (currentSearchQuery !== '') {
                     constraints.push(orderBy("company"));
                     constraints.push(where("company", ">=", currentSearchQuery));
                     constraints.push(where("company", "<=", currentSearchQuery + "\uf8ff"));
                 } else {
-                    constraints.push(orderBy("date", "desc"));
+                    constraints.push(orderBy("createdAt", "desc"));
+                    if (isAppend && lastVisibleDoc) {
+                        constraints.push(startAfter(lastVisibleDoc));
+                    }
+                    constraints.push(limit(PAGE_LIMIT));
                 }
-                
-                if (isAppend && lastVisibleDoc) {
-                    constraints.push(startAfter(lastVisibleDoc));
-                }
-                constraints.push(limit(PAGE_LIMIT));
 
                 let q = query(qRef, ...constraints);
 
@@ -1136,13 +1186,30 @@
                 }
 
                 lastVisibleDoc = snap.docs[snap.docs.length - 1];
-                if (snap.docs.length < PAGE_LIMIT) hasMoreLogs = false;
+                if (filterDate !== '') hasMoreLogs = false; 
+
+                let newItems = [];
+                snap.forEach(docSnap => {
+                    newItems.push({ id: docSnap.id, ...docSnap.data() });
+                });
+
+                // Client-side Time-Wise sort to strictly ensure exact millisecond creation pushes the latest to top
+                if (filterDate !== '') {
+                    newItems.sort((a, b) => {
+                        const timeA = a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+                        const timeB = b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+                        return timeB - timeA;
+                    });
+                }
 
                 let html = '';
-                snap.forEach(docSnap => {
-                    const data = { id: docSnap.id, ...docSnap.data() };
-                    
+                newItems.forEach(data => {
+                    // Date and Time Formatting
                     const dFormatted = new Date(data.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric'});
+                    let timeStr = "";
+                    if (data.createdAt && data.createdAt.toDate) {
+                        timeStr = data.createdAt.toDate().toLocaleTimeString('en-US', { hour: '2-digit', minute:'2-digit', hour12: true });
+                    }
                     
                     let itemsHtml = '';
                     if (data.items) {
@@ -1169,7 +1236,10 @@
                         <div class="filling-card">
                             <div class="fc-header">
                                 <div class="fc-company"><span class="material-symbols-outlined">precision_manufacturing</span> ${data.company}</div>
-                                <div class="fc-date">${dFormatted}</div>
+                                <div style="display:flex; flex-direction:column; align-items:flex-end;">
+                                    <div class="fc-date">${dFormatted}</div>
+                                    ${timeStr ? `<div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 4px; font-weight: 600;">${timeStr}</div>` : ''}
+                                </div>
                             </div>
                             
                             <div class="fc-items-list">${itemsHtml}</div>
@@ -1209,6 +1279,9 @@
         function setupPaginationAndSearch() {
             const scrollArea = document.getElementById('mainScrollArea');
             scrollArea.addEventListener('scroll', () => {
+                // If filterDate is active, we loaded all of them at once, so ignore pagination
+                if (filterDate !== '') return;
+                
                 if ((scrollArea.scrollTop + scrollArea.clientHeight) >= (scrollArea.scrollHeight - 60)) {
                     if (!isLoadingLogs && hasMoreLogs) loadFillingLogs(true);
                 }
