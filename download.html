@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Install App - LITHIK BEVERAGE</title>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a">
+    <link rel="apple-touch-icon" href="images/icon.png">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* Shared Core Theme from your ERS */
+        :root {
+            --bg-body: #f8fafc;
+            --bg-surface: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary-color: #1e40af;
+            --primary-hover: #1e3a8a;
+            --accent-color: #0ea5e9;
+            --warning-bg: #fffbeb;
+            --warning-text: #b45309;
+            --border-color: #e2e8f0;
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-body: #020617;
+                --bg-surface: #0f172a;
+                --text-main: #f8fafc;
+                --text-muted: #94a3b8;
+                --primary-color: #3b82f6;
+                --primary-hover: #2563eb;
+                --warning-bg: #422006;
+                --warning-text: #fcd34d;
+                --border-color: #1e293b;
+            }
+        }
+
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            -webkit-tap-highlight-color: transparent; 
+        }
+
+        html, body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: var(--bg-body); 
+            color: var(--text-main); 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
+        }
+
+        .install-container {
+            background-color: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 24px;
+            padding: 40px 24px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .brand-logo {
+            width: 100px;
+            height: 100px;
+            border-radius: 20px;
+            object-fit: cover;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 24px;
+            border: 2px solid var(--border-color);
+        }
+
+        .brand-name {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .brand-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .action-btn {
+            background-color: var(--primary-color);
+            color: #ffffff;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 32px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(30, 64, 175, 0.3);
+        }
+
+        .action-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-2px);
+        }
+
+        .action-btn:active {
+            transform: translateY(1px);
+        }
+
+        .browser-banner {
+            display: none; /* Hidden by default */
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 24px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-align: left;
+            line-height: 1.4;
+            width: 100%;
+        }
+
+        .browser-banner-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="install-container">
+        <img src="images/icon.png" alt="Lithik Beverage Logo" class="brand-logo" onerror="this.src='https://via.placeholder.com/100'">
+        
+        <h1 class="brand-name">LITHIK BEVERAGE</h1>
+        <p class="brand-subtitle">Enterprise Resource Software<br>Dashboard & Management</p>
+
+        <!-- Dynamic Button: Will switch between Install and Open based on context -->
+        <button id="mainActionBtn" class="action-btn">
+            <span class="material-symbols-outlined" id="btnIcon">open_in_new</span>
+            <span id="btnText">Open App</span>
+        </button>
+
+        <!-- Banner for non-chrome browsers -->
+        <div id="chromeBanner" class="browser-banner">
+            <div class="browser-banner-header">
+                <span class="material-symbols-outlined">info</span>
+                For the best experience
+            </div>
+            Please open this link in <b>Google Chrome</b> to install this dashboard as a native mobile app on your device.
+        </div>
+    </div>
+
+    <script>
+        const mainActionBtn = document.getElementById('mainActionBtn');
+        const btnText = document.getElementById('btnText');
+        const btnIcon = document.getElementById('btnIcon');
+        const chromeBanner = document.getElementById('chromeBanner');
+
+        let deferredPrompt = null;
+
+        // 1. Check if the app is already installed / running in standalone mode
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        // 2. Check if the browser is Chrome-based
+        const isChrome = /CriOS/i.test(navigator.userAgent) || 
+                         (/Chrome/i.test(navigator.userAgent) && /Google/i.test(navigator.vendor));
+
+        // 3. Show banner if not installed and not using a supported/ideal browser
+        if (!isChrome && !isStandalone) {
+            chromeBanner.style.display = 'block';
+        }
+
+        // 4. Listen for PWA Install Prompt
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Prevent default infobar
+            e.preventDefault();
+            // Stash event for later
+            deferredPrompt = e;
+            
+            // Only change button to "Install" if it's not already installed
+            if (!isStandalone) {
+                btnText.textContent = 'Install App';
+                btnIcon.textContent = 'download';
+            }
+        });
+
+        // 5. Handle Main Button Click
+        mainActionBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                // Trigger the installation prompt
+                deferredPrompt.prompt();
+                
+                // Wait for user action
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    console.log('User installed the PWA.');
+                    
+                    // Reset UI to Open App after installation
+                    deferredPrompt = null;
+                    btnText.textContent = 'Open App';
+                    btnIcon.textContent = 'open_in_new';
+                    
+                    // Automatically redirect to index page after a brief delay
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 500);
+                } else {
+                    console.log('User dismissed the PWA install.');
+                }
+            } else {
+                // If already installed, or not supported for direct install, simply act as an Open link
+                window.location.href = 'index.html';
+            }
+        });
+
+        // 6. Listen for successful installation (fallback UI update)
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            btnText.textContent = 'Open App';
+            btnIcon.textContent = 'open_in_new';
+            chromeBanner.style.display = 'none'; // Hide banner if it installed successfully
+            window.location.href = 'index.html'; // Auto redirect
+        });
+    </script>
+</body>
+</html>
