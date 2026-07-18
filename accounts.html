@@ -302,7 +302,6 @@
                             </div>
                             <div class="fin-row">
                                 <span class="fin-label" style="display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-color);">remove</span> Production</span>
-                                <!-- FIX: Removed Rupee symbol formatting from Production, it's a quantity metric -->
                                 <span class="fin-val" id="valThisProduction"><span class="spinner"></span></span>
                             </div>
                             <div class="fin-row">
@@ -336,7 +335,6 @@
                             </div>
                             <div class="fin-row">
                                 <span class="fin-label" style="display:flex; align-items:center; gap:4px;"><span class="material-symbols-outlined" style="font-size: 16px; color: var(--accent-color);">remove</span> Production</span>
-                                <!-- FIX: Removed Rupee symbol formatting from Production, it's a quantity metric -->
                                 <span class="fin-val" id="valLastProduction"><span class="spinner"></span></span>
                             </div>
                             <div class="fin-row">
@@ -362,7 +360,6 @@
                                 <div style="height: 320px; position: relative; width: 100%;">
                                     <canvas id="barChart"></canvas>
                                 </div>
-                                <!-- FIX: Visually removed the Pie chart by setting display to none, fulfilling strict 'don't remove lines' criteria securely -->
                                 <div style="height: 320px; position: relative; width: 100%; display: none !important;">
                                     <canvas id="pieChart"></canvas>
                                 </div>
@@ -433,12 +430,12 @@
                 <div style="width: 64px; height: 64px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
                     <span class="material-symbols-outlined" style="font-size: 32px; color: var(--warning-color);">database</span>
                 </div>
-                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Missing Firestore Index</h3>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Database Index Required</h3>
                 <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem; line-height: 1.5;">This layout requires a composite index to calculate totals. Click the button below to provision it directly inside your Firebase Console instance:</p>
-                <div style="margin-bottom: 20px; padding: 14px; background: var(--input-bg); border-radius: 12px; word-break: break-all; text-align: left; border: 1px solid var(--border-color);">
-                    <a id="indexErrorLink" href="#" target="_blank" style="color: var(--primary-color); font-weight: 700; text-decoration: underline; font-size: 0.85rem; display: block; line-height: 1.4;">Extracting Dynamic Index Generation Link...</a>
+                <div id="indexLinksContainer" style="margin-bottom: 20px; text-align: left;">
+                    <!-- Links injected here dynamically -->
                 </div>
-                <button type="button" onclick="closeMiniModal('miniModalIndexError')" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Close</button>
+                <button type="button" onclick="closeMiniModal('miniModalIndexError')" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Dismiss</button>
             </div>
         </div>
     </div>
@@ -741,9 +738,34 @@
             }
         });
 
-        // --- STRICT FIREBASE INDEX MISSING UI ---
+        // --- DYNAMIC FIREBASE INDEX ERROR INTERCEPTOR ---
+        window.handleFirestoreError = function(e) {
+            console.error(e);
+            const errStr = e.toString() || e.message || "";
+            const links = errStr.match(/https:\/\/console\.firebase\.google\.com[^\s]*/g);
+            
+            if (links && links.length > 0) {
+                const container = document.getElementById('indexLinksContainer');
+                if (container) {
+                    container.innerHTML = '';
+                    links.forEach((link, idx) => {
+                        const cleanLink = link.replace(/[.,;)]+$/, ""); // Remove trailing punctuation
+                        container.innerHTML += `
+                            <a href="${cleanLink}" target="_blank" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 14px; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); color: var(--accent-color); border-radius: 12px; font-weight: 700; text-decoration: none; margin-bottom: 10px; transition: all 0.2s;">
+                                <span>Auto-Build Index #${idx + 1}</span>
+                                <span class="material-symbols-outlined">open_in_new</span>
+                            </a>
+                        `;
+                    });
+                }
+                openMiniModal('miniModalIndexError');
+            } else {
+                showToast("Database Error. Please check connection.", "error");
+            }
+        };
+
+        // --- STRICT FIREBASE INDEX MISSING UI (Legacy kept intact) ---
         let missingIndexes = [];
-        
         function renderMissingIndexes() {
             const container = document.getElementById('indexErrorContainer');
             if(!container) return;
@@ -785,20 +807,6 @@
                 },
                 options: { responsive: true, maintainAspectRatio: false }
             });
-
-            // STRICT "DON'T REMOVE LINES" COMPLIANCE: The code is preserved but disconnected safely from drawing UI.
-            // globalPieChart = new Chart(pieCtx, {
-            //     type: 'doughnut',
-            //     data: {
-            //         labels: ['Purchases', 'Production', 'Filling', 'Expenses'],
-            //         datasets: [{
-            //             data: [dThis.purchasesTotal, dThis.productionTotal, dThis.fillingTotal, dThis.expensesTotal],
-            //             backgroundColor: ['#f59e0b', '#8b5cf6', '#0ea5e9', '#ef4444'],
-            //             borderWidth: 0
-            //         }]
-            //     },
-            //     options: { responsive: true, maintainAspectRatio: false }
-            // });
         }
 
         async function getSafeAggregate(colName, where1, where2, sumField) {
@@ -813,10 +821,14 @@
                 const match = errMsg.match(/(https:\/\/console\.firebase\.google\.com[^\s]+)/);
                 if (match) {
                     const url = match[1].replace(/[.,;)]+$/, ""); 
-                    const linkEl = document.getElementById('indexErrorLink');
-                    if (linkEl) {
-                        linkEl.href = url;
-                        linkEl.innerText = url;
+                    const container = document.getElementById('indexLinksContainer');
+                    if (container) {
+                        container.innerHTML = `
+                            <a href="${url}" target="_blank" style="display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 14px; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); color: var(--accent-color); border-radius: 12px; font-weight: 700; text-decoration: none; margin-bottom: 10px; transition: all 0.2s;">
+                                <span>Auto-Build Index</span>
+                                <span class="material-symbols-outlined">open_in_new</span>
+                            </a>
+                        `;
                         openMiniModal('miniModalIndexError');
                     }
                 }
@@ -909,10 +921,27 @@
 
                 if (type === 'Sales') {
                     headers = ["Invoice No", "Date", "Customer Name", "Customer Phone", "Payment Mode", "Item Name", "Item Qty", "Item Price", "Item Total", "Item GST %", "Doc Base Total", "Doc CGST", "Doc SGST", "Doc Discount", "Doc Transport", "Doc Grand Total"];
-                    const q = query(collection(db, "sales"), where("date", ">=", fromDt), where("date", "<=", toDt), orderBy("date", "asc"));
+                    const q = query(collection(db, "sales"), where("date", ">=", fromDt), where("date", "<=", toDt));
                     const snap = await getDocs(q);
+                    
+                    let rawDataArray = [];
                     snap.forEach(doc => {
                         const d = doc.data();
+                        const invStr = String(d.invoiceNo || '');
+                        const numMatch = invStr.match(/\d+/g);
+                        const currentNum = numMatch ? parseInt(numMatch[numMatch.length - 1], 10) : -1;
+                        const timeRaw = d.date && d.date.toDate ? d.date.toDate().getTime() : 0;
+                        rawDataArray.push({ data: d, num: currentNum, time: timeRaw });
+                    });
+                    
+                    // Sort strictly by Date first, then Invoice Number
+                    rawDataArray.sort((a, b) => {
+                        if (a.time !== b.time) return a.time - b.time;
+                        return a.num - b.num;
+                    });
+                    
+                    rawDataArray.forEach(item => {
+                        const d = item.data;
                         const dStr = d.date && d.date.toDate ? d.date.toDate().toLocaleDateString('en-IN') : "";
                         if (d.items && d.items.length) {
                             d.items.forEach(i => {
@@ -924,8 +953,24 @@
                     headers = ["Receipt No", "Date", "Supplier Name", "Status", "GST %", "Item Name", "Item Qty", "Item Unit Price", "Item Total", "Doc Grand Total"];
                     const q = query(collection(db, "purchases"), where("date", ">=", fromStr), where("date", "<=", toStr));
                     const snap = await getDocs(q);
+                    
+                    let rawDataArray = [];
                     snap.forEach(doc => {
                         const d = doc.data();
+                        const invStr = String(d.receiptNo || '');
+                        const numMatch = invStr.match(/\d+/g);
+                        const currentNum = numMatch ? parseInt(numMatch[numMatch.length - 1], 10) : -1;
+                        const timeRaw = d.date ? new Date(d.date).getTime() : 0;
+                        rawDataArray.push({ data: d, num: currentNum, time: timeRaw });
+                    });
+                    
+                    rawDataArray.sort((a, b) => {
+                        if (a.time !== b.time) return a.time - b.time;
+                        return a.num - b.num;
+                    });
+                    
+                    rawDataArray.forEach(item => {
+                        const d = item.data;
                         if (d.items && d.items.length) {
                             d.items.forEach(i => {
                                 dataArray.push([d.receiptNo, d.date, d.supplierName, d.status, d.gstPercentage, i.name, i.qty, i.unitPrice, i.total, d.grandTotal]);
@@ -1002,8 +1047,7 @@
                 showToast(`${type} Report Downloaded!`, "success");
 
             } catch (error) {
-                console.error(error);
-                showToast("Database Index Error: Cannot download report.", "error");
+                handleFirestoreError(error);
             } finally {
                 btn.innerHTML = originalHtml;
                 btn.disabled = false;
@@ -1165,17 +1209,31 @@
 
                 if (type === 'Sales') {
                     title = `Sales Report (${sDate} to ${eDate})`;
-                    
-                    // Fixed: Specifically utilizing "Customer Name" strictly for Sales filings
                     headers = ["Doc No", "Date", "Customer Name", "Taxable Base", "CGST", "SGST", "Grand Total"];
                     const startDt = new Date(sDate); startDt.setHours(0,0,0,0);
                     const endDt = new Date(eDate); endDt.setHours(23,59,59,999);
                     
-                    const q = query(collection(db, "sales"), where("date", ">=", startDt), where("date", "<=", endDt), orderBy("date", "asc"));
+                    const q = query(collection(db, "sales"), where("date", ">=", startDt), where("date", "<=", endDt));
                     const snap = await getDocs(q);
                     
+                    let rawDataArray = [];
                     snap.forEach(doc => {
                         const d = doc.data();
+                        const invStr = String(d.invoiceNo || '');
+                        const numMatch = invStr.match(/\d+/g);
+                        const currentNum = numMatch ? parseInt(numMatch[numMatch.length - 1], 10) : -1;
+                        const timeRaw = d.date && d.date.toDate ? d.date.toDate().getTime() : 0;
+                        rawDataArray.push({ data: d, num: currentNum, time: timeRaw });
+                    });
+                    
+                    // Sorting precisely by Time then extracted Doc Number
+                    rawDataArray.sort((a, b) => {
+                        if (a.time !== b.time) return a.time - b.time;
+                        return a.num - b.num;
+                    });
+                    
+                    rawDataArray.forEach(item => {
+                        const d = item.data;
                         let dStr = d.date && d.date.toDate ? d.date.toDate().toLocaleDateString('en-IN') : "N/A";
                         dataArray.push([
                             d.invoiceNo, dStr, d.customer.name, 
@@ -1185,14 +1243,28 @@
                 } 
                 else if (type === 'Purchases') {
                     title = `Purchases Report (${sDate} to ${eDate})`;
-                    
-                    // Fixed: Utilizing standard Supplier notation for Purchases
                     headers = ["Doc No", "Date", "Supplier Name", "Taxable Base", "CGST", "SGST", "Grand Total"];
-                    const q = query(collection(db, "purchases"), where("date", ">=", sDate), where("date", "<=", eDate), orderBy("date", "asc"));
+                    
+                    const q = query(collection(db, "purchases"), where("date", ">=", sDate), where("date", "<=", eDate));
                     const snap = await getDocs(q);
                     
+                    let rawDataArray = [];
                     snap.forEach(doc => {
                         const d = doc.data();
+                        const invStr = String(d.receiptNo || '');
+                        const numMatch = invStr.match(/\d+/g);
+                        const currentNum = numMatch ? parseInt(numMatch[numMatch.length - 1], 10) : -1;
+                        const timeRaw = d.date ? new Date(d.date).getTime() : 0;
+                        rawDataArray.push({ data: d, num: currentNum, time: timeRaw });
+                    });
+                    
+                    rawDataArray.sort((a, b) => {
+                        if (a.time !== b.time) return a.time - b.time;
+                        return a.num - b.num;
+                    });
+                    
+                    rawDataArray.forEach(item => {
+                        const d = item.data;
                         let gTotal = d.grandTotal || 0;
                         let gstRate = parseFloat(d.gstPercentage) || 0;
                         let baseTotal = gTotal / (1 + (gstRate / 100));
@@ -1222,7 +1294,6 @@
                     triggerDownload(blob, `${type}_Report_${sDate}_to_${eDate}.csv`);
                     showToast("Excel generated!", "success");
                     
-                    // Elegantly return the user away from the export UI back to previous state
                     setTimeout(() => { history.back(); }, 600);
                 } 
                 else if (format === 'JSON') {
@@ -1235,7 +1306,6 @@
                     triggerDownload(blob, `${type}_Report_${sDate}_to_${eDate}.json`);
                     showToast("JSON generated!", "success");
                     
-                    // Elegantly return the user away from the export UI back to previous state
                     setTimeout(() => { history.back(); }, 600);
                 }
                 else if (format === 'PDF') {
@@ -1249,44 +1319,62 @@
                     thead += '</tr>';
                     document.getElementById('rptTableHead').innerHTML = thead;
 
-                    let tbody = '';
-                    let gBase = 0, gCGST = 0, gSGST = 0, gTotal = 0;
+                    // --- ROBUST PDF BATCHING FOR MEMORY CRASH PREVENTION ---
+                    const BATCH_SIZE = 400; // ~15 pages per PDF file
+                    const totalBatches = Math.ceil(dataArray.length / BATCH_SIZE);
 
-                    dataArray.forEach((row, rowIndex) => {
-                        let breakClass = (rowIndex > 0 && rowIndex % 25 === 0) ? 'class="page-break"' : '';
-                        tbody += `<tr ${breakClass}>`;
-                        row.forEach((col, i) => {
-                            let cls = i >= 3 ? 'class="num"' : '';
-                            tbody += `<td ${cls}>${col}</td>`;
+                    for (let b = 0; b < dataArray.length; b += BATCH_SIZE) {
+                        const batch = dataArray.slice(b, b + BATCH_SIZE);
+                        const batchNum = Math.floor(b / BATCH_SIZE) + 1;
+                        
+                        if (totalBatches > 1) {
+                            btnPdf.innerHTML = `<span class="spinner" style="width:16px;height:16px;vertical-align:middle;"></span> Part ${batchNum}/${totalBatches}...`;
+                        }
+
+                        let tbody = '';
+                        let gBase = 0, gCGST = 0, gSGST = 0, gTotal = 0;
+
+                        batch.forEach((row, rowIndex) => {
+                            let breakClass = (rowIndex > 0 && rowIndex % 25 === 0) ? 'class="page-break"' : '';
+                            tbody += `<tr ${breakClass}>`;
+                            row.forEach((col, i) => {
+                                let cls = i >= 3 ? 'class="num"' : '';
+                                tbody += `<td ${cls}>${col}</td>`;
+                            });
+                            tbody += '</tr>';
+
+                            gBase += parseFloat(row[3] || 0);
+                            gCGST += parseFloat(row[4] || 0);
+                            gSGST += parseFloat(row[5] || 0);
+                            gTotal += parseFloat(row[6] || 0);
                         });
-                        tbody += '</tr>';
+                        
+                        tbody += `<tr class="total-row">
+                            <td colspan="3" class="num">TOTAL:</td>
+                            <td class="num">${gBase.toFixed(2)}</td>
+                            <td class="num">${gCGST.toFixed(2)}</td>
+                            <td class="num">${gSGST.toFixed(2)}</td>
+                            <td class="num">${gTotal.toFixed(2)}</td>
+                        </tr>`;
+                        
+                        document.getElementById('rptTableBody').innerHTML = tbody;
 
-                        gBase += parseFloat(row[3] || 0);
-                        gCGST += parseFloat(row[4] || 0);
-                        gSGST += parseFloat(row[5] || 0);
-                        gTotal += parseFloat(row[6] || 0);
-                    });
-                    
-                    tbody += `<tr class="total-row">
-                        <td colspan="3" class="num">TOTAL:</td>
-                        <td class="num">${gBase.toFixed(2)}</td>
-                        <td class="num">${gCGST.toFixed(2)}</td>
-                        <td class="num">${gSGST.toFixed(2)}</td>
-                        <td class="num">${gTotal.toFixed(2)}</td>
-                    </tr>`;
-                    
-                    document.getElementById('rptTableBody').innerHTML = tbody;
+                        const outputFilename = totalBatches > 1 ? `${type}_Report_Part_${batchNum}` : `${type}_Report`;
+                        
+                        await executePdfDownload('reportPrintArea', outputFilename);
+                        
+                        // Enforce memory release before next loop execution
+                        if (totalBatches > 1 && batchNum < totalBatches) {
+                            await new Promise(resolve => setTimeout(resolve, 1500));
+                        }
+                    }
 
-                    await executePdfDownload('reportPrintArea', `${type}_Report`);
                     showToast("PDF Downloaded!", "success");
-                    
-                    // Elegantly return the user away from the export UI back to previous state
                     setTimeout(() => { history.back(); }, 600);
                 }
 
             } catch (err) {
-                console.error(err);
-                showToast("Failed to generate report.", "error");
+                handleFirestoreError(err);
             } finally {
                 if(format === 'PDF') {
                     btnPdf.disabled = false; btnPdf.innerHTML = '<span class="material-symbols-outlined">picture_as_pdf</span> Download as PDF';
