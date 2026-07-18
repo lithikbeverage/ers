@@ -795,7 +795,7 @@
             );
             
             // FIX: Target collection changed to 'filling' and field changed to 'qty' to fix the 0 bug
-            const tFill = await getSafeAggregate("filling", 
+            const tFill = await getSafeAggregate("filling_logs", 
                 [where("date", "==", todayStr)], 
                 { totalQty: { type: 'sum', field: 'qty' } }
             );
