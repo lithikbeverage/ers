@@ -129,6 +129,7 @@
         .pay-cash { background: rgba(16, 185, 129, 0.1); color: var(--success-color); border: 1px solid rgba(16, 185, 129, 0.2); }
         .pay-online { background: rgba(14, 165, 233, 0.1); color: var(--accent-color); border: 1px solid rgba(14, 165, 233, 0.2); }
         .pay-credit { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); border: 1px solid rgba(245, 158, 11, 0.2); }
+        .pay-credit-received { background: rgba(16, 185, 129, 0.1); color: var(--success-color); border: 1px solid rgba(16, 185, 129, 0.2); }
 
         .sc-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--border-color); padding-top: 12px; }
         .sc-total { font-size: 1.4rem; font-weight: 900; color: var(--success-color); }
@@ -191,6 +192,9 @@
         .btn-primary { width: 100%; padding: 16px; border-radius: 12px; border: none; background: var(--primary-color); color: white; font-size: 1.1em; font-weight: 700; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 10px; transition: all 0.2s; box-shadow: 0 4px 10px rgba(30, 64, 175, 0.2); }
         .btn-primary:active:not(:disabled) { transform: translateY(2px); box-shadow: none; }
         .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        .index-link-btn { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 14px; background: rgba(14, 165, 233, 0.1); border: 1px solid rgba(14, 165, 233, 0.3); color: var(--accent-color); border-radius: 12px; font-weight: 700; text-decoration: none; margin-bottom: 10px; transition: all 0.2s; }
+        .index-link-btn:active { transform: scale(0.98); }
 
         /* Toasts */
         .toast-msg { position: fixed; top: 20px; left: 50%; transform: translate(-50%, -20px); color: white; padding: 12px 24px; border-radius: 8px; z-index: 9999; display: none; font-weight: 600; font-size: 0.95em; align-items: center; gap: 10px; opacity: 0; transition: all 0.3s; box-shadow: var(--shadow-lg); }
@@ -414,6 +418,25 @@
         </div>
     </div>
 
+    <!-- DYNAMIC INDEX ERROR MODAL -->
+    <div class="mini-modal-overlay" id="miniModalIndexError">
+        <div class="mini-modal-content" style="max-width: 460px; width: 92%;">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--warning-color);">database</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Database Index Required</h3>
+                <p style="color: var(--text-muted); margin-bottom: 20px; font-size: 0.9rem; line-height: 1.5;">Firebase needs a composite index to run this query. Click the link(s) below to auto-generate them in your console:</p>
+                
+                <div id="indexLinksContainer" style="margin-bottom: 20px; text-align: left;">
+                    <!-- Links injected here -->
+                </div>
+                
+                <button type="button" onclick="closeMiniModal('miniModalIndexError')" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Print Area -->
     <div id="printArea">
         <div class="print-top-band">
@@ -603,6 +626,32 @@
             document.querySelectorAll('.mini-modal-overlay.active').forEach(m => m.classList.remove('active'));
         });
 
+        // Dynamic Firebase Index Error Interceptor
+        window.handleFirestoreError = function(e) {
+            console.error(e);
+            const errStr = e.toString() || e.message || "";
+            const links = errStr.match(/https:\/\/console\.firebase\.google\.com[^\s]*/g);
+            
+            if (links && links.length > 0) {
+                const container = document.getElementById('indexLinksContainer');
+                container.innerHTML = '';
+                
+                links.forEach((link, idx) => {
+                    const cleanLink = link.replace(/[.,;)]+$/, ""); // Remove trailing punctuation
+                    container.innerHTML += `
+                        <a href="${cleanLink}" target="_blank" class="index-link-btn">
+                            <span>Auto-Build Index #${idx + 1}</span>
+                            <span class="material-symbols-outlined">open_in_new</span>
+                        </a>
+                    `;
+                });
+                
+                openMiniModal('miniModalIndexError');
+            } else {
+                window.showToast("Failed to load data. Please check connection.", "error");
+            }
+        };
+
         // Global Variables
         let currentUser = null;
         let salesCache = [];
@@ -762,8 +811,7 @@
                 document.getElementById('scrollLoader').style.display = 'none';
 
             } catch (err) {
-                console.error(err);
-                showToast("Error loading records.", "error");
+                window.handleFirestoreError(err);
             } finally {
                 isFetching = false;
             }
@@ -818,8 +866,20 @@
             const grand = item.totals ? item.totals.grand : 0;
             
             let payClass = "pay-cash";
-            if(item.paymentMode === "Online") payClass = "pay-online";
-            if(item.paymentMode === "Credit") payClass = "pay-credit";
+            let displayPaymentMode = item.paymentMode;
+            
+            if(item.paymentMode === "Online") {
+                payClass = "pay-online";
+            }
+            if(item.paymentMode === "Credit") {
+                if(item.creditStatus === "Received") {
+                    payClass = "pay-credit-received";
+                    displayPaymentMode = "Credit (Received)";
+                } else {
+                    payClass = "pay-credit";
+                    displayPaymentMode = "Credit (Pending)";
+                }
+            }
 
             let productsHTML = '';
             if (item.items && item.items.length > 0) {
@@ -853,7 +913,7 @@
                         ${productsHTML}
                         
                         <div style="margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap;">
-                            <div class="badge-pay ${payClass}">${item.paymentMode}</div>
+                            <div class="badge-pay ${payClass}">${displayPaymentMode}</div>
                             <div class="badge-pay" style="background: var(--input-bg); color: var(--text-muted); border: 1px solid var(--border-color);">${itemsCount} Items</div>
                         </div>
                     </div>
