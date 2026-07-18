@@ -366,6 +366,23 @@
         </div>
     </div>
 
+    <!-- Mini Popup - Missing Firestore Index Diagnostic UI Linker -->
+    <div class="mini-modal-overlay" id="miniModalIndexError">
+        <div class="mini-modal-content" style="max-width: 460px; width: 92%;">
+            <div style="text-align: center;">
+                <div style="width: 64px; height: 64px; background: rgba(245, 158, 11, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;">
+                    <span class="material-symbols-outlined" style="font-size: 32px; color: var(--warning-color);">database</span>
+                </div>
+                <h3 style="margin-bottom: 8px; font-size: 1.25rem; color: var(--text-main); font-weight: 700;">Missing Firestore Index</h3>
+                <p style="color: var(--text-muted); margin-bottom: 16px; font-size: 0.9rem; line-height: 1.5;">This layout requires a composite index to calculate totals. Click the button below to provision it directly inside your Firebase Console instance:</p>
+                <div style="margin-bottom: 20px; padding: 14px; background: var(--input-bg); border-radius: 12px; word-break: break-all; text-align: left; border: 1px solid var(--border-color);">
+                    <a id="indexErrorLink" href="#" target="_blank" style="color: var(--primary-color); font-weight: 700; text-decoration: underline; font-size: 0.85rem; display: block; line-height: 1.4;">Extracting Dynamic Index Generation Link...</a>
+                </div>
+                <button type="button" onclick="closeMiniModal('miniModalIndexError')" style="width: 100%; padding: 14px; border-radius: 12px; border: 1px solid var(--border-color); background: var(--input-bg); color: var(--text-main); font-weight: 600; cursor: pointer; transition: all 0.2s;">Close</button>
+            </div>
+        </div>
+    </div>
+
     <div class="modal" id="modalGst">
         <div class="modal-header">
             <div style="display: flex; align-items: center; gap: 15px;">
@@ -708,10 +725,12 @@
                 const errMsg = err.message || "";
                 const match = errMsg.match(/(https:\/\/console\.firebase\.google\.com[^\s]+)/);
                 if (match) {
-                    const url = match[1];
-                    if (!missingIndexes.includes(url)) {
-                        missingIndexes.push(url);
-                        renderMissingIndexes();
+                    const url = match[1].replace(/[.,;)]+$/, ""); 
+                    const linkEl = document.getElementById('indexErrorLink');
+                    if (linkEl) {
+                        linkEl.href = url;
+                        linkEl.innerText = url;
+                        openMiniModal('miniModalIndexError');
                     }
                 }
                 return 0; // Strictly blocks fallback iteration to save reads
@@ -721,8 +740,10 @@
         async function fetchAggregateData(startDt, endDt, startStr, endStr) {
             const salesTotal = await getSafeAggregate("sales", where("date", ">=", startDt), where("date", "<=", endDt), "totals.grand");
             const purchasesTotal = await getSafeAggregate("purchases", where("date", ">=", startStr), where("date", "<=", endStr), "grandTotal");
+            
+            // FIX: Changed "filling" to "filling_logs" to pull correct cost fields preventing the 0 value bug
             const productionTotal = await getSafeAggregate("production", where("date", ">=", startStr), where("date", "<=", endStr), "totalCost");
-            const fillingTotal = await getSafeAggregate("filling", where("date", ">=", startStr), where("date", "<=", endStr), "totalCost");
+            const fillingTotal = await getSafeAggregate("filling_logs", where("date", ">=", startStr), where("date", "<=", endStr), "totalCost");
             const expensesTotal = await getSafeAggregate("expanse", where("dateStr", ">=", startStr), where("dateStr", "<=", endStr), "amount");
             
             const profit = salesTotal - purchasesTotal - productionTotal - fillingTotal - expensesTotal;
@@ -769,7 +790,12 @@
                 // Hide UI strictly to let HTML2PDF grab only the print elements
                 appShell.style.display = 'none';
                 activeModals.forEach(m => m.style.display = 'none');
+                
+                // FIX: Desktop Half-Cut Prevention
                 element.style.display = 'block';
+                element.style.width = '210mm';
+                element.style.maxWidth = '210mm';
+                element.style.position = 'relative';
 
                 const opt = {
                     margin:       0,
@@ -780,7 +806,8 @@
                         useCORS: true, 
                         letterRendering: true,
                         scrollY: 0, 
-                        windowWidth: 794 // Strictly locks canvas view rendering to exact A4 size limits
+                        // FIX: Replaced strict hardcoded windowWidth that broke on desktop with native scroll scaling
+                        windowWidth: element.scrollWidth 
                     },
                     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' },
                     pagebreak:    { mode: ['css', 'legacy'] }
@@ -792,12 +819,18 @@
                     appShell.style.display = ''; 
                     activeModals.forEach(m => m.style.display = ''); 
                     element.style.display = ''; 
+                    element.style.width = '';
+                    element.style.maxWidth = '';
+                    element.style.position = '';
                     resolve(true);
                 }).catch(err => {
                     console.error("PDF Export Error:", err);
                     appShell.style.display = '';
                     activeModals.forEach(m => m.style.display = '');
                     element.style.display = '';
+                    element.style.width = '';
+                    element.style.maxWidth = '';
+                    element.style.position = '';
                     resolve(false);
                 });
             });
