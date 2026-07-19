@@ -477,7 +477,7 @@
                     <strong id="prPrintTime">N/A</strong>
                 </div>
                 
-                <img id="prQrCode" src="" alt="Invoice QR" style="width: 95px; height: 95px; display: none; border: 2px solid #3b82f6; padding: 4px; background: white; border-radius: 8px; margin-top: 20px;" onerror="this.style.display='none'">
+                <img id="prQrCode" src="" alt="Invoice QR" style="width: 95px; height: 95px; display: none; border: 2px solid #3b82f6; padding: 4px; background: white; border-radius: 8px; margin-top: 20px;">
             </div>
         </div>
 
@@ -1167,7 +1167,7 @@
 
             const qrTextData = `LITHIK BEVERAGE\nInv No: ${sale.invoiceNo}\nDate: ${dateFormatted}\nBilled To: ${sale.customer.name}\nTotal Amount: Rs. ${sale.totals.grand.toFixed(2)}`;
             const qrCodeImg = document.getElementById('prQrCode');
-            qrCodeImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(qrTextData)}`;
+            qrCodeImg.src = `https://quickchart.io/qr?text=${encodeURIComponent(qrTextData)}&size=150&margin=1`;
             qrCodeImg.style.display = 'block';
 
             const tbody = document.getElementById('prTableBody');
@@ -1209,7 +1209,7 @@
                     <tr style="height: 25mm; max-height: 25mm;">
                         <td>${num}.</td>
                         <td>${desc}</td>
-                        <td class="text-center">-</td>
+                        <td class="text-center">${item.hsn || '-'}</td>
                         <td class="text-center">${item.qty.toString().padStart(2, '0')}</td>
                         <td class="text-right">₹${item.price.toFixed(2)}</td>
                         <td class="text-right" style="font-weight:900; color:#0f172a;">₹${item.finalTotal.toFixed(2)}</td>
