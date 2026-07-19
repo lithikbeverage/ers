@@ -242,6 +242,11 @@
                 <label>Exact Product Name *</label>
                 <input type="text" id="invName" placeholder="e.g. 1L Water Box (12 Pack)">
             </div>
+
+            <div class="input-wrapper">
+                <label>HSN Code</label>
+                <input type="text" id="invHsn" placeholder="e.g. 22011010">
+            </div>
             
             <div class="row-inputs">
                 <div class="input-wrapper">
@@ -407,6 +412,7 @@
                 document.getElementById('modalInvTitle').innerText = "Edit Finished Good";
                 document.getElementById('editInvId').value = id;
                 document.getElementById('invName').value = item.name;
+                document.getElementById('invHsn').value = item.hsn || '';
                 document.getElementById('invMrp').value = item.mrp || 0;
                 document.getElementById('invPrice').value = item.price || 0;
                 document.getElementById('invQty').value = item.qty || 0;
@@ -415,6 +421,7 @@
                 document.getElementById('modalInvTitle').innerText = "Add Finished Good";
                 document.getElementById('editInvId').value = '';
                 document.getElementById('invName').value = '';
+                document.getElementById('invHsn').value = '';
                 document.getElementById('invMrp').value = '';
                 document.getElementById('invPrice').value = '';
                 document.getElementById('invQty').value = '0';
@@ -426,6 +433,7 @@
             vibrateApp(30);
             const id = document.getElementById('editInvId').value;
             const name = document.getElementById('invName').value.trim();
+            const hsn = document.getElementById('invHsn').value.trim();
             const mrp = parseFloat(document.getElementById('invMrp').value) || 0;
             const price = parseFloat(document.getElementById('invPrice').value) || 0;
             const qty = parseInt(document.getElementById('invQty').value) || 0;
@@ -440,6 +448,7 @@
             try {
                 const payload = {
                     name,
+                    hsn,
                     mrp,
                     price,
                     qty,
